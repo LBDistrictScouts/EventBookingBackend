@@ -32,7 +32,6 @@
                     echo $this->Form->control('entry_count');
                     echo $this->Form->control('participant_count');
                     echo $this->Form->control('checked_in_count');
-                    echo $this->Form->control('deleted');
                     echo $this->Form->control('sections._ids', ['options' => $sections]);
                 ?>
             </fieldset>

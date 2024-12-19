@@ -10,6 +10,7 @@ class CreateGroups extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
     public function up(): void
@@ -43,6 +44,7 @@ class CreateGroups extends BaseMigration
      * Down Method.
      *
      * This method reverts the changes made by the up method by dropping the 'groups' table.
+     *
      * @return void
      */
     public function down(): void

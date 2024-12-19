@@ -48,6 +48,7 @@ class EventsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->hasMany('Checkpoints', [
             'foreignKey' => 'event_id',
@@ -74,7 +75,8 @@ class EventsTable extends Table
             ->scalar('event_name')
             ->maxLength('event_name', 64)
             ->requirePresence('event_name', 'create')
-            ->notEmptyString('event_name');
+            ->notEmptyString('event_name')
+            ->add('event_name', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
 
         $validator
             ->scalar('event_description')
@@ -86,7 +88,8 @@ class EventsTable extends Table
             ->scalar('booking_code')
             ->maxLength('booking_code', 20)
             ->requirePresence('booking_code', 'create')
-            ->notEmptyString('booking_code');
+            ->notEmptyString('booking_code')
+            ->add('booking_code', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
 
         $validator
             ->dateTime('start_time')
@@ -113,10 +116,21 @@ class EventsTable extends Table
             ->integer('checked_in_count')
             ->notEmptyString('checked_in_count');
 
-        $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
-
         return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(RulesChecker $rules): RulesChecker
+    {
+        $rules->add($rules->isUnique(['event_name']), ['errorField' => 'event_name']);
+        $rules->add($rules->isUnique(['booking_code']), ['errorField' => 'booking_code']);
+
+        return $rules;
     }
 }

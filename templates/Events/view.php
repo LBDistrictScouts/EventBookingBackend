@@ -81,6 +81,7 @@
                             <th><?= __('Section Name') ?></th>
                             <th><?= __('Participant Type Id') ?></th>
                             <th><?= __('Group Id') ?></th>
+                            <th><?= __('Osm Section Id') ?></th>
                             <th><?= __('Created') ?></th>
                             <th><?= __('Modified') ?></th>
                             <th><?= __('Deleted') ?></th>
@@ -92,6 +93,7 @@
                             <td><?= h($section->section_name) ?></td>
                             <td><?= h($section->participant_type_id) ?></td>
                             <td><?= h($section->group_id) ?></td>
+                            <td><?= h($section->osm_section_id) ?></td>
                             <td><?= h($section->created) ?></td>
                             <td><?= h($section->modified) ?></td>
                             <td><?= h($section->deleted) ?></td>

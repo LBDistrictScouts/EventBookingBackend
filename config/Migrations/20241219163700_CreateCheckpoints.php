@@ -10,9 +10,10 @@ class CreateCheckpoints extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
-    public function change(): void
+    public function up(): void
     {
         $table = $this->table('checkpoints');
         $table->addColumn('checkpoint_sequence', 'integer', [
@@ -30,7 +31,12 @@ class CreateCheckpoints extends BaseMigration
             'limit' => 11,
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_checkpoint_events', 'event_id', 'events', 'id', []);
+        $table->addForeignKeyWithName(
+            'fk_checkpoint_events',
+            'event_id',
+            'events',
+            'id',
+        );
         $table->addIndex(['event_id', 'checkpoint_sequence'], ['unique' => true]);
         $table->addColumn('created', 'datetime', [
             'default' => null,
@@ -45,5 +51,18 @@ class CreateCheckpoints extends BaseMigration
             'null' => true,
         ]);
         $table->create();
+    }
+
+    /**
+     * Revert Method.
+     *
+     * Reverts the changes made in the up() method by dropping the 'checkpoints' table.
+     *
+     * @return void
+     */
+    public function down(): void
+    {
+        $table = $this->table('checkpoints');
+        $table->drop()->save();
     }
 }

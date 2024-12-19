@@ -1,0 +1,5 @@
+<?php
+
+return [
+    'Muffin/Trash' => [],
+];

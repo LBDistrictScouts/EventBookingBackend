@@ -12,9 +12,10 @@ class CreateParticipantsCheckIns extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
-    public function change(): void
+    public function up(): void
     {
         $table = $this->table('participants_check_ins');
         $table->addColumn('check_in_id', 'integer', [
@@ -23,14 +24,24 @@ class CreateParticipantsCheckIns extends BaseMigration
             'limit' => 11,
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_participant_check_in_check_ins', 'check_in_id', 'check_ins', 'id', []);
+        $table->addForeignKeyWithName(
+            'fk_participant_check_in_check_ins',
+            'check_in_id',
+            'check_ins',
+            'id',
+        );
         $table->addColumn('participant_id', 'integer', [
             'autoIncrement' => false,
             'default' => null,
             'limit' => 11,
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_participant_check_in_participants', 'participant_id', 'participants', 'id', []);
+        $table->addForeignKeyWithName(
+            'fk_participant_check_in_participants',
+            'participant_id',
+            'participants',
+            'id'
+        );
         $table->addColumn('created', 'datetime', [
             'default' => null,
             'null' => false,
@@ -48,5 +59,18 @@ class CreateParticipantsCheckIns extends BaseMigration
             'participant_id',
         ]);
         $table->create();
+    }
+
+    /**
+     * Revert Method.
+     *
+     * Reverts the database changes made by the up() method by dropping the 'participants_check_ins' table.
+     *
+     * @return void
+     */
+    public function down(): void
+    {
+        $table = $this->table('participants_check_ins');
+        $table->drop()->save();
     }
 }

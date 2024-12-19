@@ -10,6 +10,7 @@ class CreateParticipantTypes extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
     public function up(): void
@@ -42,7 +43,7 @@ class CreateParticipantTypes extends BaseMigration
         ]);
         $table->addColumn('deleted', 'datetime', [
             'default' => null,
-            'null' => false,
+            'null' => true,
         ]);
         $table->create();
     }
@@ -51,6 +52,7 @@ class CreateParticipantTypes extends BaseMigration
      * Revert the migrations.
      *
      * This method is used to drop the 'participant_types' table, reversing changes applied during the migration.
+     *
      * @return void
      */
     public function down(): void

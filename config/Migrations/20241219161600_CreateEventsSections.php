@@ -12,9 +12,10 @@ class CreateEventsSections extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
-    public function change(): void
+    public function up(): void
     {
         $table = $this->table('events_sections');
         $table->addColumn('section_id', 'integer', [
@@ -46,5 +47,18 @@ class CreateEventsSections extends BaseMigration
             'event_id',
         ]);
         $table->create();
+    }
+
+    /**
+     * Revert Method.
+     *
+     * This method is used to reverse the changes made by the migration, typically by removing a table or other database structure.
+     *
+     * @return void
+     */
+    public function down(): void
+    {
+        $table = $this->table('events_sections');
+        $table->drop()->save();
     }
 }

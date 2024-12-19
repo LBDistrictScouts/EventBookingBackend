@@ -10,6 +10,7 @@ class CreateEvents extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
     public function up(): void
@@ -73,6 +74,7 @@ class CreateEvents extends BaseMigration
      * Revert Method.
      *
      * This method is used to revert the changes made by the `up` method. It drops the `events` table from the database.
+     *
      * @return void
      */
     public function down(): void

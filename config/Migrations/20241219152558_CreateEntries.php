@@ -10,6 +10,7 @@ class CreateEntries extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
     public function up(): void
@@ -19,7 +20,7 @@ class CreateEntries extends BaseMigration
             'default' => null,
             'null' => false,
         ]);
-        $table->addForeignKeyWithName( 'fk_entry_events', 'event_id', 'events', 'id');
+        $table->addForeignKeyWithName('fk_entry_events', 'event_id', 'events', 'id');
         $table->addColumn('entry_name', 'string', [
             'default' => null,
             'limit' => 32,
@@ -57,6 +58,7 @@ class CreateEntries extends BaseMigration
      * Revert Method.
      *
      * Reverts the changes made in the migration by dropping the 'entries' table.
+     *
      * @return void
      */
     public function down(): void

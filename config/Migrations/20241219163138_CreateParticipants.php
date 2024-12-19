@@ -10,9 +10,10 @@ class CreateParticipants extends BaseMigration
      *
      * More information on this method is available here:
      * https://book.cakephp.org/migrations/4/en/migrations.html#the-change-method
+     *
      * @return void
      */
-    public function change(): void
+    public function up(): void
     {
         $table = $this->table('participants');
         $table->addColumn('first_name', 'string', [
@@ -30,19 +31,34 @@ class CreateParticipants extends BaseMigration
             'limit' => 11,
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_participant_entries', 'entry_id', 'entries', 'id', []);
+        $table->addForeignKeyWithName(
+            'fk_participant_entries',
+            'entry_id',
+            'entries',
+            'id',
+        );
         $table->addColumn('participant_type_id', 'integer', [
             'default' => null,
             'limit' => 11,
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_participant_participant_types', 'participant_type_id', 'participant_types', 'id', []);
+        $table->addForeignKeyWithName(
+            'fk_participant_participant_types',
+            'participant_type_id',
+            'participant_types',
+            'id',
+        );
         $table->addColumn('section_id', 'integer', [
             'default' => null,
             'limit' => 11,
             'null' => true,
         ]);
-        $table->addForeignKeyWithName('fk_participant_sections', 'section_id', 'sections', 'id', []);
+        $table->addForeignKeyWithName(
+            'fk_participant_sections',
+            'section_id',
+            'sections',
+            'id',
+        );
         $table->addColumn('checked_in', 'boolean', [
             'default' => false,
             'null' => false,
@@ -64,5 +80,18 @@ class CreateParticipants extends BaseMigration
             'null' => true,
         ]);
         $table->create();
+    }
+
+    /**
+     * Revert Method.
+     *
+     * Reverts the changes made to the 'participants' table by dropping it.
+     *
+     * @return void
+     */
+    public function down(): void
+    {
+        $table = $this->table('participants');
+        $table->drop()->save();
     }
 }
