@@ -15,7 +15,7 @@ use Cake\ORM\Entity;
  * @property bool $out_of_district
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
- * @property \Cake\I18n\DateTime $deleted
+ * @property \Cake\I18n\DateTime|null $deleted
  *
  * @property \App\Model\Entity\Participant[] $participants
  * @property \App\Model\Entity\Section[] $sections

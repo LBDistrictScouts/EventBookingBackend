@@ -17,11 +17,9 @@ class CreateParticipantsCheckIns extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('participants_check_ins');
-        $table->addColumn('check_in_id', 'integer', [
-            'autoIncrement' => false,
-            'default' => null,
-            'limit' => 11,
+        $table = $this->table('participants_check_ins', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
+        $table->addColumn('check_in_id', 'uuid', [
             'null' => false,
         ]);
         $table->addForeignKeyWithName(
@@ -30,10 +28,7 @@ class CreateParticipantsCheckIns extends BaseMigration
             'check_ins',
             'id',
         );
-        $table->addColumn('participant_id', 'integer', [
-            'autoIncrement' => false,
-            'default' => null,
-            'limit' => 11,
+        $table->addColumn('participant_id', 'uuid', [
             'null' => false,
         ]);
         $table->addForeignKeyWithName(

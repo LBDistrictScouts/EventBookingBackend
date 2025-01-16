@@ -21,9 +21,9 @@ class EventsSectionsFixture extends TestFixture
             [
                 'section_id' => 1,
                 'event_id' => 1,
-                'created' => 1734627166,
-                'modified' => 1734627166,
-                'deleted' => 1734627166,
+                'created' => 1737037152,
+                'modified' => 1737037152,
+                'deleted' => 1737037152,
             ],
         ];
         parent::init();

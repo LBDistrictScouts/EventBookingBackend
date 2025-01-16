@@ -24,9 +24,9 @@ class SectionsFixture extends TestFixture
                 'participant_type_id' => 1,
                 'group_id' => 1,
                 'osm_section_id' => 1,
-                'created' => 1734628886,
-                'modified' => 1734628886,
-                'deleted' => 1734628886,
+                'created' => 1737037153,
+                'modified' => 1737037153,
+                'deleted' => 1737037153,
             ],
         ];
         parent::init();

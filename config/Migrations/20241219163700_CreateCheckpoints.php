@@ -15,7 +15,8 @@ class CreateCheckpoints extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('checkpoints');
+        $table = $this->table('checkpoints', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
         $table->addColumn('checkpoint_sequence', 'integer', [
             'default' => null,
             'limit' => 11,

@@ -15,7 +15,8 @@ class CreateParticipants extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('participants');
+        $table = $this->table('participants', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
         $table->addColumn('first_name', 'string', [
             'default' => null,
             'limit' => 255,

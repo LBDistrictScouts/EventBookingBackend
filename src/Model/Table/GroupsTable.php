@@ -46,7 +46,6 @@ class GroupsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->hasMany('Sections', [
             'foreignKey' => 'group_id',
@@ -71,6 +70,10 @@ class GroupsTable extends Table
         $validator
             ->boolean('visible')
             ->notEmptyString('visible');
+
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
 
         return $validator;
     }

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use Migrations\BaseMigration;
 
-class AlterEvents extends BaseMigration
+class AlterParticipants extends BaseMigration
 {
     /**
      * Change Method.
@@ -15,24 +15,27 @@ class AlterEvents extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('events');
-        $table->addIndex(['event_name'], ['unique' => true]);
-        $table->addIndex(['booking_code'], ['unique' => true]);
+        $table = $this->table('participants');
+        $table->addColumn('highest_check_in_sequence', 'integer', [
+            'default' => 0,
+            'limit' => 11,
+            'null' => false,
+        ]);
         $table->update();
     }
 
     /**
      * Revert Method.
      *
-     * Reverts changes made in the up method by removing specified indexes.
+     * Reverts the changes applied in the up method by removing the specified column
+     * from the participants table.
      *
      * @return void
      */
     public function down(): void
     {
-        $table = $this->table('events');
-        $table->removeIndex(['event_name']);
-        $table->removeIndex(['booking_code']);
+        $table = $this->table('participants');
+        $table->removeColumn('highest_check_in_sequence');
         $table->update();
     }
 }

@@ -19,6 +19,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
+ * @property int $highest_check_in_sequence
  *
  * @property \App\Model\Entity\Entry $entry
  * @property \App\Model\Entity\ParticipantType $participant_type
@@ -47,6 +48,7 @@ class Participant extends Entity
         'created' => true,
         'modified' => true,
         'deleted' => true,
+        'highest_check_in_sequence' => true,
         'entry' => true,
         'participant_type' => true,
         'section' => true,

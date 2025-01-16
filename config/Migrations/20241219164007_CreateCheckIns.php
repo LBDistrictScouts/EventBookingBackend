@@ -15,10 +15,9 @@ class CreateCheckIns extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('check_ins');
-        $table->addColumn('checkpoint_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
+        $table = $this->table('check_ins', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
+        $table->addColumn('checkpoint_id', 'uuid', [
             'null' => false,
         ]);
         $table->addForeignKeyWithName(

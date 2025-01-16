@@ -47,7 +47,6 @@ class ParticipantTypesTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->hasMany('Participants', [
             'foreignKey' => 'participant_type_id',
@@ -85,6 +84,10 @@ class ParticipantTypesTable extends Table
             ->boolean('out_of_district')
             ->requirePresence('out_of_district', 'create')
             ->notEmptyString('out_of_district');
+
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
 
         return $validator;
     }

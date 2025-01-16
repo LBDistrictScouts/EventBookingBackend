@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\EntriesController;
+use App\Controller\CheckpointsController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Controller\EntriesController Test Case
+ * App\Controller\CheckpointsController Test Case
  *
- * @uses \App\Controller\EntriesController
+ * @uses \App\Controller\CheckpointsController
  */
-class EntriesControllerTest extends TestCase
+class CheckpointsControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
@@ -22,23 +22,15 @@ class EntriesControllerTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.Events',
         'app.Checkpoints',
-        'app.Entries',
-        'app.Groups',
-        'app.Sections',
-        'app.ParticipantTypes',
-        'app.Participants',
-        'app.CheckIns',
-        'app.ParticipantsCheckIns',
-        'app.EventsSections',
+        'app.Events',
     ];
 
     /**
      * Test index method
      *
      * @return void
-     * @uses \App\Controller\EntriesController::index()
+     * @uses \App\Controller\CheckpointsController::index()
      */
     public function testIndex(): void
     {
@@ -49,7 +41,7 @@ class EntriesControllerTest extends TestCase
      * Test view method
      *
      * @return void
-     * @uses \App\Controller\EntriesController::view()
+     * @uses \App\Controller\CheckpointsController::view()
      */
     public function testView(): void
     {
@@ -60,7 +52,7 @@ class EntriesControllerTest extends TestCase
      * Test add method
      *
      * @return void
-     * @uses \App\Controller\EntriesController::add()
+     * @uses \App\Controller\CheckpointsController::add()
      */
     public function testAdd(): void
     {
@@ -71,7 +63,7 @@ class EntriesControllerTest extends TestCase
      * Test edit method
      *
      * @return void
-     * @uses \App\Controller\EntriesController::edit()
+     * @uses \App\Controller\CheckpointsController::edit()
      */
     public function testEdit(): void
     {
@@ -82,7 +74,7 @@ class EntriesControllerTest extends TestCase
      * Test delete method
      *
      * @return void
-     * @uses \App\Controller\EntriesController::delete()
+     * @uses \App\Controller\CheckpointsController::delete()
      */
     public function testDelete(): void
     {

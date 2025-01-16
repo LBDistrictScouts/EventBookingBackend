@@ -47,7 +47,6 @@ class EventsSectionsTable extends Table
         $this->setPrimaryKey(['section_id', 'event_id']);
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->belongsTo('Sections', [
             'foreignKey' => 'section_id',
@@ -57,6 +56,21 @@ class EventsSectionsTable extends Table
             'foreignKey' => 'event_id',
             'joinType' => 'INNER',
         ]);
+    }
+
+    /**
+     * Default validation rules.
+     *
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationDefault(Validator $validator): Validator
+    {
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
+
+        return $validator;
     }
 
     /**

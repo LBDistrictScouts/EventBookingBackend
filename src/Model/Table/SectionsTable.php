@@ -49,7 +49,6 @@ class SectionsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->belongsTo('ParticipantTypes', [
             'foreignKey' => 'participant_type_id',
@@ -96,6 +95,10 @@ class SectionsTable extends Table
             ->allowEmptyString('osm_section_id')
             ->add('osm_section_id', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
 
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
+
         return $validator;
     }
 
@@ -108,27 +111,9 @@ class SectionsTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add(
-            $rules->isUnique(
-                ['osm_section_id'],
-                ['allowMultipleNulls' => true]
-            ),
-            ['errorField' => 'osm_section_id'],
-        );
-        $rules->add(
-            $rules->existsIn(
-                ['participant_type_id'],
-                'ParticipantTypes'
-            ),
-            ['errorField' => 'participant_type_id']
-        );
-        $rules->add(
-            $rules->existsIn(
-                ['group_id'],
-                'Groups'
-            ),
-            ['errorField' => 'group_id']
-        );
+        $rules->add($rules->isUnique(['osm_section_id'], ['allowMultipleNulls' => true]), ['errorField' => 'osm_section_id']);
+        $rules->add($rules->existsIn(['participant_type_id'], 'ParticipantTypes'), ['errorField' => 'participant_type_id']);
+        $rules->add($rules->existsIn(['group_id'], 'Groups'), ['errorField' => 'group_id']);
 
         return $rules;
     }

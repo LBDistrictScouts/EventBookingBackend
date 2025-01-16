@@ -22,11 +22,11 @@ class CheckInsFixture extends TestFixture
                 'id' => 1,
                 'checkpoint_id' => 1,
                 'entry_id' => 1,
-                'check_in_time' => 1734627158,
+                'check_in_time' => 1737037152,
                 'participant_count' => 1,
-                'created' => 1734627158,
-                'modified' => 1734627158,
-                'deleted' => 1734627158,
+                'created' => 1737037152,
+                'modified' => 1737037152,
+                'deleted' => 1737037152,
             ],
         ];
         parent::init();

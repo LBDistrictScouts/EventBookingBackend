@@ -49,7 +49,6 @@ class EntriesTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
         $this->addBehavior('CounterCache', [
             'Events' => ['entry_count'],
         ]);
@@ -95,6 +94,10 @@ class EntriesTable extends Table
         $validator
             ->integer('checked_in_count')
             ->notEmptyString('checked_in_count');
+
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
 
         $validator
             ->scalar('entry_email')

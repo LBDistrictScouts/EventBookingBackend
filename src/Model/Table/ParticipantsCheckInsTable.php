@@ -47,7 +47,6 @@ class ParticipantsCheckInsTable extends Table
         $this->setPrimaryKey(['check_in_id', 'participant_id']);
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->belongsTo('CheckIns', [
             'foreignKey' => 'check_in_id',
@@ -57,6 +56,21 @@ class ParticipantsCheckInsTable extends Table
             'foreignKey' => 'participant_id',
             'joinType' => 'INNER',
         ]);
+    }
+
+    /**
+     * Default validation rules.
+     *
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationDefault(Validator $validator): Validator
+    {
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
+
+        return $validator;
     }
 
     /**

@@ -25,9 +25,9 @@ class EntriesFixture extends TestFixture
                 'active' => 1,
                 'participant_count' => 1,
                 'checked_in_count' => 1,
-                'created' => 1734627158,
-                'modified' => 1734627158,
-                'deleted' => 1734627158,
+                'created' => 1737037152,
+                'modified' => 1737037152,
+                'deleted' => 1737037152,
                 'entry_email' => 'Lorem ipsum dolor sit amet',
             ],
         ];
