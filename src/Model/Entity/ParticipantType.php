@@ -8,7 +8,7 @@ use Cake\ORM\Entity;
 /**
  * ParticipantType Entity
  *
- * @property int $id
+ * @property string $id
  * @property string $participant_type
  * @property bool $adult
  * @property bool $uniformed

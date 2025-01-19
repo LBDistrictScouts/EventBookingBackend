@@ -15,7 +15,8 @@ class CreateParticipantTypes extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('participant_types');
+        $table = $this->table('participant_types', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
         $table->addColumn('participant_type', 'string', [
             'default' => null,
             'limit' => 32,

@@ -19,12 +19,12 @@
             <h3><?= h($participantType->participant_type) ?></h3>
             <table>
                 <tr>
-                    <th><?= __('Participant Type') ?></th>
-                    <td><?= h($participantType->participant_type) ?></td>
+                    <th><?= __('Id') ?></th>
+                    <td><?= h($participantType->id) ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= $this->Number->format($participantType->id) ?></td>
+                    <th><?= __('Participant Type') ?></th>
+                    <td><?= h($participantType->participant_type) ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Created') ?></th>
@@ -33,10 +33,6 @@
                 <tr>
                     <th><?= __('Modified') ?></th>
                     <td><?= h($participantType->modified) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Deleted') ?></th>
-                    <td><?= h($participantType->deleted) ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Adult') ?></th>
@@ -68,6 +64,7 @@
                             <th><?= __('Created') ?></th>
                             <th><?= __('Modified') ?></th>
                             <th><?= __('Deleted') ?></th>
+                            <th><?= __('Highest Check In Sequence') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                         <?php foreach ($participantType->participants as $participant) : ?>
@@ -83,6 +80,7 @@
                             <td><?= h($participant->created) ?></td>
                             <td><?= h($participant->modified) ?></td>
                             <td><?= h($participant->deleted) ?></td>
+                            <td><?= h($participant->highest_check_in_sequence) ?></td>
                             <td class="actions">
                                 <?= $this->Html->link(__('View'), ['controller' => 'Participants', 'action' => 'view', $participant->id]) ?>
                                 <?= $this->Html->link(__('Edit'), ['controller' => 'Participants', 'action' => 'edit', $participant->id]) ?>
@@ -104,6 +102,7 @@
                             <th><?= __('Section Name') ?></th>
                             <th><?= __('Participant Type Id') ?></th>
                             <th><?= __('Group Id') ?></th>
+                            <th><?= __('Osm Section Id') ?></th>
                             <th><?= __('Created') ?></th>
                             <th><?= __('Modified') ?></th>
                             <th><?= __('Deleted') ?></th>
@@ -115,6 +114,7 @@
                             <td><?= h($section->section_name) ?></td>
                             <td><?= h($section->participant_type_id) ?></td>
                             <td><?= h($section->group_id) ?></td>
+                            <td><?= h($section->osm_section_id) ?></td>
                             <td><?= h($section->created) ?></td>
                             <td><?= h($section->modified) ?></td>
                             <td><?= h($section->deleted) ?></td>

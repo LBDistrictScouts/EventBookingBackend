@@ -31,10 +31,6 @@
                     <td><?= h($event->booking_code) ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= $this->Number->format($event->id) ?></td>
-                </tr>
-                <tr>
                     <th><?= __('Entry Count') ?></th>
                     <td><?= $this->Number->format($event->entry_count) ?></td>
                 </tr>

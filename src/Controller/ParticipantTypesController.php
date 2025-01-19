@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\View\JsonView;
+
 /**
  * ParticipantTypes Controller
  *
@@ -10,6 +12,14 @@ namespace App\Controller;
  */
 class ParticipantTypesController extends AppController
 {
+    /**
+     * @return array<class-string>
+     */
+    public function viewClasses(): array
+    {
+        return [JsonView::class];
+    }
+
     /**
      * Index method
      *
@@ -21,6 +31,7 @@ class ParticipantTypesController extends AppController
         $participantTypes = $this->paginate($query);
 
         $this->set(compact('participantTypes'));
+        $this->viewBuilder()->setOption('serialize', ['participantTypes']);
     }
 
     /**
@@ -30,7 +41,7 @@ class ParticipantTypesController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $participantType = $this->ParticipantTypes->get($id, contain: ['Participants', 'Sections']);
         $this->set(compact('participantType'));
@@ -63,7 +74,7 @@ class ParticipantTypesController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $participantType = $this->ParticipantTypes->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -85,7 +96,7 @@ class ParticipantTypesController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $participantType = $this->ParticipantTypes->get($id);

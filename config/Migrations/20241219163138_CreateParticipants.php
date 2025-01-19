@@ -27,9 +27,7 @@ class CreateParticipants extends BaseMigration
             'limit' => 255,
             'null' => false,
         ]);
-        $table->addColumn('entry_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
+        $table->addColumn('entry_id', 'uuid', [
             'null' => false,
         ]);
         $table->addForeignKeyWithName(
@@ -38,9 +36,7 @@ class CreateParticipants extends BaseMigration
             'entries',
             'id',
         );
-        $table->addColumn('participant_type_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
+        $table->addColumn('participant_type_id', 'uuid', [
             'null' => false,
         ]);
         $table->addForeignKeyWithName(
@@ -49,9 +45,7 @@ class CreateParticipants extends BaseMigration
             'participant_types',
             'id',
         );
-        $table->addColumn('section_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
+        $table->addColumn('section_id', 'uuid', [
             'null' => true,
         ]);
         $table->addForeignKeyWithName(

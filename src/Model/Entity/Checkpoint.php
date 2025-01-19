@@ -8,14 +8,13 @@ use Cake\ORM\Entity;
 /**
  * Checkpoint Entity
  *
- * @property int $id
+ * @property string $id
  * @property int $checkpoint_sequence
  * @property string $checkpoint_name
- * @property int $event_id
+ * @property string $event_id
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
- * @property string $external_id
  *
  * @property \App\Model\Entity\Event $event
  * @property \App\Model\Entity\CheckIn[] $check_ins
@@ -38,7 +37,6 @@ class Checkpoint extends Entity
         'created' => true,
         'modified' => true,
         'deleted' => true,
-        'external_id' => true,
         'event' => true,
         'check_ins' => true,
     ];

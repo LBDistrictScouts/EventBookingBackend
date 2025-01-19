@@ -8,7 +8,7 @@ use Cake\ORM\Entity;
 /**
  * Group Entity
  *
- * @property int $id
+ * @property string $id
  * @property string $group_name
  * @property bool $visible
  * @property \Cake\I18n\DateTime $created
@@ -31,9 +31,6 @@ class Group extends Entity
     protected array $_accessible = [
         'group_name' => true,
         'visible' => true,
-        'created' => true,
-        'modified' => true,
-        'deleted' => true,
         'sections' => true,
     ];
 }

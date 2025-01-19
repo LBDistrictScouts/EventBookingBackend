@@ -15,9 +15,9 @@ class CreateEntries extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('entries');
-        $table->addColumn('event_id', 'integer', [
-            'default' => null,
+        $table = $this->table('entries', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
+        $table->addColumn('event_id', 'uuid', [
             'null' => false,
         ]);
         $table->addForeignKeyWithName('fk_entry_events', 'event_id', 'events', 'id');

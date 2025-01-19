@@ -11,6 +11,8 @@ use Cake\TestSuite\TestCase;
  */
 class ParticipantTypesTableTest extends TestCase
 {
+    use TableTestTrait;
+
     /**
      * Test subject
      *
@@ -25,8 +27,6 @@ class ParticipantTypesTableTest extends TestCase
      */
     protected array $fixtures = [
         'app.ParticipantTypes',
-        'app.Participants',
-        'app.Sections',
     ];
 
     /**
@@ -61,6 +61,13 @@ class ParticipantTypesTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $goodData = [
+            'participant_type' => 'Test Participant Type',
+            'adult' => true,
+            'uniformed' => true,
+            'out_of_district' => true,
+        ];
+
+        $this->validatorTest($this, $this->ParticipantTypes, $goodData);
     }
 }

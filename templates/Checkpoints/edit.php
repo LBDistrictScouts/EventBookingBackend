@@ -26,6 +26,7 @@
                     echo $this->Form->control('checkpoint_sequence');
                     echo $this->Form->control('checkpoint_name');
                     echo $this->Form->control('event_id', ['options' => $events]);
+                    echo $this->Form->control('deleted');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

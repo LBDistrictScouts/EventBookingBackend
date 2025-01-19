@@ -11,6 +11,8 @@ use Cake\TestSuite\TestCase;
  */
 class GroupsTableTest extends TestCase
 {
+    use TableTestTrait;
+
     /**
      * Test subject
      *
@@ -26,6 +28,7 @@ class GroupsTableTest extends TestCase
     protected array $fixtures = [
         'app.Groups',
         'app.Sections',
+        'app.ParticipantTypes',
     ];
 
     /**
@@ -60,7 +63,12 @@ class GroupsTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $goodData = [
+            'group_name' => 'Test Group',
+            'visible' => true,
+        ];
+
+        $this->validatorTest($this, $this->Groups, $goodData);
     }
 
     /**

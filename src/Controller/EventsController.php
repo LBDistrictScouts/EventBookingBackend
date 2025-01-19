@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\View\JsonView;
+
 /**
  * Events Controller
  *
@@ -10,6 +12,14 @@ namespace App\Controller;
  */
 class EventsController extends AppController
 {
+    /**
+     * @return array<class-string>
+     */
+    public function viewClasses(): array
+    {
+        return [JsonView::class];
+    }
+
     /**
      * Index method
      *
@@ -21,6 +31,7 @@ class EventsController extends AppController
         $events = $this->paginate($query);
 
         $this->set(compact('events'));
+        $this->viewBuilder()->setOption('serialize', ['events']);
     }
 
     /**
@@ -34,6 +45,7 @@ class EventsController extends AppController
     {
         $event = $this->Events->get($id, contain: ['Sections', 'Checkpoints', 'Entries']);
         $this->set(compact('event'));
+        $this->viewBuilder()->setOption('serialize', ['event']);
     }
 
     /**

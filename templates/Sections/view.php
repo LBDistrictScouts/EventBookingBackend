@@ -31,12 +31,8 @@
                     <td><?= $section->hasValue('group') ? $this->Html->link($section->group->group_name, ['controller' => 'Groups', 'action' => 'view', $section->group->id]) : '' ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= $this->Number->format($section->id) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Osm Section Id') ?></th>
-                    <td><?= $section->osm_section_id === null ? '' : $this->Number->format($section->osm_section_id) ?></td>
+                    <th><?= __('OSM Section Id') ?></th>
+                    <td><?= $section->osm_section_id === null ? '' : $section->osm_section_id ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Created') ?></th>
@@ -45,10 +41,6 @@
                 <tr>
                     <th><?= __('Modified') ?></th>
                     <td><?= h($section->modified) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Deleted') ?></th>
-                    <td><?= h($section->deleted) ?></td>
                 </tr>
             </table>
             <div class="related">
@@ -115,6 +107,7 @@
                             <th><?= __('Created') ?></th>
                             <th><?= __('Modified') ?></th>
                             <th><?= __('Deleted') ?></th>
+                            <th><?= __('Highest Check In Sequence') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                         <?php foreach ($section->participants as $participant) : ?>
@@ -130,6 +123,7 @@
                             <td><?= h($participant->created) ?></td>
                             <td><?= h($participant->modified) ?></td>
                             <td><?= h($participant->deleted) ?></td>
+                            <td><?= h($participant->highest_check_in_sequence) ?></td>
                             <td class="actions">
                                 <?= $this->Html->link(__('View'), ['controller' => 'Participants', 'action' => 'view', $participant->id]) ?>
                                 <?= $this->Html->link(__('Edit'), ['controller' => 'Participants', 'action' => 'edit', $participant->id]) ?>

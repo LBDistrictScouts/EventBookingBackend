@@ -17,20 +17,14 @@ class CreateCheckIns extends BaseMigration
     {
         $table = $this->table('check_ins', ['id' => false, 'primary_key' => ['id']]);
         $table->addColumn('id', 'uuid', ['null' => false]);
-        $table->addColumn('checkpoint_id', 'uuid', [
-            'null' => false,
-        ]);
+        $table->addColumn('checkpoint_id', 'uuid', ['null' => false]);
         $table->addForeignKeyWithName(
             'fk_check_in_checkpoints',
             'checkpoint_id',
             'checkpoints',
             'id',
         );
-        $table->addColumn('entry_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
-            'null' => false,
-        ]);
+        $table->addColumn('entry_id', 'uuid', ['null' => false]);
         $table->addForeignKeyWithName(
             'fk_check_in_entries',
             'entry_id',

@@ -15,7 +15,8 @@ class CreateGroups extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('groups');
+        $table = $this->table('groups', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
         $table->addColumn('group_name', 'string', [
             'limit' => 64,
             'null' => false,

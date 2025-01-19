@@ -47,7 +47,6 @@ class CheckpointsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash', ['field' => 'deleted']);
 
         $this->belongsTo('Events', [
             'foreignKey' => 'event_id',
@@ -78,12 +77,12 @@ class CheckpointsTable extends Table
             ->notEmptyString('checkpoint_name');
 
         $validator
-            ->integer('event_id')
+            ->uuid('event_id')
             ->notEmptyString('event_id');
 
         $validator
-            ->uuid('external_id')
-            ->add('external_id', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
 
         return $validator;
     }
@@ -98,7 +97,6 @@ class CheckpointsTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->isUnique(['checkpoint_sequence', 'event_id']), ['errorField' => 'checkpoint_sequence']);
-        $rules->add($rules->isUnique(['external_id']), ['errorField' => 'external_id']);
         $rules->add($rules->existsIn(['event_id'], 'Events'), ['errorField' => 'event_id']);
 
         return $rules;

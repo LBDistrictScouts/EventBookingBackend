@@ -16,19 +16,17 @@
                     <th><?= $this->Paginator->sort('visible') ?></th>
                     <th><?= $this->Paginator->sort('created') ?></th>
                     <th><?= $this->Paginator->sort('modified') ?></th>
-                    <th><?= $this->Paginator->sort('deleted') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($groups as $group): ?>
                 <tr>
-                    <td><?= $this->Number->format($group->id) ?></td>
+                    <td><?= h($group->id) ?></td>
                     <td><?= h($group->group_name) ?></td>
                     <td><?= h($group->visible) ?></td>
                     <td><?= h($group->created) ?></td>
                     <td><?= h($group->modified) ?></td>
-                    <td><?= h($group->deleted) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $group->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $group->id]) ?>

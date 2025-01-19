@@ -8,8 +8,8 @@ use Cake\ORM\Entity;
 /**
  * Entry Entity
  *
- * @property int $id
- * @property int $event_id
+ * @property string $id
+ * @property string $event_id
  * @property string $entry_name
  * @property bool $active
  * @property int $participant_count

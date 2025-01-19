@@ -51,12 +51,23 @@ class ParticipantsTable extends Table
 
         $this->addBehavior('Timestamp');
         $this->addBehavior('CounterCache', [
-            'Entries' => ['participant_count'],
+            'Entries' => [
+                'participant_count',
+                'checked_in_count' => ['conditions' => ['Participants.checked_in' => true],],
+            ],
+            'Events' => [
+                'participant_count',
+                'checked_in_count' => ['conditions' => ['Participants.checked_in' => true],],
+            ],
         ]);
 
         $this->belongsTo('Entries', [
             'foreignKey' => 'entry_id',
             'joinType' => 'INNER',
+        ]);
+        $this->belongsTo('Events', [
+            'through' => 'Entries',
+            'cascadeCallbacks' => true,
         ]);
         $this->belongsTo('ParticipantTypes', [
             'foreignKey' => 'participant_type_id',
@@ -93,15 +104,16 @@ class ParticipantsTable extends Table
             ->notEmptyString('last_name');
 
         $validator
-            ->integer('entry_id')
+            ->uuid('entry_id')
             ->notEmptyString('entry_id');
 
         $validator
-            ->integer('participant_type_id')
+            ->uuid('participant_type_id')
+            ->requirePresence('participant_type_id', 'create')
             ->notEmptyString('participant_type_id');
 
         $validator
-            ->integer('section_id')
+            ->uuid('section_id')
             ->allowEmptyString('section_id');
 
         $validator

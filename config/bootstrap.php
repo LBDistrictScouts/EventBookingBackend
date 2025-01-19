@@ -34,17 +34,18 @@ require CORE_PATH . 'config' . DS . 'bootstrap.php';
 use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Database\Type\StringType;
-use Cake\Database\TypeFactory;
 use Cake\Datasource\ConnectionManager;
 use Cake\Error\ErrorTrap;
 use Cake\Error\ExceptionTrap;
 use Cake\Http\ServerRequest;
+use Cake\I18n\Date;
+use Cake\I18n\DateTime;
 use Cake\Log\Log;
 use Cake\Mailer\Mailer;
 use Cake\Mailer\TransportFactory;
 use Cake\Routing\Router;
 use Cake\Utility\Security;
+use Detection\MobileDetect;
 
 /**
  * Load global functions.
@@ -84,7 +85,7 @@ require CAKE . 'functions.php';
 try {
     Configure::config('default', new PhpConfig());
     Configure::load('app', 'default', false);
-} catch (\Exception $e) {
+} catch (Exception $e) {
     exit($e->getMessage() . "\n");
 }
 
@@ -102,7 +103,7 @@ if (file_exists(CONFIG . 'app_local.php')) {
  */
 if (Configure::read('debug')) {
     Configure::write('Cache._cake_model_.duration', '+2 minutes');
-    Configure::write('Cache._cake_core_.duration', '+2 minutes');
+    Configure::write('Cache._cake_translations_.duration', '+2 minutes');
     // disable router cache during development
     Configure::write('Cache._cake_routes_.duration', '+2 seconds');
 }
@@ -182,12 +183,12 @@ Security::setSalt(Configure::consume('Security.salt'));
  * and the mobiledetect package from composer.json.
  */
 ServerRequest::addDetector('mobile', function ($request) {
-    $detector = new \Detection\MobileDetect();
+    $detector = new MobileDetect();
 
     return $detector->isMobile();
 });
 ServerRequest::addDetector('tablet', function ($request) {
-    $detector = new \Detection\MobileDetect();
+    $detector = new MobileDetect();
 
     return $detector->isTablet();
 });
@@ -227,5 +228,8 @@ ServerRequest::addDetector('tablet', function ($request) {
 // set a custom date and time format
 // see https://book.cakephp.org/4/en/core-libraries/time.html#setting-the-default-locale-and-format-string
 // and https://unicode-org.github.io/icu/userguide/format_parse/datetime/#datetime-format-syntax
-//\Cake\I18n\FrozenDate::setToStringFormat('dd.MM.yyyy');
-//\Cake\I18n\FrozenTime::setToStringFormat('dd.MM.yyyy HH:mm');
+Date::setToStringFormat('dd-MMM-yy');
+DateTime::setToStringFormat('dd-MMM-yy HH:mm');
+
+DateTime::setJsonEncodeFormat('yyyy-MM-dd HH:mm:ss'); // For any immutable DateTime
+Date::setJsonEncodeFormat('yyyy-MM-dd HH:mm:ss'); // For any mutable Date

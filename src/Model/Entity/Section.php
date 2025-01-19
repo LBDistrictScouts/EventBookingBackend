@@ -8,10 +8,10 @@ use Cake\ORM\Entity;
 /**
  * Section Entity
  *
- * @property int $id
+ * @property string $id
  * @property string $section_name
- * @property int $participant_type_id
- * @property int $group_id
+ * @property string $participant_type_id
+ * @property string $group_id
  * @property int|null $osm_section_id
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified

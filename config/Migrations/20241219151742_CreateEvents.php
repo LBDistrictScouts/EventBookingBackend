@@ -15,7 +15,8 @@ class CreateEvents extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('events');
+        $table = $this->table('events', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
         $table->addColumn('event_name', 'string', [
             'default' => null,
             'limit' => 64,

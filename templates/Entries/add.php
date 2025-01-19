@@ -20,10 +20,6 @@
                 <?php
                     echo $this->Form->control('event_id', ['options' => $events]);
                     echo $this->Form->control('entry_name');
-                    echo $this->Form->control('active');
-                    echo $this->Form->control('participant_count');
-                    echo $this->Form->control('checked_in_count');
-                    echo $this->Form->control('deleted');
                     echo $this->Form->control('entry_email');
                 ?>
             </fieldset>

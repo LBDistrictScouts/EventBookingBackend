@@ -64,6 +64,8 @@ return function (RouteBuilder $routes): void {
 
         $builder->setExtensions(['json']);
 
+        $builder->connect('/book', ['controller' => 'Booking', 'action' => 'add', 'ext' => 'json']);
+
         /*
          * Connect catchall routes for all controllers.
          *

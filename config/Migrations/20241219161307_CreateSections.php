@@ -15,28 +15,21 @@ class CreateSections extends BaseMigration
      */
     public function up(): void
     {
-        $table = $this->table('sections');
+        $table = $this->table('sections', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', ['null' => false]);
         $table->addColumn('section_name', 'string', [
             'default' => null,
             'limit' => 255,
             'null' => false,
         ]);
-        $table->addColumn('participant_type_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
-            'null' => false,
-        ]);
+        $table->addColumn('participant_type_id', 'uuid', ['null' => false]);
         $table->addForeignKeyWithName(
             'fk_section_participant_types',
             'participant_type_id',
             'participant_types',
             'id',
         );
-        $table->addColumn('group_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
-            'null' => false,
-        ]);
+        $table->addColumn('group_id', 'uuid', ['null' => false]);
         $table->addForeignKeyWithName(
             'fk_section_groups',
             'group_id',

@@ -49,8 +49,8 @@ return [
     'App' => [
         'namespace' => 'App',
         'encoding' => env('APP_ENCODING', 'UTF-8'),
-        'defaultLocale' => env('APP_DEFAULT_LOCALE', 'en_US'),
-        'defaultTimezone' => env('APP_DEFAULT_TIMEZONE', 'UTC'),
+        'defaultLocale' => env('APP_DEFAULT_LOCALE', 'en_GB'),
+        'defaultTimezone' => env('APP_DEFAULT_TIMEZONE', 'Europe/London'),
         'base' => false,
         'dir' => 'src',
         'webroot' => 'webroot',
@@ -107,9 +107,9 @@ return [
          * Duration will be set to '+2 minutes' in bootstrap.php when debug = true
          * If you set 'className' => 'Null' core cache will be disabled.
          */
-        '_cake_core_' => [
+        '_cake_translations_' => [
             'className' => FileEngine::class,
-            'prefix' => 'myapp_cake_core_',
+            'prefix' => 'event_booking_cake_translations_',
             'path' => CACHE . 'persistent' . DS,
             'serialize' => true,
             'duration' => '+1 years',
@@ -124,7 +124,7 @@ return [
          */
         '_cake_model_' => [
             'className' => FileEngine::class,
-            'prefix' => 'myapp_cake_model_',
+            'prefix' => 'event_booking_cake_model_',
             'path' => CACHE . 'models' . DS,
             'serialize' => true,
             'duration' => '+1 years',

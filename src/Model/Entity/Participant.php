@@ -8,12 +8,12 @@ use Cake\ORM\Entity;
 /**
  * Participant Entity
  *
- * @property int $id
+ * @property string $id
  * @property string $first_name
  * @property string $last_name
- * @property int $entry_id
- * @property int $participant_type_id
- * @property int|null $section_id
+ * @property string $entry_id
+ * @property string $participant_type_id
+ * @property string|null $section_id
  * @property bool $checked_in
  * @property bool $checked_out
  * @property \Cake\I18n\DateTime $created

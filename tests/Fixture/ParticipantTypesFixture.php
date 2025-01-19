@@ -19,14 +19,14 @@ class ParticipantTypesFixture extends TestFixture
     {
         $this->records = [
             [
-                'id' => 1,
+                'id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
                 'participant_type' => 'Lorem ipsum dolor sit amet',
                 'adult' => 1,
                 'uniformed' => 1,
                 'out_of_district' => 1,
-                'created' => 1737037152,
-                'modified' => 1737037152,
-                'deleted' => 1737037152,
+                'created' => 1737039597,
+                'modified' => 1737039597,
+                'deleted' => 1737039597,
             ],
         ];
         parent::init();

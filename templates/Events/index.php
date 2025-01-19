@@ -11,38 +11,23 @@
         <table>
             <thead>
                 <tr>
-                    <th><?= $this->Paginator->sort('id') ?></th>
-                    <th><?= $this->Paginator->sort('event_name') ?></th>
-                    <th><?= $this->Paginator->sort('event_description') ?></th>
                     <th><?= $this->Paginator->sort('booking_code') ?></th>
+                    <th><?= $this->Paginator->sort('event_name') ?></th>
                     <th><?= $this->Paginator->sort('start_time') ?></th>
-                    <th><?= $this->Paginator->sort('bookable') ?></th>
-                    <th><?= $this->Paginator->sort('finished') ?></th>
                     <th><?= $this->Paginator->sort('entry_count') ?></th>
                     <th><?= $this->Paginator->sort('participant_count') ?></th>
-                    <th><?= $this->Paginator->sort('checked_in_count') ?></th>
-                    <th><?= $this->Paginator->sort('created') ?></th>
-                    <th><?= $this->Paginator->sort('modified') ?></th>
-                    <th><?= $this->Paginator->sort('deleted') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($events as $event): ?>
                 <tr>
-                    <td><?= $this->Number->format($event->id) ?></td>
-                    <td><?= h($event->event_name) ?></td>
-                    <td><?= h($event->event_description) ?></td>
                     <td><?= h($event->booking_code) ?></td>
+                    <td><?= h($event->event_name) ?></td>
                     <td><?= h($event->start_time) ?></td>
-                    <td><?= h($event->bookable) ?></td>
-                    <td><?= h($event->finished) ?></td>
+
                     <td><?= $this->Number->format($event->entry_count) ?></td>
                     <td><?= $this->Number->format($event->participant_count) ?></td>
-                    <td><?= $this->Number->format($event->checked_in_count) ?></td>
-                    <td><?= h($event->created) ?></td>
-                    <td><?= h($event->modified) ?></td>
-                    <td><?= h($event->deleted) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $event->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $event->id]) ?>

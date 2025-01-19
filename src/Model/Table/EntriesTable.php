@@ -74,7 +74,7 @@ class EntriesTable extends Table
     public function validationDefault(Validator $validator): Validator
     {
         $validator
-            ->integer('event_id')
+            ->uuid('event_id')
             ->notEmptyString('event_id');
 
         $validator

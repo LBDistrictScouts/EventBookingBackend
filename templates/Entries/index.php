@@ -27,7 +27,7 @@
             <tbody>
                 <?php foreach ($entries as $entry): ?>
                 <tr>
-                    <td><?= $this->Number->format($entry->id) ?></td>
+                    <td><?= h($entry->id) ?></td>
                     <td><?= $entry->hasValue('event') ? $this->Html->link($entry->event->event_name, ['controller' => 'Events', 'action' => 'view', $entry->event->id]) : '' ?></td>
                     <td><?= h($entry->entry_name) ?></td>
                     <td><?= h($entry->active) ?></td>

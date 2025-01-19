@@ -24,7 +24,7 @@
             <tbody>
                 <?php foreach ($checkpoints as $checkpoint): ?>
                 <tr>
-                    <td><?= $this->Number->format($checkpoint->id) ?></td>
+                    <td><?= h($checkpoint->id) ?></td>
                     <td><?= $this->Number->format($checkpoint->checkpoint_sequence) ?></td>
                     <td><?= h($checkpoint->checkpoint_name) ?></td>
                     <td><?= $checkpoint->hasValue('event') ? $this->Html->link($checkpoint->event->event_name, ['controller' => 'Events', 'action' => 'view', $checkpoint->event->id]) : '' ?></td>

@@ -8,7 +8,7 @@ use Cake\ORM\Entity;
 /**
  * Event Entity
  *
- * @property int $id
+ * @property string $id
  * @property string $event_name
  * @property string $event_description
  * @property string $booking_code

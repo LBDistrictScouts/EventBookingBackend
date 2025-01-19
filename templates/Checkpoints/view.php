@@ -19,16 +19,16 @@
             <h3><?= h($checkpoint->checkpoint_name) ?></h3>
             <table>
                 <tr>
+                    <th><?= __('Id') ?></th>
+                    <td><?= h($checkpoint->id) ?></td>
+                </tr>
+                <tr>
                     <th><?= __('Checkpoint Name') ?></th>
                     <td><?= h($checkpoint->checkpoint_name) ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Event') ?></th>
                     <td><?= $checkpoint->hasValue('event') ? $this->Html->link($checkpoint->event->event_name, ['controller' => 'Events', 'action' => 'view', $checkpoint->event->id]) : '' ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= $this->Number->format($checkpoint->id) ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Checkpoint Sequence') ?></th>

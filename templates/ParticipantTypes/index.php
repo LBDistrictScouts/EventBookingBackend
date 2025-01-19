@@ -11,28 +11,24 @@
         <table>
             <thead>
                 <tr>
-                    <th><?= $this->Paginator->sort('id') ?></th>
                     <th><?= $this->Paginator->sort('participant_type') ?></th>
                     <th><?= $this->Paginator->sort('adult') ?></th>
                     <th><?= $this->Paginator->sort('uniformed') ?></th>
                     <th><?= $this->Paginator->sort('out_of_district') ?></th>
                     <th><?= $this->Paginator->sort('created') ?></th>
                     <th><?= $this->Paginator->sort('modified') ?></th>
-                    <th><?= $this->Paginator->sort('deleted') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($participantTypes as $participantType): ?>
                 <tr>
-                    <td><?= $this->Number->format($participantType->id) ?></td>
                     <td><?= h($participantType->participant_type) ?></td>
-                    <td><?= h($participantType->adult) ?></td>
-                    <td><?= h($participantType->uniformed) ?></td>
-                    <td><?= h($participantType->out_of_district) ?></td>
+                    <td><?= h($participantType->adult) ? 'Yes' : 'No' ?></td>
+                    <td><?= h($participantType->uniformed) ? 'Yes' : 'No' ?></td>
+                    <td><?= h($participantType->out_of_district) ? 'Yes' : 'No' ?></td>
                     <td><?= h($participantType->created) ?></td>
                     <td><?= h($participantType->modified) ?></td>
-                    <td><?= h($participantType->deleted) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $participantType->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $participantType->id]) ?>

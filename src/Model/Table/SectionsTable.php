@@ -83,11 +83,11 @@ class SectionsTable extends Table
             ->notEmptyString('section_name');
 
         $validator
-            ->integer('participant_type_id')
+            ->uuid('participant_type_id')
             ->notEmptyString('participant_type_id');
 
         $validator
-            ->integer('group_id')
+            ->uuid('group_id')
             ->notEmptyString('group_id');
 
         $validator

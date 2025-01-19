@@ -19,11 +19,11 @@ class EventsSectionsFixture extends TestFixture
     {
         $this->records = [
             [
-                'section_id' => 1,
-                'event_id' => 1,
-                'created' => 1737037152,
-                'modified' => 1737037152,
-                'deleted' => 1737037152,
+                'section_id' => '36ee029d-7de2-4a9e-8aca-9442e074b19b',
+                'event_id' => 'de44ddf5-ebbe-4bdb-9241-1242a6bbf2d8',
+                'created' => 1737039597,
+                'modified' => 1737039597,
+                'deleted' => 1737039597,
             ],
         ];
         parent::init();

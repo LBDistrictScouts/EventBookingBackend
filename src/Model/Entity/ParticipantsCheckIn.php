@@ -8,8 +8,9 @@ use Cake\ORM\Entity;
 /**
  * ParticipantsCheckIn Entity
  *
- * @property int $check_in_id
- * @property int $participant_id
+ * @property string $id
+ * @property string $check_in_id
+ * @property string $participant_id
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
@@ -29,6 +30,7 @@ class ParticipantsCheckIn extends Entity
      * @var array<string, bool>
      */
     protected array $_accessible = [
+        'id' => true,
         'created' => true,
         'modified' => true,
         'deleted' => true,

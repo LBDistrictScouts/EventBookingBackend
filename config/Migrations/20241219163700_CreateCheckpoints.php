@@ -27,11 +27,7 @@ class CreateCheckpoints extends BaseMigration
             'limit' => 255,
             'null' => false,
         ]);
-        $table->addColumn('event_id', 'integer', [
-            'default' => null,
-            'limit' => 11,
-            'null' => false,
-        ]);
+        $table->addColumn('event_id', 'uuid', ['null' => false]);
         $table->addForeignKeyWithName(
             'fk_checkpoint_events',
             'event_id',

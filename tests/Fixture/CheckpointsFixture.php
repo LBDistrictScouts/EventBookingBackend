@@ -19,14 +19,13 @@ class CheckpointsFixture extends TestFixture
     {
         $this->records = [
             [
-                'id' => 1,
+                'id' => '8454694e-a2f3-4775-b75d-1fd3e57cc4b7',
                 'checkpoint_sequence' => 1,
                 'checkpoint_name' => 'Lorem ipsum dolor sit amet',
-                'event_id' => 1,
-                'created' => 1737037152,
-                'modified' => 1737037152,
-                'deleted' => 1737037152,
-                'external_id' => 'be6e70e5-4c7c-4cf9-94d6-ad09bbc352a1',
+                'event_id' => 'f7692506-1349-4efa-86eb-10c26f0691f3',
+                'created' => 1737039597,
+                'modified' => 1737039597,
+                'deleted' => 1737039597,
             ],
         ];
         parent::init();

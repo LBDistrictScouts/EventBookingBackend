@@ -67,6 +67,11 @@ class ParticipantsCheckInsTable extends Table
     public function validationDefault(Validator $validator): Validator
     {
         $validator
+            ->uuid('id')
+            ->requirePresence('id', 'create')
+            ->notEmptyString('id');
+
+        $validator
             ->dateTime('deleted')
             ->allowEmptyDateTime('deleted');
 

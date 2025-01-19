@@ -19,6 +19,10 @@
             <h3><?= h($entry->entry_name) ?></h3>
             <table>
                 <tr>
+                    <th><?= __('Id') ?></th>
+                    <td><?= h($entry->id) ?></td>
+                </tr>
+                <tr>
                     <th><?= __('Event') ?></th>
                     <td><?= $entry->hasValue('event') ? $this->Html->link($entry->event->event_name, ['controller' => 'Events', 'action' => 'view', $entry->event->id]) : '' ?></td>
                 </tr>
@@ -29,10 +33,6 @@
                 <tr>
                     <th><?= __('Entry Email') ?></th>
                     <td><?= h($entry->entry_email) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= $this->Number->format($entry->id) ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Participant Count') ?></th>
@@ -113,6 +113,7 @@
                             <th><?= __('Created') ?></th>
                             <th><?= __('Modified') ?></th>
                             <th><?= __('Deleted') ?></th>
+                            <th><?= __('Highest Check In Sequence') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                         <?php foreach ($entry->participants as $participant) : ?>
@@ -128,6 +129,7 @@
                             <td><?= h($participant->created) ?></td>
                             <td><?= h($participant->modified) ?></td>
                             <td><?= h($participant->deleted) ?></td>
+                            <td><?= h($participant->highest_check_in_sequence) ?></td>
                             <td class="actions">
                                 <?= $this->Html->link(__('View'), ['controller' => 'Participants', 'action' => 'view', $participant->id]) ?>
                                 <?= $this->Html->link(__('Edit'), ['controller' => 'Participants', 'action' => 'edit', $participant->id]) ?>

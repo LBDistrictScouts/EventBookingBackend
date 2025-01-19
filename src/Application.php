@@ -21,6 +21,7 @@ use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
+use Cake\Http\ServerRequest;
 use Cake\Http\Middleware\BodyParserMiddleware;
 use Cake\Http\Middleware\CsrfProtectionMiddleware;
 use Cake\Http\MiddlewareQueue;
@@ -95,13 +96,28 @@ class Application extends BaseApplication
             // Parse various types of encoded request bodies so that they are
             // available as array through $request->getData()
             // https://book.cakephp.org/4/en/controllers/middleware.html#body-parser-middleware
-            ->add(new BodyParserMiddleware())
+            ->add(new BodyParserMiddleware());
 
             // Cross Site Request Forgery (CSRF) Protection Middleware
             // https://book.cakephp.org/4/en/security/csrf.html#cross-site-request-forgery-csrf-middleware
-            ->add(new CsrfProtectionMiddleware([
-                'httponly' => true,
-            ]));
+            $csrf = new CsrfProtectionMiddleware();
+
+            // Token check will be skipped when callback returns `true`.
+            $csrf->skipCheckCallback(function (ServerRequest $request) {
+                // Skip token check for API URLs.
+                $extension = $request->getUri()->getPath();
+
+                if (str_contains($extension, '.json')) {
+                    return true;
+                }
+
+                if (str_contains($request->getPath(), 'book')) {
+                    return true;
+                }
+            });
+
+            // Ensure routing middleware is added to the queue before CSRF protection middleware.
+            $middlewareQueue->add($csrf);
 
         return $middlewareQueue;
     }

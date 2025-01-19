@@ -73,11 +73,11 @@ class CheckInsTable extends Table
     public function validationDefault(Validator $validator): Validator
     {
         $validator
-            ->integer('checkpoint_id')
+            ->uuid('checkpoint_id')
             ->notEmptyString('checkpoint_id');
 
         $validator
-            ->integer('entry_id')
+            ->uuid('entry_id')
             ->notEmptyString('entry_id');
 
         $validator

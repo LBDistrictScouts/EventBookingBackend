@@ -8,8 +8,8 @@ use Cake\ORM\Entity;
 /**
  * EventsSection Entity
  *
- * @property int $section_id
- * @property int $event_id
+ * @property string $section_id
+ * @property string $event_id
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted

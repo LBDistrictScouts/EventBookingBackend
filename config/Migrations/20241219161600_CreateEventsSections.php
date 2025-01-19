@@ -18,16 +18,12 @@ class CreateEventsSections extends BaseMigration
     public function up(): void
     {
         $table = $this->table('events_sections');
-        $table->addColumn('section_id', 'integer', [
+        $table->addColumn('section_id', 'uuid', [
             'autoIncrement' => false,
-            'default' => null,
-            'limit' => 11,
             'null' => false,
         ]);
-        $table->addColumn('event_id', 'integer', [
+        $table->addColumn('event_id', 'uuid', [
             'autoIncrement' => false,
-            'default' => null,
-            'limit' => 11,
             'null' => false,
         ]);
         $table->addColumn('created', 'datetime', [

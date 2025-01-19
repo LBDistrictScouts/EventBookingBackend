@@ -19,12 +19,12 @@ class GroupsFixture extends TestFixture
     {
         $this->records = [
             [
-                'id' => 1,
+                'id' => '873b0f71-5389-46f9-baae-7d4855406b64',
                 'group_name' => 'Lorem ipsum dolor sit amet',
                 'visible' => 1,
-                'created' => 1737037152,
-                'modified' => 1737037152,
-                'deleted' => 1737037152,
+                'created' => 1737039597,
+                'modified' => 1737039597,
+                'deleted' => 1737039597,
             ],
         ];
         parent::init();

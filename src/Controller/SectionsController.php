@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\View\JsonView;
+
 /**
  * Sections Controller
  *
@@ -10,6 +12,11 @@ namespace App\Controller;
  */
 class SectionsController extends AppController
 {
+    public function viewClasses(): array
+    {
+        return [JsonView::class];
+    }
+
     /**
      * Index method
      *
@@ -22,6 +29,7 @@ class SectionsController extends AppController
         $sections = $this->paginate($query);
 
         $this->set(compact('sections'));
+        $this->viewBuilder()->setOption('serialize', ['sections']);
     }
 
     /**

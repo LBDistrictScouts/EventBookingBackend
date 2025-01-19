@@ -8,9 +8,9 @@ use Cake\ORM\Entity;
 /**
  * CheckIn Entity
  *
- * @property int $id
- * @property int $checkpoint_id
- * @property int $entry_id
+ * @property string $id
+ * @property string $checkpoint_id
+ * @property string $entry_id
  * @property \Cake\I18n\DateTime $check_in_time
  * @property int $participant_count
  * @property \Cake\I18n\DateTime $created
