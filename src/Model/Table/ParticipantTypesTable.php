@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
-use Cake\ORM\RulesChecker;
+use App\Model\Enum\ParticipantTypeCategory;
+use Cake\Database\Type\EnumType;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -13,7 +13,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\HasMany $Participants
  * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\HasMany $Sections
- *
  * @method \App\Model\Entity\ParticipantType newEmptyEntity()
  * @method \App\Model\Entity\ParticipantType newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\ParticipantType> newEntities(array $data, array $options = [])
@@ -27,7 +26,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class ParticipantTypesTable extends Table
@@ -45,6 +43,8 @@ class ParticipantTypesTable extends Table
         $this->setTable('participant_types');
         $this->setDisplayField('participant_type');
         $this->setPrimaryKey('id');
+
+        $this->getSchema()->setColumnType('category', EnumType::from(ParticipantTypeCategory::class));
 
         $this->addBehavior('Timestamp');
 
@@ -88,6 +88,11 @@ class ParticipantTypesTable extends Table
         $validator
             ->dateTime('deleted')
             ->allowEmptyDateTime('deleted');
+
+        $validator
+            ->enum('category', 'ParticipantTypesCategory')
+            ->requirePresence('category', 'create')
+            ->notEmptyString('category');
 
         return $validator;
     }

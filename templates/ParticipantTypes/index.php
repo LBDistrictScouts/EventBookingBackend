@@ -17,6 +17,7 @@
                     <th><?= $this->Paginator->sort('out_of_district') ?></th>
                     <th><?= $this->Paginator->sort('created') ?></th>
                     <th><?= $this->Paginator->sort('modified') ?></th>
+                    <th><?= $this->Paginator->sort('category') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
@@ -29,6 +30,7 @@
                     <td><?= h($participantType->out_of_district) ? 'Yes' : 'No' ?></td>
                     <td><?= h($participantType->created) ?></td>
                     <td><?= h($participantType->modified) ?></td>
+                    <td><?= $participantType->category === null ? '' : h($participantType->category->value) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $participantType->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $participantType->id]) ?>

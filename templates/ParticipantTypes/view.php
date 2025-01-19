@@ -27,6 +27,10 @@
                     <td><?= h($participantType->participant_type) ?></td>
                 </tr>
                 <tr>
+                    <th><?= __('Category') ?></th>
+                    <td><?= $participantType->category === null ? '' : h($participantType->category->value) ?></td>
+                </tr>
+                <tr>
                     <th><?= __('Created') ?></th>
                     <td><?= h($participantType->created) ?></td>
                 </tr>

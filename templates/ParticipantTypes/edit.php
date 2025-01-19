@@ -26,6 +26,7 @@
                     echo $this->Form->control('adult');
                     echo $this->Form->control('uniformed');
                     echo $this->Form->control('out_of_district');
+                    echo $this->Form->control('category');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

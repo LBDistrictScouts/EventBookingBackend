@@ -24,9 +24,10 @@ class ParticipantTypesFixture extends TestFixture
                 'adult' => 1,
                 'uniformed' => 1,
                 'out_of_district' => 1,
-                'created' => 1737039597,
-                'modified' => 1737039597,
-                'deleted' => 1737039597,
+                'created' => 1737326741,
+                'modified' => 1737326741,
+                'deleted' => null,
+                'category' => 0,
             ],
         ];
         parent::init();
