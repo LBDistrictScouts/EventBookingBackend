@@ -90,9 +90,14 @@ class ParticipantTypesTable extends Table
             ->allowEmptyDateTime('deleted');
 
         $validator
-            ->enum('category', 'ParticipantTypesCategory')
+            ->enum('category', ParticipantTypeCategory::class)
             ->requirePresence('category', 'create')
             ->notEmptyString('category');
+
+        $validator
+            ->integer('sort_order')
+            ->requirePresence('sort_order', 'create')
+            ->notEmptyString('sort_order');
 
         return $validator;
     }

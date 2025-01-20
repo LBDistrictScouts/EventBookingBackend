@@ -17,6 +17,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
  * @property \App\Model\Enum\ParticipantTypeCategory|null $category
+ * @property int $sort_order
  *
  * @property \App\Model\Entity\Participant[] $participants
  * @property \App\Model\Entity\Section[] $sections
@@ -41,6 +42,7 @@ class ParticipantType extends Entity
         'modified' => true,
         'deleted' => true,
         'category' => true,
+        'sort_order' => true,
         'participants' => true,
         'sections' => true,
     ];

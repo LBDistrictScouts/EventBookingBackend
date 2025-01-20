@@ -20,6 +20,13 @@ class ParticipantTypesController extends AppController
         return [JsonView::class];
     }
 
+    protected array $paginate = [
+        'order' => [
+            'ParticipantTypes.category' => 'asc',
+            'ParticipantTypes.sort_order' => 'asc',
+        ],
+    ];
+
     /**
      * Index method
      *

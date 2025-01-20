@@ -28,6 +28,7 @@ class ParticipantTypesFixture extends TestFixture
                 'modified' => 1737326741,
                 'deleted' => null,
                 'category' => 0,
+                'sort_order' => 1,
             ],
         ];
         parent::init();

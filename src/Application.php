@@ -16,15 +16,16 @@ declare(strict_types=1);
  */
 namespace App;
 
+use App\Middleware\CorsMiddleware;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
-use Cake\Http\ServerRequest;
 use Cake\Http\Middleware\BodyParserMiddleware;
 use Cake\Http\Middleware\CsrfProtectionMiddleware;
 use Cake\Http\MiddlewareQueue;
+use Cake\Http\ServerRequest;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
@@ -93,6 +94,8 @@ class Application extends BaseApplication
             // See https://github.com/CakeDC/cakephp-cached-routing
             ->add(new RoutingMiddleware($this))
 
+            ->add(new CorsMiddleware())
+
             // Parse various types of encoded request bodies so that they are
             // available as array through $request->getData()
             // https://book.cakephp.org/4/en/controllers/middleware.html#body-parser-middleware
@@ -114,6 +117,8 @@ class Application extends BaseApplication
                 if (str_contains($request->getPath(), 'book')) {
                     return true;
                 }
+
+                return false;
             });
 
             // Ensure routing middleware is added to the queue before CSRF protection middleware.
