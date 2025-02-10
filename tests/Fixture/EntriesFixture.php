@@ -19,16 +19,18 @@ class EntriesFixture extends TestFixture
     {
         $this->records = [
             [
-                'id' => '937a1181-e099-442c-be4e-1b103d413c9f',
-                'event_id' => 'f7692506-1349-4efa-86eb-10c26f0691f3',
+                'id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+                'event_id' => '3dbd85d9-7b67-4f59-aaec-6186c3c33858',
                 'entry_name' => 'Lorem ipsum dolor sit amet',
                 'active' => 1,
                 'participant_count' => 1,
                 'checked_in_count' => 1,
-                'created' => 1737039597,
-                'modified' => 1737039597,
-                'deleted' => null,
+                'created' => 1739184246,
+                'modified' => 1739184246,
+                'deleted' => 1739184246,
                 'entry_email' => 'Lorem ipsum dolor sit amet',
+                'entry_mobile' => 'Lorem ipsum dolor ',
+                'security_code' => 'Lor',
             ],
         ];
         parent::init();

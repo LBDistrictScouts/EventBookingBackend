@@ -22,9 +22,10 @@ class GroupsFixture extends TestFixture
                 'id' => '873b0f71-5389-46f9-baae-7d4855406b64',
                 'group_name' => 'Lorem ipsum dolor sit amet',
                 'visible' => 1,
-                'created' => 1737039597,
-                'modified' => 1737039597,
-                'deleted' => 1737039597,
+                'created' => 1739184233,
+                'modified' => 1739184233,
+                'deleted' => null,
+                'sort_order' => 1,
             ],
         ];
         parent::init();

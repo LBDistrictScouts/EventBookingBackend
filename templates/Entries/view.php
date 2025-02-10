@@ -35,6 +35,14 @@
                     <td><?= h($entry->entry_email) ?></td>
                 </tr>
                 <tr>
+                    <th><?= __('Entry Mobile') ?></th>
+                    <td><?= h($entry->entry_mobile) ?></td>
+                </tr>
+                <tr>
+                    <th><?= __('Security Code') ?></th>
+                    <td><?= h($entry->security_code) ?></td>
+                </tr>
+                <tr>
                     <th><?= __('Participant Count') ?></th>
                     <td><?= $this->Number->format($entry->participant_count) ?></td>
                 </tr>

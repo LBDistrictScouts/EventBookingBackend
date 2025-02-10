@@ -27,6 +27,10 @@
                     <td><?= h($group->group_name) ?></td>
                 </tr>
                 <tr>
+                    <th><?= __('Sort Order') ?></th>
+                    <td><?= $this->Number->format($group->sort_order) ?></td>
+                </tr>
+                <tr>
                     <th><?= __('Created') ?></th>
                     <td><?= h($group->created) ?></td>
                 </tr>

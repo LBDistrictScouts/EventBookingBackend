@@ -18,6 +18,8 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
  * @property string $entry_email
+ * @property string|null $entry_mobile
+ * @property string|null $security_code
  *
  * @property \App\Model\Entity\Event $event
  * @property \App\Model\Entity\CheckIn[] $check_ins
@@ -40,10 +42,9 @@ class Entry extends Entity
         'active' => true,
         'participant_count' => true,
         'checked_in_count' => true,
-        'created' => true,
-        'modified' => true,
-        'deleted' => true,
         'entry_email' => true,
+        'entry_mobile' => true,
+        'security_code' => true,
         'event' => true,
         'check_ins' => true,
         'participants' => true,

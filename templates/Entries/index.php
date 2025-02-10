@@ -21,6 +21,8 @@
                     <th><?= $this->Paginator->sort('modified') ?></th>
                     <th><?= $this->Paginator->sort('deleted') ?></th>
                     <th><?= $this->Paginator->sort('entry_email') ?></th>
+                    <th><?= $this->Paginator->sort('entry_mobile') ?></th>
+                    <th><?= $this->Paginator->sort('security_code') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
@@ -37,6 +39,8 @@
                     <td><?= h($entry->modified) ?></td>
                     <td><?= h($entry->deleted) ?></td>
                     <td><?= h($entry->entry_email) ?></td>
+                    <td><?= h($entry->entry_mobile) ?></td>
+                    <td><?= h($entry->security_code) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $entry->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $entry->id]) ?>

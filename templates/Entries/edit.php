@@ -28,8 +28,9 @@
                     echo $this->Form->control('active');
                     echo $this->Form->control('participant_count');
                     echo $this->Form->control('checked_in_count');
-                    echo $this->Form->control('deleted');
                     echo $this->Form->control('entry_email');
+                    echo $this->Form->control('entry_mobile');
+                    echo $this->Form->control('security_code');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

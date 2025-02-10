@@ -105,6 +105,16 @@ class EntriesTable extends Table
             ->requirePresence('entry_email', 'create')
             ->notEmptyString('entry_email');
 
+        $validator
+            ->scalar('entry_mobile')
+            ->maxLength('entry_mobile', 20)
+            ->allowEmptyString('entry_mobile');
+
+        $validator
+            ->scalar('security_code')
+            ->maxLength('security_code', 5)
+            ->allowEmptyString('security_code');
+
         return $validator;
     }
 

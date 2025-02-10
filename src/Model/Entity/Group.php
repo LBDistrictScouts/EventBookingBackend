@@ -14,6 +14,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
+ * @property int $sort_order
  *
  * @property \App\Model\Entity\Section[] $sections
  */
@@ -31,6 +32,7 @@ class Group extends Entity
     protected array $_accessible = [
         'group_name' => true,
         'visible' => true,
+        'sort_order' => true,
         'sections' => true,
     ];
 }

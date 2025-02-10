@@ -16,6 +16,7 @@
                     <th><?= $this->Paginator->sort('visible') ?></th>
                     <th><?= $this->Paginator->sort('created') ?></th>
                     <th><?= $this->Paginator->sort('modified') ?></th>
+                    <th><?= $this->Paginator->sort('sort_order') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
             </thead>
@@ -27,6 +28,7 @@
                     <td><?= h($group->visible) ?></td>
                     <td><?= h($group->created) ?></td>
                     <td><?= h($group->modified) ?></td>
+                    <td><?= $this->Number->format($group->sort_order) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $group->id]) ?>
                         <?= $this->Html->link(__('Edit'), ['action' => 'edit', $group->id]) ?>

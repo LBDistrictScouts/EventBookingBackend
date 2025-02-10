@@ -21,6 +21,8 @@
                     echo $this->Form->control('event_id', ['options' => $events]);
                     echo $this->Form->control('entry_name');
                     echo $this->Form->control('entry_email');
+                    echo $this->Form->control('entry_mobile');
+                    echo $this->Form->control('security_code');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

@@ -19,6 +19,7 @@
                 <?php
                     echo $this->Form->control('group_name');
                     echo $this->Form->control('visible');
+                    echo $this->Form->control('sort_order');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

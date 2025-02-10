@@ -75,6 +75,11 @@ class GroupsTable extends Table
             ->dateTime('deleted')
             ->allowEmptyDateTime('deleted');
 
+        $validator
+            ->integer('sort_order')
+            ->requirePresence('sort_order', 'create')
+            ->notEmptyString('sort_order');
+
         return $validator;
     }
 
