@@ -67,13 +67,24 @@ class BookingController extends AppController
      */
     public function add()
     {
-        $this->request->allowMethod(['post', 'put']);
+        $this->request->allowMethod(['post', 'put', 'options']);
+
+        if ($this->request->is(['options'])) {
+            $message = 'OPTIONS YES';
+            $this->set(compact('message'));
+            $this->viewBuilder()->setOption('serialize', ['message']);
+
+            return;
+        }
+
         $entry = $this->Entries->newEntity($this->request->getData());
         if ($this->Entries->save($entry)) {
             $success = true;
             $message = 'Saved';
             $errors = [];
         } else {
+            $this->response = $this->response->withStatus(422, 'Validation failed');
+
             $success = false;
             $message = 'Error';
             $errors = $entry->getErrors();

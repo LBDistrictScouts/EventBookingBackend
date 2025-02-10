@@ -21,7 +21,8 @@ class CorsMiddleware implements MiddlewareInterface
 
         // Add CORS headers to the response
         return $response
-            ->withHeader('Access-Control-Allow-Origin', '*') // Adjust the '*' to restrict domains
+            ->withHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+//            ->withHeader('Access-Control-Allow-Origin', '*') // Adjust the '*' to restrict domains
             ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
             ->withHeader('Access-Control-Allow-Headers', 'Content-Type');
     }
