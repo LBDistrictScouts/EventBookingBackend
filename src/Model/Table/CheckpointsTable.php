@@ -47,6 +47,7 @@ class CheckpointsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->belongsTo('Events', [
             'foreignKey' => 'event_id',
@@ -79,10 +80,6 @@ class CheckpointsTable extends Table
         $validator
             ->uuid('event_id')
             ->notEmptyString('event_id');
-
-        $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
 
         return $validator;
     }

@@ -48,6 +48,7 @@ class EventsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->hasMany('Checkpoints', [
             'foreignKey' => 'event_id',
@@ -59,6 +60,9 @@ class EventsTable extends Table
             'foreignKey' => 'event_id',
             'targetForeignKey' => 'section_id',
             'joinTable' => 'events_sections',
+        ]);
+        $this->hasMany('Questions', [
+            'foreignKey' => 'event_id',
         ]);
     }
 
@@ -114,10 +118,6 @@ class EventsTable extends Table
         $validator
             ->integer('checked_in_count')
             ->notEmptyString('checked_in_count');
-
-        $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
 
         return $validator;
     }

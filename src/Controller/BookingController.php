@@ -78,12 +78,13 @@ class BookingController extends AppController
         }
 
         $entry = $this->Entries->newEntity($this->request->getData());
+        $entry->set('security_code', '');
         if ($this->Entries->save($entry)) {
             $success = true;
             $message = 'Saved';
             $errors = [];
         } else {
-            $this->response = $this->response->withStatus(422, 'Validation failed');
+            $this->response = $this->response->withStatus(400, 'Validation failed');
 
             $success = false;
             $message = 'Error';

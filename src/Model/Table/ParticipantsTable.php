@@ -50,6 +50,7 @@ class ParticipantsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
         $this->addBehavior('CounterCache', [
             'Entries' => [
                 'participant_count',
@@ -123,10 +124,6 @@ class ParticipantsTable extends Table
         $validator
             ->boolean('checked_out')
             ->notEmptyString('checked_out');
-
-        $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
 
         $validator
             ->integer('highest_check_in_sequence')

@@ -47,6 +47,7 @@ class ParticipantsCheckInsTable extends Table
         $this->setPrimaryKey(['check_in_id', 'participant_id']);
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->belongsTo('CheckIns', [
             'foreignKey' => 'check_in_id',
@@ -70,10 +71,6 @@ class ParticipantsCheckInsTable extends Table
             ->uuid('id')
             ->requirePresence('id', 'create')
             ->notEmptyString('id');
-
-        $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
 
         return $validator;
     }

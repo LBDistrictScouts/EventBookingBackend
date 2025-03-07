@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \App\View\AppView $this
- * @var \App\Model\Entity\Checkpoint $checkpoint
+ * @var \App\Model\Entity\Question $question
  * @var \Cake\Collection\CollectionInterface|string[] $events
  */
 ?>
@@ -9,18 +9,18 @@
     <aside class="column">
         <div class="side-nav">
             <h4 class="heading"><?= __('Actions') ?></h4>
-            <?= $this->Html->link(__('List Checkpoints'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
+            <?= $this->Html->link(__('List Questions'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
         </div>
     </aside>
     <div class="column column-80">
-        <div class="checkpoints form content">
-            <?= $this->Form->create($checkpoint) ?>
+        <div class="questions form content">
+            <?= $this->Form->create($question) ?>
             <fieldset>
-                <legend><?= __('Add Checkpoint') ?></legend>
+                <legend><?= __('Add Question') ?></legend>
                 <?php
-                    echo $this->Form->control('checkpoint_sequence');
-                    echo $this->Form->control('checkpoint_name');
                     echo $this->Form->control('event_id', ['options' => $events]);
+                    echo $this->Form->control('question_text');
+                    echo $this->Form->control('answer_text');
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Submit')) ?>

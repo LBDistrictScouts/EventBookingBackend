@@ -15,6 +15,7 @@ use Cake\Utility\Inflector;
             <thead>
                 <tr>
                     <th><?= $this->Paginator->sort('participant_type') ?></th>
+                    <th><?= $this->Paginator->sort('sort_order') ?></th>
                     <th><?= $this->Paginator->sort('adult') ?></th>
                     <th><?= $this->Paginator->sort('uniformed') ?></th>
                     <th><?= $this->Paginator->sort('out_of_district') ?></th>
@@ -26,6 +27,7 @@ use Cake\Utility\Inflector;
                 <?php foreach ($participantTypes as $participantType) : ?>
                 <tr>
                     <td><?= h($participantType->participant_type) ?></td>
+                    <td><?= $this->Number->ordinal($participantType->sort_order) ?></td>
                     <td><?= h($participantType->adult) ? 'Yes' : 'No' ?></td>
                     <td><?= h($participantType->uniformed) ? 'Yes' : 'No' ?></td>
                     <td><?= h($participantType->out_of_district) ? 'Yes' : 'No' ?></td>

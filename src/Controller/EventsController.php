@@ -43,9 +43,55 @@ class EventsController extends AppController
      */
     public function view($id = null)
     {
-        $event = $this->Events->get($id, contain: ['Sections', 'Checkpoints', 'Entries']);
+        if (str_contains($this->request->getPath(), '.json')) {
+
+            $event = $this->Events->get(
+                $id,
+                fields: [
+                    'id',
+                    'event_name',
+                    'event_description',
+                    'booking_code',
+                    'start_time',
+                    'bookable',
+                    'finished',
+                ],
+                contain: [
+                    'Sections' => [
+                        'Groups',
+                        'ParticipantTypes',
+                        'fields' => [
+                            'section_name',
+                            'Groups.group_name',
+                            'Groups.sort_order',
+                            'ParticipantTypes.participant_type',
+                            'ParticipantTypes.adult',
+                            'ParticipantTypes.uniformed',
+                            'ParticipantTypes.out_of_district',
+                            'ParticipantTypes.category',
+                            'ParticipantTypes.sort_order',
+                        ]
+                    ],
+                    'Questions' => [
+                        'fields' => ['event_id', 'question_text', 'answer_text'],
+                    ],
+                    'Checkpoints' => [
+                        'sort' => 'Checkpoints.checkpoint_sequence',
+                        'fields' => ['checkpoint_sequence', 'checkpoint_name', 'event_id'],
+                        'conditions' => [
+                            'Checkpoints.checkpoint_sequence >=' => 0,
+                        ]
+                    ]]
+            );
+            $event->setHidden(['Checkpoints.event_id', 'Questions.event_id', 'event_id']);
+            $this->set(compact('event'));
+            $this->viewBuilder()->setOption('serialize', ['event']);
+
+            return;
+        }
+
+        $event = $this->Events->get($id, contain: ['Sections' => ['Groups', 'ParticipantTypes'], 'Questions', 'Checkpoints']);
         $this->set(compact('event'));
-        $this->viewBuilder()->setOption('serialize', ['event']);
     }
 
     /**

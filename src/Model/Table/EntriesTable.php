@@ -49,6 +49,7 @@ class EntriesTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
         $this->addBehavior('CounterCache', [
             'Events' => ['entry_count'],
         ]);
@@ -96,17 +97,15 @@ class EntriesTable extends Table
             ->notEmptyString('checked_in_count');
 
         $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
-
-        $validator
             ->scalar('entry_email')
+            ->email('entry_email')
             ->maxLength('entry_email', 255)
             ->requirePresence('entry_email', 'create')
             ->notEmptyString('entry_email');
 
         $validator
             ->scalar('entry_mobile')
+            ->requirePresence('entry_mobile', 'create')
             ->maxLength('entry_mobile', 20)
             ->allowEmptyString('entry_mobile');
 
@@ -127,7 +126,7 @@ class EntriesTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['event_id', 'entry_name']), ['errorField' => 'event_id']);
+        $rules->add($rules->isUnique(['event_id', 'entry_name']), ['errorField' => 'entry_name']);
         $rules->add($rules->existsIn(['event_id'], 'Events'), ['errorField' => 'event_id']);
 
         return $rules;

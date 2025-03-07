@@ -25,6 +25,8 @@ class CheckpointsController extends AppController
     public function index()
     {
         $query = $this->Checkpoints->find()
+            ->orderByAsc('event_id')
+            ->orderByAsc( 'checkpoint_sequence')
             ->contain(['Events']);
         $checkpoints = $this->paginate($query);
 

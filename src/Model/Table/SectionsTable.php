@@ -49,6 +49,7 @@ class SectionsTable extends Table
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Muffin/Trash.Trash');
 
         $this->belongsTo('ParticipantTypes', [
             'foreignKey' => 'participant_type_id',

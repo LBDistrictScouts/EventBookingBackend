@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use App\Utility\CodeUtility;
+use Cake\Log\Log;
 use Cake\ORM\Entity;
+use Random\RandomException;
 
 /**
  * Entry Entity
@@ -49,4 +52,21 @@ class Entry extends Entity
         'check_ins' => true,
         'participants' => true,
     ];
+
+    /**
+     * @param string $securityCode
+     * @return string
+     */
+    protected function _setSecurityCode(string $securityCode): string
+    {
+        if (empty($securityCode)) {
+            try {
+                $securityCode = CodeUtility::generateCode(5);
+            } catch (RandomException) {
+                Log::error('Random exception');
+            }
+        }
+
+        return $securityCode;
+    }
 }
