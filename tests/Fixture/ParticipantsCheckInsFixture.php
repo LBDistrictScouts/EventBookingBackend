@@ -20,11 +20,11 @@ class ParticipantsCheckInsFixture extends TestFixture
         $this->records = [
             [
                 'id' => 'bb4c3640-5998-4e4c-8b9b-1f88146297e0',
-                'check_in_id' => '2de88706-5c62-4f93-9567-b3352d0d0485',
-                'participant_id' => '4f2e8c06-206c-4566-a77d-5250f085f0fa',
+                'check_in_id' => '2172aa66-e48c-4026-aa73-e6674a3d9926',
+                'participant_id' => '5045fd83-55db-4d36-8a8a-63222e50e3fd',
                 'created' => 1737039597,
                 'modified' => 1737039597,
-                'deleted' => 1737039597,
+                'deleted' => null,
             ],
         ];
         parent::init();

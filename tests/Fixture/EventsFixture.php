@@ -24,14 +24,14 @@ class EventsFixture extends TestFixture
                 'event_description' => 'Lorem ipsum dolor sit amet',
                 'booking_code' => 'Lorem ipsum dolor ',
                 'start_time' => 1737039597,
-                'bookable' => 1,
-                'finished' => 1,
+                'bookable' => true,
+                'finished' => false,
                 'entry_count' => 1,
                 'participant_count' => 1,
                 'checked_in_count' => 1,
                 'created' => 1737039597,
                 'modified' => 1737039597,
-                'deleted' => 1737039597,
+                'deleted' => null,
             ],
         ];
         parent::init();

@@ -23,9 +23,9 @@ class EventsController extends AppController
     /**
      * Index method
      *
-     * @return \Cake\Http\Response|null|void Renders view
+     * @return void Renders view
      */
-    public function index()
+    public function index(): void
     {
         $query = $this->Events->find();
         $events = $this->paginate($query);
@@ -35,16 +35,25 @@ class EventsController extends AppController
     }
 
     /**
+     * @return void
+     */
+    public function current(): void
+    {
+        $query = $this->Events->find()->where(['bookable' => true, 'finished' => false])->orderByAsc('start_time');
+        $latest = $query->firstOrFail();
+        $this->view($latest->id);
+    }
+
+    /**
      * View method
      *
      * @param string|null $id Event id.
-     * @return \Cake\Http\Response|null|void Renders view
+     * @return void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         if (str_contains($this->request->getPath(), '.json')) {
-
             $event = $this->Events->get(
                 $id,
                 fields: [
@@ -70,7 +79,7 @@ class EventsController extends AppController
                             'ParticipantTypes.out_of_district',
                             'ParticipantTypes.category',
                             'ParticipantTypes.sort_order',
-                        ]
+                        ],
                     ],
                     'Questions' => [
                         'fields' => ['event_id', 'question_text', 'answer_text'],
@@ -80,7 +89,7 @@ class EventsController extends AppController
                         'fields' => ['checkpoint_sequence', 'checkpoint_name', 'event_id'],
                         'conditions' => [
                             'Checkpoints.checkpoint_sequence >=' => 0,
-                        ]
+                        ],
                     ]]
             );
             $event->setHidden(['Checkpoints.event_id', 'Questions.event_id', 'event_id']);
@@ -90,7 +99,19 @@ class EventsController extends AppController
             return;
         }
 
-        $event = $this->Events->get($id, contain: ['Sections' => ['Groups', 'ParticipantTypes'], 'Questions', 'Checkpoints']);
+        $event = $this->Events->get(
+            $id,
+            contain: [
+                'Sections' => [
+                    'Groups',
+                    'ParticipantTypes',
+                    'sort' => ['Groups.sort_order' => 'ASC', 'ParticipantTypes.sort_order' => 'ASC'],
+                ],
+                'Questions',
+                'Checkpoints' => ['sort' => 'checkpoint_sequence'],
+                'Entries' => ['Participants', 'CheckIns.Checkpoints'],
+            ]
+        );
         $this->set(compact('event'));
     }
 
@@ -122,7 +143,7 @@ class EventsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $event = $this->Events->get($id, contain: ['Sections']);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -145,7 +166,7 @@ class EventsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $event = $this->Events->get($id);

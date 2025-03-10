@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Model\Table;
 
+use App\Model\Enum\ParticipantTypeCategory;
 use App\Model\Table\ParticipantTypesTable;
 use Cake\TestSuite\TestCase;
 
@@ -66,8 +67,15 @@ class ParticipantTypesTableTest extends TestCase
             'adult' => true,
             'uniformed' => true,
             'out_of_district' => true,
+            'sort_order' => 1,
+            'category' => ParticipantTypeCategory::Adult,
         ];
 
-        $this->validatorTest($this, $this->ParticipantTypes, $goodData);
+        $validationFields = [
+            'require' => ['participant_type', 'adult', 'uniformed', 'out_of_district', 'sort_order', 'category'],
+            'notEmpty' => ['participant_type', 'adult', 'uniformed', 'out_of_district', 'sort_order', 'category'],
+        ];
+
+        $this->validatorTest($this, $this->ParticipantTypes, $goodData, $validationFields);
     }
 }

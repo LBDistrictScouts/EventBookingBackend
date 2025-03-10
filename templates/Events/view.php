@@ -55,10 +55,6 @@
                     <td><?= h($event->modified) ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Deleted') ?></th>
-                    <td><?= h($event->deleted) ?></td>
-                </tr>
-                <tr>
                     <th><?= __('Bookable') ?></th>
                     <td><?= $event->bookable ? __('Yes') : __('No'); ?></td>
                 </tr>
@@ -68,66 +64,19 @@
                 </tr>
             </table>
             <div class="related">
-                <h4><?= __('Related Sections') ?></h4>
-                <?php if (!empty($event->sections)) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('Section Name') ?></th>
-                            <th><?= __('Participant Type Id') ?></th>
-                            <th><?= __('Group Id') ?></th>
-                            <th><?= __('Osm Section Id') ?></th>
-                            <th><?= __('Created') ?></th>
-                            <th><?= __('Modified') ?></th>
-                            <th><?= __('Deleted') ?></th>
-                            <th class="actions"><?= __('Actions') ?></th>
-                        </tr>
-                        <?php foreach ($event->sections as $section) : ?>
-                        <tr>
-                            <td><?= h($section->id) ?></td>
-                            <td><?= h($section->section_name) ?></td>
-                            <td><?= h($section->participant_type_id) ?></td>
-                            <td><?= h($section->group_id) ?></td>
-                            <td><?= h($section->osm_section_id) ?></td>
-                            <td><?= h($section->created) ?></td>
-                            <td><?= h($section->modified) ?></td>
-                            <td><?= h($section->deleted) ?></td>
-                            <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'Sections', 'action' => 'view', $section->id]) ?>
-                                <?= $this->Html->link(__('Edit'), ['controller' => 'Sections', 'action' => 'edit', $section->id]) ?>
-                                <?= $this->Form->postLink(__('Delete'), ['controller' => 'Sections', 'action' => 'delete', $section->id], ['confirm' => __('Are you sure you want to delete # {0}?', $section->id)]) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="related">
                 <h4><?= __('Related Checkpoints') ?></h4>
                 <?php if (!empty($event->checkpoints)) : ?>
                 <div class="table-responsive">
                     <table>
                         <tr>
-                            <th><?= __('Id') ?></th>
                             <th><?= __('Checkpoint Sequence') ?></th>
                             <th><?= __('Checkpoint Name') ?></th>
-                            <th><?= __('Event Id') ?></th>
-                            <th><?= __('Created') ?></th>
-                            <th><?= __('Modified') ?></th>
-                            <th><?= __('Deleted') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                         <?php foreach ($event->checkpoints as $checkpoint) : ?>
                         <tr>
-                            <td><?= h($checkpoint->id) ?></td>
                             <td><?= h($checkpoint->checkpoint_sequence) ?></td>
                             <td><?= h($checkpoint->checkpoint_name) ?></td>
-                            <td><?= h($checkpoint->event_id) ?></td>
-                            <td><?= h($checkpoint->created) ?></td>
-                            <td><?= h($checkpoint->modified) ?></td>
-                            <td><?= h($checkpoint->deleted) ?></td>
                             <td class="actions">
                                 <?= $this->Html->link(__('View'), ['controller' => 'Checkpoints', 'action' => 'view', $checkpoint->id]) ?>
                                 <?= $this->Html->link(__('Edit'), ['controller' => 'Checkpoints', 'action' => 'edit', $checkpoint->id]) ?>
@@ -140,34 +89,51 @@
                 <?php endif; ?>
             </div>
             <div class="related">
+                <h4><?= __('Related Sections') ?></h4>
+                <?php if (!empty($event->sections)) : ?>
+                    <div class="table-responsive">
+                        <table>
+                            <tr>
+                                <th><?= __('Section Name') ?></th>
+                                <th><?= __('Participant Type') ?></th>
+                                <th><?= __('Group') ?></th>
+                                <th class="actions"><?= __('Actions') ?></th>
+                            </tr>
+                            <?php foreach ($event->sections as $section) : ?>
+                                <tr>
+                                    <td><?= h($section->section_name) ?></td>
+                                    <td><?= $section->has('participant_type') ? $section->participant_type->participant_type : '' ?></td>
+                                    <td><?= $section->has('group') ? $section->group->group_name : '' ?></td>
+                                    <td class="actions">
+                                        <?= $this->Html->link(__('View'), ['controller' => 'Sections', 'action' => 'view', $section->id]) ?>
+                                        <?= $this->Html->link(__('Edit'), ['controller' => 'Sections', 'action' => 'edit', $section->id]) ?>
+                                        <?= $this->Form->postLink(__('Delete'), ['controller' => 'Sections', 'action' => 'delete', $section->id], ['confirm' => __('Are you sure you want to delete # {0}?', $section->id)]) ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="related">
                 <h4><?= __('Related Entries') ?></h4>
                 <?php if (!empty($event->entries)) : ?>
                 <div class="table-responsive">
                     <table>
                         <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('Event Id') ?></th>
                             <th><?= __('Entry Name') ?></th>
-                            <th><?= __('Active') ?></th>
                             <th><?= __('Participant Count') ?></th>
                             <th><?= __('Checked In Count') ?></th>
                             <th><?= __('Created') ?></th>
-                            <th><?= __('Modified') ?></th>
-                            <th><?= __('Deleted') ?></th>
                             <th><?= __('Entry Email') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                         <?php foreach ($event->entries as $entry) : ?>
                         <tr>
-                            <td><?= h($entry->id) ?></td>
-                            <td><?= h($entry->event_id) ?></td>
                             <td><?= h($entry->entry_name) ?></td>
-                            <td><?= h($entry->active) ?></td>
                             <td><?= h($entry->participant_count) ?></td>
                             <td><?= h($entry->checked_in_count) ?></td>
                             <td><?= h($entry->created) ?></td>
-                            <td><?= h($entry->modified) ?></td>
-                            <td><?= h($entry->deleted) ?></td>
                             <td><?= h($entry->entry_email) ?></td>
                             <td class="actions">
                                 <?= $this->Html->link(__('View'), ['controller' => 'Entries', 'action' => 'view', $entry->id]) ?>

@@ -24,11 +24,16 @@ class ParticipantsTableTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.Participants',
-        'app.Entries',
+        'app.Groups',
         'app.ParticipantTypes',
         'app.Sections',
-        'app.CheckIns',
+
+        'app.Events',
+        'app.EventsSections',
+        'app.Checkpoints',
+
+        'app.Entries',
+        'app.Participants',
     ];
 
     /**

@@ -24,9 +24,12 @@ class EventsSectionsTableTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.EventsSections',
+        'app.Groups',
+        'app.ParticipantTypes',
         'app.Sections',
+
         'app.Events',
+        'app.EventsSections',
     ];
 
     /**

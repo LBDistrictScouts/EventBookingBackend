@@ -27,8 +27,8 @@ class GroupsTableTest extends TestCase
      */
     protected array $fixtures = [
         'app.Groups',
-        'app.Sections',
         'app.ParticipantTypes',
+        'app.Sections',
     ];
 
     /**
@@ -66,9 +66,15 @@ class GroupsTableTest extends TestCase
         $goodData = [
             'group_name' => 'Test Group',
             'visible' => true,
+            'sort_order' => 1,
         ];
 
-        $this->validatorTest($this, $this->Groups, $goodData);
+        $validation = [
+            'require' => ['group_name', 'visible', 'sort_order'],
+            'notEmpty' => ['group_name', 'visible', 'sort_order'],
+        ];
+
+        $this->validatorTest($this, $this->Groups, $goodData, $validation);
     }
 
     /**

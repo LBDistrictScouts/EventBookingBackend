@@ -22,12 +22,9 @@ class SectionsControllerTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.Sections',
-        'app.ParticipantTypes',
         'app.Groups',
-        'app.Participants',
-        'app.Events',
-        'app.EventsSections',
+        'app.ParticipantTypes',
+        'app.Sections',
     ];
 
     /**

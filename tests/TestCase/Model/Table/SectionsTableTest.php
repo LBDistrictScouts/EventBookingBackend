@@ -26,9 +26,9 @@ class SectionsTableTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.Sections',
-        'app.ParticipantTypes',
         'app.Groups',
+        'app.ParticipantTypes',
+        'app.Sections',
     ];
 
     /**
@@ -68,12 +68,12 @@ class SectionsTableTest extends TestCase
             'section_name' => 'Lorem ipsum dolor sit amet',
             'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
             'group_id' => '873b0f71-5389-46f9-baae-7d4855406b64',
-            'osm_section_id' => 1,
+            'osm_section_id' => 29,
         ];
 
         $validation = [
             'require' => ['section_name'],
-            'notEmpty' => ['section_name', 'participant_type_id', 'group_id', 'osm_section_id'],
+            'notEmpty' => ['section_name', 'participant_type_id', 'group_id'],
         ];
 
         $this->validatorTest($this, $this->Sections, $goodData, $validation);

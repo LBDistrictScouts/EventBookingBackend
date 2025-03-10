@@ -11,13 +11,16 @@ trait TableTestTrait
 {
     use LocatorAwareTrait;
 
-    public function validatorTest(TestCase $context, Table $table, array $goodData, array $validation): void
+    public function validatorTest(TestCase $context, Table $table, array $goodData, array $validation = []): void
     {
         $newGroup = $table->newEntity($goodData);
         $defaultValidator = $table->getValidator('default');
-        $context->assertEmpty($defaultValidator->validate($newGroup->toArray()));
+        $result = $defaultValidator->validate($newGroup->toArray());
+        // debug($result);
+        $context->assertEmpty($result);
 
         $result = $table->save($newGroup);
+        // debug($result);
         $context->assertEmpty($result->getErrors());
 
         /**

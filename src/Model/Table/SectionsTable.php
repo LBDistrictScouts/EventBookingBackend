@@ -96,10 +96,6 @@ class SectionsTable extends Table
             ->allowEmptyString('osm_section_id')
             ->add('osm_section_id', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
 
-        $validator
-            ->dateTime('deleted')
-            ->allowEmptyDateTime('deleted');
-
         return $validator;
     }
 

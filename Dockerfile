@@ -5,10 +5,14 @@ ARG user=www-data
 ARG group=www-data
 #ARG uid=969
 
+ENV TAR_OPTIONS="--no-same-owner"
+
+WORKDIR /tmp
+
 RUN apk update
 RUN apk add bash zip unzip postgresql17-client icu-dev libpq-dev php83-pdo_pgsql php83-pgsql
 
-RUN docker-php-ext-configure intl
+RUN docker-php-ext-configure intl || true
 RUN docker-php-ext-configure pgsql
 RUN docker-php-ext-install intl pgsql pdo pdo_pgsql
 

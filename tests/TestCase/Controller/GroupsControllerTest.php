@@ -23,6 +23,7 @@ class GroupsControllerTest extends TestCase
      */
     protected array $fixtures = [
         'app.Groups',
+        'app.ParticipantTypes',
         'app.Sections',
     ];
 

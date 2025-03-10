@@ -24,10 +24,15 @@ class EntriesTableTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.Entries',
+        'app.Groups',
+        'app.ParticipantTypes',
+        'app.Sections',
+
         'app.Events',
-        'app.CheckIns',
-        'app.Participants',
+        'app.EventsSections',
+        'app.Checkpoints',
+
+        'app.Entries',
     ];
 
     /**

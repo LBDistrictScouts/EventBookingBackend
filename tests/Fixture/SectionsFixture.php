@@ -26,7 +26,7 @@ class SectionsFixture extends TestFixture
                 'osm_section_id' => 1,
                 'created' => 1737039597,
                 'modified' => 1737039597,
-                'deleted' => 1737039597,
+                'deleted' => null,
             ],
         ];
         parent::init();

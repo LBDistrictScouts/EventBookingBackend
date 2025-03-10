@@ -77,12 +77,30 @@ class BookingController extends AppController
             return;
         }
 
-        $entry = $this->Entries->newEntity($this->request->getData());
+        // Filter out empty keys in incoming arrays.
+        $data = array_filter($this->request->getData(), fn ($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+
+        // Ensure 'participants' exists and is an array before processing
+        if (!empty($data['participants']) && is_array($data['participants'])) {
+            foreach ($data['participants'] as &$participant) {
+                // Filter out empty keys in each participant
+                $participant = array_filter($participant, fn ($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+            }
+            unset($participant); // Unset reference to prevent unexpected behavior
+        }
+
+        $entry = $this->Entries->newEntity($data);
         $entry->set('security_code', '');
         if ($this->Entries->save($entry)) {
             $success = true;
             $message = 'Saved';
             $errors = [];
+
+            $entry = $this->Entries->get($entry->id, contain: [
+                'Events' => ['Checkpoints', 'Questions'],
+                'CheckIns',
+                'Participants',
+            ]);
         } else {
             $this->response = $this->response->withStatus(400, 'Validation failed');
 

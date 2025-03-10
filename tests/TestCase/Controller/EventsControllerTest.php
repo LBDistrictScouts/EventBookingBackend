@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\EventsController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -22,11 +21,21 @@ class EventsControllerTest extends TestCase
      * @var list<string>
      */
     protected array $fixtures = [
-        'app.Events',
-        'app.Checkpoints',
-        'app.Entries',
+        'app.Groups',
+        'app.ParticipantTypes',
         'app.Sections',
+
+        'app.Events',
         'app.EventsSections',
+        'app.Checkpoints',
+
+        'app.Entries',
+        'app.Participants',
+
+        'app.CheckIns',
+        'app.ParticipantsCheckIns',
+
+        'app.Questions',
     ];
 
     /**
@@ -37,7 +46,37 @@ class EventsControllerTest extends TestCase
      */
     public function testIndex(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/events/index.json');
+        $this->assertResponseOk();
+
+        $resultData = json_decode($this->_response->getBody()->__toString(), true);
+
+        $this->assertArrayHasKey('events', $resultData);
+        $this->assertCount(1, $resultData['events']);
+    }
+
+    /**
+     * Test view method
+     *
+     * @return void
+     * @uses \App\Controller\EventsController::view()
+     */
+    public function testCurrent(): void
+    {
+        $this->get('/events/current.json');
+        $this->assertResponseOk();
+
+        $resultData = json_decode($this->_response->getBody()->__toString(), true);
+        $this->assertArrayHasKey('event', $resultData);
+        $this->assertCount(10, $resultData['event']);
+
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->first();
+        $event->set('finished', true);
+        $events->save($event);
+
+        $this->get('/events/current.json');
+        $this->assertResponseError();
     }
 
     /**

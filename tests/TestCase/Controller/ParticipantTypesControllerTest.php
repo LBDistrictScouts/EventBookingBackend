@@ -23,8 +23,6 @@ class ParticipantTypesControllerTest extends TestCase
      */
     protected array $fixtures = [
         'app.ParticipantTypes',
-        'app.Participants',
-        'app.Sections',
     ];
 
     /**
