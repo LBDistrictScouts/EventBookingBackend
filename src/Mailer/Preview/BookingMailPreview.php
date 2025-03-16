@@ -14,10 +14,14 @@ class BookingMailPreview extends MailPreview
     public function confirmation(): Mailer
     {
         $entries = $this->getTableLocator()->get('Entries');
-        $entry = $entries->find()->first();
+        $entry = $entries->find()->orderByDesc('Entries.created')->contain([
+            'Events' => ['Checkpoints', 'Questions'],
+            'CheckIns',
+            'Participants',
+        ])->first();
 
         return $this->getMailer('Booking')
-            ->confirmation($entry)
-            ->setViewVars(compact('entry'));
+            ->confirmation($entry);
+//            ->setViewVars(compact('entry'));
     }
 }

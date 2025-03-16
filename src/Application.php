@@ -36,7 +36,6 @@ use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
 use Cake\Routing\Router;
 use Psr\Http\Message\ServerRequestInterface;
-use RuntimeException;
 
 /**
  * Application setup class.
@@ -109,23 +108,23 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             // https://book.cakephp.org/4/en/controllers/middleware.html#body-parser-middleware
             ->add(new BodyParserMiddleware());
 
-            // Cross Site Request Forgery (CSRF) Protection Middleware
-            // https://book.cakephp.org/4/en/security/csrf.html#cross-site-request-forgery-csrf-middleware
-            $csrf = new CsrfProtectionMiddleware();
+        // Cross Site Request Forgery (CSRF) Protection Middleware
+        // https://book.cakephp.org/4/en/security/csrf.html#cross-site-request-forgery-csrf-middleware
+        $csrf = new CsrfProtectionMiddleware();
 
-            // Token check will be skipped when callback returns `true`.
-            $csrf->skipCheckCallback(function (ServerRequest $request) {
-                // Skip CSRF for API JSON requests and "book" endpoints
-                $path = $request->getUri()->getPath();
+        // Token check will be skipped when callback returns `true`.
+        $csrf->skipCheckCallback(function (ServerRequest $request) {
+            // Skip CSRF for API JSON requests and "book" endpoints
+            $path = $request->getUri()->getPath();
 
-                return str_contains($path, '/book.json');
-            });
+            return str_contains($path, '/book.json');
+        });
 
-            // Ensure routing middleware is added to the queue before CSRF protection middleware.
-            $middlewareQueue->add($csrf);
+        // Ensure routing middleware is added to the queue before CSRF protection middleware.
+        $middlewareQueue->add($csrf);
 
-            // Add Authentication Service Middleware
-            $middlewareQueue->add(new AuthenticationMiddleware($this));
+        // Add Authentication Service Middleware
+        $middlewareQueue->add(new AuthenticationMiddleware($this));
 
         return $middlewareQueue;
     }

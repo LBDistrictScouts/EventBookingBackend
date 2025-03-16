@@ -15,12 +15,15 @@ class BookingMailer extends Mailer
     public function confirmation(Entry $entry): Mailer
     {
         $mailer = $this->setTo($entry->entry_email)
+            ->setFrom(['greenway@lbdscouts.org.uk' => 'LBD Scouts - Greenway Team'])
             ->setSubject("Booking Confirmation for {$entry->event->event_name}")
+            ->setEmailFormat('both')
             ->setViewVars(compact('entry'));
 
         $mailer->viewBuilder()
-            ->setTemplate('confirmation') // By default template with same name as method name is used.
-            ->setLayout('custom');
+            ->addHelpers(['Html', 'Text', 'Time'])
+            ->setTemplate('confirmation')
+            ->setLayout('default');
 
         return $mailer;
     }

@@ -14,12 +14,24 @@
  * @var \App\View\AppView $this
  */
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="EN-GB" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title><?= $this->fetch('title') ?></title>
 </head>
-<body>
-    <?= $this->fetch('content') ?>
+<body style="margin:0; padding:0; font-family: 'Nunito Sans', Arial, sans-serif; background-color: #f4f4f4;">
+    <table
+        role="presentation"
+        width="100%"
+        cellpadding="0"
+        cellspacing="0"
+        style="background-color: #f4f4f4; padding: 20px;"
+    >
+        <tr>
+            <td align="center">
+                <?= $this->fetch('content') ?>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
