@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Event\EventInterface;
 use Cake\View\JsonView;
 
 /**
@@ -18,6 +19,18 @@ class EventsController extends AppController
     public function viewClasses(): array
     {
         return [JsonView::class];
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event): void
+    {
+        parent::beforeFilter($event);
+
+        // 🔹 Bypass authentication for these actions
+        $this->Authentication->allowUnauthenticated(['current']);
     }
 
     /**
@@ -39,6 +52,8 @@ class EventsController extends AppController
      */
     public function current(): void
     {
+        $this->viewBuilder()->setTemplate('view');
+
         $query = $this->Events->find()->where(['bookable' => true, 'finished' => false])->orderByAsc('start_time');
         $latest = $query->firstOrFail();
         $this->view($latest->id);
@@ -82,7 +97,7 @@ class EventsController extends AppController
                         ],
                     ],
                     'Questions' => [
-                        'fields' => ['event_id', 'question_text', 'answer_text'],
+                        'fields' => ['Questions.id', 'event_id', 'question_text', 'answer_text'],
                     ],
                     'Checkpoints' => [
                         'sort' => 'Checkpoints.checkpoint_sequence',
@@ -132,7 +147,17 @@ class EventsController extends AppController
             }
             $this->Flash->error(__('The event could not be saved. Please, try again.'));
         }
-        $sections = $this->Events->Sections->find('list', limit: 200)->all();
+        $sections = $this->Events->Sections
+            ->find(
+                'list',
+                keyField: 'id',
+                valueField: 'section_name',
+                groupField: 'group.group_name',
+                limit: 200,
+            )
+            ->contain(['Groups', 'ParticipantTypes'])
+            ->orderBy(['Groups.sort_order' => 'ASC', 'ParticipantTypes.sort_order' => 'ASC'])
+            ->all();
         $this->set(compact('event', 'sections'));
     }
 

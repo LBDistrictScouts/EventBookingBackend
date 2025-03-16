@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Controller\Controller;
+use Cake\Event\EventInterface;
 use Exception;
 
 /**
@@ -43,6 +44,8 @@ class AppController extends Controller
         parent::initialize();
 
         try {
+            $this->loadComponent('Authentication.Authentication');
+
             $this->loadComponent('Flash');
 
             /*
@@ -52,6 +55,28 @@ class AppController extends Controller
 //            $this->loadComponent('FormProtection');
         } catch (Exception $e) {
             error_log($e->getMessage());
+        }
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event): void
+    {
+        parent::beforeFilter($event);
+
+        $session = $this->request->getSession();
+        $expiresAt = $session->read('Auth.expires_at');
+
+        if ($expiresAt && time() > $expiresAt) {
+            $session->destroy();
+            $this->Flash->error('Your session has expired. Please log in again.');
+        }
+
+        // 🔹 Allow DebugKit requests to bypass authentication
+        if ($this->request->getParam('plugin') === 'DebugKit') {
+            $this->Authentication->allowUnauthenticated();
         }
     }
 }

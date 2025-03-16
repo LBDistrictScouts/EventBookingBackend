@@ -24,6 +24,7 @@
                     echo $this->Form->control('entry_id', ['options' => $entries]);
                     echo $this->Form->control('check_in_time');
                     echo $this->Form->control('participant_count');
+                    echo $this->Form->control('deleted');
                     echo $this->Form->control('participants._ids', ['options' => $participants]);
                 ?>
             </fieldset>

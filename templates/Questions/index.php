@@ -11,7 +11,6 @@
         <table>
             <thead>
                 <tr>
-                    <th><?= $this->Paginator->sort('id') ?></th>
                     <th><?= $this->Paginator->sort('event_id') ?></th>
                     <th><?= $this->Paginator->sort('created') ?></th>
                     <th><?= $this->Paginator->sort('modified') ?></th>
@@ -21,7 +20,6 @@
             <tbody>
                 <?php foreach ($questions as $question): ?>
                 <tr>
-                    <td><?= h($question->id) ?></td>
                     <td><?= $question->hasValue('event') ? $this->Html->link($question->event->event_name, ['controller' => 'Events', 'action' => 'view', $question->event->id]) : '' ?></td>
                     <td><?= h($question->created) ?></td>
                     <td><?= h($question->modified) ?></td>

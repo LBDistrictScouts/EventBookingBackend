@@ -19,10 +19,6 @@
             <h3><?= h($question->id) ?></h3>
             <table>
                 <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= h($question->id) ?></td>
-                </tr>
-                <tr>
                     <th><?= __('Event') ?></th>
                     <td><?= $question->hasValue('event') ? $this->Html->link($question->event->event_name, ['controller' => 'Events', 'action' => 'view', $question->event->id]) : '' ?></td>
                 </tr>
@@ -33,10 +29,6 @@
                 <tr>
                     <th><?= __('Modified') ?></th>
                     <td><?= h($question->modified) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Deleted') ?></th>
-                    <td><?= h($question->deleted) ?></td>
                 </tr>
             </table>
             <div class="text">

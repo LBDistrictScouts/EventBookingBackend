@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\View\JsonView;
+
 /**
  * Groups Controller
  *
@@ -11,16 +13,25 @@ namespace App\Controller;
 class GroupsController extends AppController
 {
     /**
+     * @return array<class-string>
+     */
+    public function viewClasses(): array
+    {
+        return [JsonView::class];
+    }
+
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()
     {
-        $query = $this->Groups->find();
+        $query = $this->Groups->find()->orderByAsc('sort_order');
         $groups = $this->paginate($query);
 
         $this->set(compact('groups'));
+        $this->viewBuilder()->setOption('serialize', ['groups']);
     }
 
     /**
@@ -30,7 +41,7 @@ class GroupsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $group = $this->Groups->get($id, contain: ['Sections']);
         $this->set(compact('group'));
@@ -63,7 +74,7 @@ class GroupsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $group = $this->Groups->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -85,7 +96,7 @@ class GroupsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $group = $this->Groups->get($id);

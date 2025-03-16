@@ -23,6 +23,7 @@ use Random\RandomException;
  * @property string $entry_email
  * @property string|null $entry_mobile
  * @property string|null $security_code
+ * @property int $reference_number
  *
  * @property \App\Model\Entity\Event $event
  * @property \App\Model\Entity\CheckIn[] $check_ins
@@ -48,6 +49,7 @@ class Entry extends Entity
         'entry_email' => true,
         'entry_mobile' => true,
         'security_code' => true,
+        'reference_number' => false,
         'event' => true,
         'check_ins' => true,
         'participants' => true,

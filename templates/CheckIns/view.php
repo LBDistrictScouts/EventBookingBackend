@@ -67,6 +67,7 @@
                             <th><?= __('Checked Out') ?></th>
                             <th><?= __('Created') ?></th>
                             <th><?= __('Modified') ?></th>
+                            <th><?= __('Deleted') ?></th>
                             <th><?= __('Highest Check In Sequence') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>

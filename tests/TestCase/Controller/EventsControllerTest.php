@@ -46,6 +46,22 @@ class EventsControllerTest extends TestCase
      */
     public function testIndex(): void
     {
+        $this->session([
+            'Config' => [
+                'time' => 1742087458,
+            ],
+            'Auth' => [
+                'User' => [
+                    'email' => 'jacob@lbdscouts.org.uk',
+                    'subject' => '712277bf-88bc-4ad5-a87d-f3b4fd0051d5',
+                    'first_name' => 'Jacob',
+                    'last_name' => 'Tyler',
+                    'token' => 'fake.token.goat-iIYoB5LwpHY5-dhcML-zRiFXsQFtHjedjUO7D2yJhjcLkxIVH3Qy7uIEenjcqyYKuTA0wVrm11N25II0UdBeazEEjEHgGZCO6Vf9ZFoJRtkw_rjHMR9LlpGbE0Z53hxifRjCXXMZNlX3GJQb80PQbPaU8FUq21EPPGLCZhni-Bdl4ZJeQtVOrretAk8HUBLdXw',
+                ],
+                'expires_at' => 1742088064,
+            ],
+        ]);
+
         $this->get('/events/index.json');
         $this->assertResponseOk();
 

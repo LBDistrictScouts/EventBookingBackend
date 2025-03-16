@@ -17,6 +17,11 @@ declare(strict_types=1);
 namespace App;
 
 use App\Middleware\CorsMiddleware;
+use App\Utility\JwksUtility;
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
@@ -29,6 +34,9 @@ use Cake\Http\ServerRequest;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use Cake\Routing\Router;
+use Psr\Http\Message\ServerRequestInterface;
+use RuntimeException;
 
 /**
  * Application setup class.
@@ -38,7 +46,7 @@ use Cake\Routing\Middleware\RoutingMiddleware;
  *
  * @extends \Cake\Http\BaseApplication<\App\Application>
  */
-class Application extends BaseApplication
+class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
     /**
      * Load all the application configuration and bootstrap logic.
@@ -107,22 +115,17 @@ class Application extends BaseApplication
 
             // Token check will be skipped when callback returns `true`.
             $csrf->skipCheckCallback(function (ServerRequest $request) {
-                // Skip token check for API URLs.
-                $extension = $request->getUri()->getPath();
+                // Skip CSRF for API JSON requests and "book" endpoints
+                $path = $request->getUri()->getPath();
 
-                if (str_contains($extension, '.json')) {
-                    return true;
-                }
-
-                if (str_contains($request->getPath(), 'book')) {
-                    return true;
-                }
-
-                return false;
+                return str_contains($path, '/book.json');
             });
 
             // Ensure routing middleware is added to the queue before CSRF protection middleware.
             $middlewareQueue->add($csrf);
+
+            // Add Authentication Service Middleware
+            $middlewareQueue->add(new AuthenticationMiddleware($this));
 
         return $middlewareQueue;
     }
@@ -136,6 +139,55 @@ class Application extends BaseApplication
      */
     public function services(ContainerInterface $container): void
     {
+    }
+
+    /**
+     * Function to Augment the Server Request with an Authenticator
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request Interface to be augmented with Authentication
+     * @return \Authentication\AuthenticationServiceInterface Augmented Interface
+     */
+    public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface
+    {
+        $service = new AuthenticationService();
+
+        $service->setConfig([
+            'unauthenticatedRedirect' => Router::url([
+                'plugin' => null,
+                'controller' => 'Auth',
+                'action' => 'login',
+            ], true),
+            'queryParam' => 'redirect',
+        ]);
+
+        // Fetch and cache JWKS keys
+        $jwksUtil = new JwksUtility();
+        $jsonWebKeySet = $jwksUtil->getJwks();
+
+        // Load JWT authentication with JWKS key set
+        $service->loadAuthenticator('Authentication.Jwt', [
+            'secretKey' => $jsonWebKeySet, // Directly passing the JWKS key set
+            'algorithm' => ['RS256'], // Cognito uses RS256
+            'returnPayload' => false,
+            'skipAuthorization' => true,
+            'skip' => function (ServerRequestInterface $request) {
+                // ✅ Skip for DebugKit plugin requests
+                if ($request->getParam('plugin') === 'DebugKit') {
+                    return true;
+                }
+
+                return false;
+            },
+        ]);
+
+        $service->loadAuthenticator('Authentication.Session', [
+            'sessionKey' => 'Auth.User',
+        ]);
+
+        // Load your identifiers
+//        $service->loadIdentifier('Authentication.JwtSubject');
+
+        return $service;
     }
 
     /**

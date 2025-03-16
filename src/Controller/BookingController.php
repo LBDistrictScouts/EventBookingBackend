@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Model\Table\EntriesTable;
+use Cake\Event\EventInterface;
+use Cake\Mailer\MailerAwareTrait;
 use Cake\ORM\Table;
 use Cake\View\JsonView;
 
@@ -14,6 +16,8 @@ use Cake\View\JsonView;
  */
 class BookingController extends AppController
 {
+    use MailerAwareTrait;
+
     private EntriesTable|Table $Entries;
 
     /**
@@ -31,6 +35,18 @@ class BookingController extends AppController
     public function viewClasses(): array
     {
         return [JsonView::class];
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event): void
+    {
+        parent::beforeFilter($event);
+
+        // 🔹 Bypass authentication for these actions
+        $this->Authentication->allowUnauthenticated(['add']);
     }
 
     /**
@@ -101,6 +117,8 @@ class BookingController extends AppController
                 'CheckIns',
                 'Participants',
             ]);
+
+            $this->getMailer('Booking')->send('confirmation', [$entry]);
         } else {
             $this->response = $this->response->withStatus(400, 'Validation failed');
 

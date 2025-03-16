@@ -142,7 +142,7 @@ class BookingControllerTest extends TestCase
         $this->assertSame($expected['message'], $resultData['message']);
 
         $this->assertCount(3, $resultData['entry']['participants']);
-        $this->assertCount(15, $resultData['entry']);
+        $this->assertCount(16, $resultData['entry']);
 
         $this->assertEquals($expected['entry']['entry_name'], $resultData['entry']['entry_name']);
         $this->assertEquals($expected['entry']['entry_email'], $resultData['entry']['entry_email']);

@@ -78,6 +78,16 @@ return [
         'salt' => env('SECURITY_SALT'),
     ],
 
+    'AWS' => [
+        'Cognito' => [
+            'Region' => env('AWS_REGION', 'eu-west-1'),
+            'Domain' => env('COGNITO_DOMAIN'),
+            'ClientId' => env('COGNITO_CLIENT_ID'),
+            'ClientSecret' => env('COGNITO_CLIENT_SECRET'),
+            'UserPoolId' => env('COGNITO_USER_POOL_ID'),
+        ],
+    ],
+
     /*
      * Apply timestamps with the last modified time to static assets (js, css, images).
      * Will append a querystring parameter containing the time the file was modified.

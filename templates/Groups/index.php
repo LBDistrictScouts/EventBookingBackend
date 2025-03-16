@@ -11,11 +11,8 @@
         <table>
             <thead>
                 <tr>
-                    <th><?= $this->Paginator->sort('id') ?></th>
                     <th><?= $this->Paginator->sort('group_name') ?></th>
                     <th><?= $this->Paginator->sort('visible') ?></th>
-                    <th><?= $this->Paginator->sort('created') ?></th>
-                    <th><?= $this->Paginator->sort('modified') ?></th>
                     <th><?= $this->Paginator->sort('sort_order') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
@@ -23,11 +20,8 @@
             <tbody>
                 <?php foreach ($groups as $group): ?>
                 <tr>
-                    <td><?= h($group->id) ?></td>
                     <td><?= h($group->group_name) ?></td>
-                    <td><?= h($group->visible) ?></td>
-                    <td><?= h($group->created) ?></td>
-                    <td><?= h($group->modified) ?></td>
+                    <td><?= $group->visible ? 'Yes' : 'No' ?></td>
                     <td><?= $this->Number->format($group->sort_order) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $group->id]) ?>

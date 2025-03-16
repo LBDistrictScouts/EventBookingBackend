@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
+use App\Model\Entity\Entry;
+use ArrayObject;
+use Cake\Event\EventInterface;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -14,7 +16,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
  * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\HasMany $CheckIns
  * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\HasMany $Participants
- *
  * @method \App\Model\Entity\Entry newEmptyEntity()
  * @method \App\Model\Entity\Entry newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Entry> newEntities(array $data, array $options = [])
@@ -28,7 +29,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  * @mixin \Cake\ORM\Behavior\CounterCacheBehavior
  */
@@ -64,6 +64,26 @@ class EntriesTable extends Table
         $this->hasMany('Participants', [
             'foreignKey' => 'entry_id',
         ]);
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param \App\Model\Entity\Entry $entity
+     * @param \ArrayObject $options
+     * @return void
+     */
+    public function beforeSave(EventInterface $event, Entry $entity, ArrayObject $options): void
+    {
+        if ($entity->isNew() && isset($entity->event_id)) {
+            // Get the current max reference number for this event
+            $maxRef = $this->find()
+                ->select(['max_ref' => $this->find()->func()->max('reference_number')])
+                ->where(['event_id' => $entity->event_id])
+                ->first()
+                ->max_ref ?? 0;
+
+            $entity->reference_number = $maxRef + 1;
+        }
     }
 
     /**

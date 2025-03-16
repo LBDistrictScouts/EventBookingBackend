@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Event\EventInterface;
 use Cake\View\JsonView;
 
 /**
@@ -18,6 +19,18 @@ class SectionsController extends AppController
     }
 
     /**
+     * @param \Cake\Event\EventInterface $event
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event): void
+    {
+        parent::beforeFilter($event);
+
+        // 🔹 Bypass authentication for these actions
+        $this->Authentication->allowUnauthenticated(['index']);
+    }
+
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
@@ -25,8 +38,10 @@ class SectionsController extends AppController
     public function index()
     {
         $query = $this->Sections->find()
-            ->contain(['ParticipantTypes', 'Groups']);
-        $sections = $this->paginate($query);
+            ->contain(['ParticipantTypes', 'Groups'])
+            ->orderBy(['Groups.sort_order' => 'Asc', 'ParticipantTypes.sort_order' => 'Asc']);
+
+        $sections = $this->paginate($query, ['limit' => 100]);
 
         $this->set(compact('sections'));
         $this->viewBuilder()->setOption('serialize', ['sections']);

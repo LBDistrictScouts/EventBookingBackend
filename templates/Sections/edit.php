@@ -28,7 +28,7 @@
                     echo $this->Form->control('section_name');
                     echo $this->Form->control('participant_type_id', ['options' => $participantTypes]);
                     echo $this->Form->control('group_id', ['options' => $groups]);
-                    echo $this->Form->control('osm_section_id', ['label' => 'OSM Section ID']);
+                    echo $this->Form->control('osm_section_id', ['type' => 'number', 'label' => 'OSM Section ID']);
                     echo $this->Form->control('events._ids', ['options' => $events]);
                 ?>
             </fieldset>

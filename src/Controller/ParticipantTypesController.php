@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Event\EventInterface;
 use Cake\View\JsonView;
 
 /**
@@ -18,6 +19,18 @@ class ParticipantTypesController extends AppController
     public function viewClasses(): array
     {
         return [JsonView::class];
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event): void
+    {
+        parent::beforeFilter($event);
+
+        // 🔹 Bypass authentication for these actions
+        $this->Authentication->allowUnauthenticated(['index']);
     }
 
     protected array $paginate = [

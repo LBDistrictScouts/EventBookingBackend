@@ -52,3 +52,4 @@ nbproject/*
 yarn-debug.log
 yarn-error.log
 /config/Migrations/schema-dump-default.lock
+/package.xml
