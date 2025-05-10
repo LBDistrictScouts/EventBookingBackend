@@ -16,12 +16,10 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th scope="col"><?= $this->Paginator->sort('id') ?></th>
         <th scope="col"><?= $this->Paginator->sort('group_name') ?></th>
         <th scope="col"><?= $this->Paginator->sort('visible') ?></th>
         <th scope="col"><?= $this->Paginator->sort('created') ?></th>
         <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('deleted') ?></th>
         <th scope="col"><?= $this->Paginator->sort('sort_order') ?></th>
         <th scope="col" class="actions"><?= __('Actions') ?></th>
     </tr>
@@ -29,17 +27,13 @@
     <tbody>
         <?php foreach ($groups as $group) : ?>
         <tr>
-            <td><?= h($group->id) ?></td>
             <td><?= h($group->group_name) ?></td>
-            <td><?= h($group->visible) ?></td>
+            <td><?= $group->visible ? 'Yes' : 'No' ?></td>
             <td><?= h($group->created) ?></td>
             <td><?= h($group->modified) ?></td>
-            <td><?= h($group->deleted) ?></td>
             <td><?= $this->Number->format($group->sort_order) ?></td>
             <td class="actions">
-                <?= $this->Html->link(__('View'), ['action' => 'view', $group->id], ['title' => __('View'), 'class' => 'btn btn-secondary']) ?>
-                <?= $this->Html->link(__('Edit'), ['action' => 'edit', $group->id], ['title' => __('Edit'), 'class' => 'btn btn-secondary']) ?>
-                <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $group->id], ['confirm' => __('Are you sure you want to delete # {0}?', $group->id), 'title' => __('Delete'), 'class' => 'btn btn-danger']) ?>
+                <?= $this->Actions->buttons($group) ?>
             </td>
         </tr>
         <?php endforeach; ?>

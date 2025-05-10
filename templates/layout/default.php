@@ -39,7 +39,7 @@ $this->start('tb_body_start');
             <span class="navbar-toggler-icon"></span>
         </button>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
-        <ul class="navbar-nav px-3">
+        <ul class="navbar-nav px-3 w-100">
             <li class="nav-item text-nowrap">
                 <?= $this->Html->link('Home', '/', ['class' => 'nav-link']) ?>
             </li>

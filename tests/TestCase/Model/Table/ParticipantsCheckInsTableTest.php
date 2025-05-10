@@ -34,9 +34,6 @@ class ParticipantsCheckInsTableTest extends TestCase
 
         'app.Entries',
         'app.Participants',
-
-        'app.CheckIns',
-        'app.ParticipantsCheckIns',
     ];
 
     /**

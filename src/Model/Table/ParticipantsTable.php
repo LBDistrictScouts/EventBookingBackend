@@ -49,7 +49,7 @@ class ParticipantsTable extends Table
         parent::initialize($config);
 
         $this->setTable('participants');
-        $this->setDisplayField('first_name');
+        $this->setDisplayField('full_name');
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
@@ -80,6 +80,7 @@ class ParticipantsTable extends Table
             'foreignKey' => 'participant_id',
             'targetForeignKey' => 'check_in_id',
             'joinTable' => 'participants_check_ins',
+            'through' => 'ParticipantsCheckIns',
         ]);
     }
 

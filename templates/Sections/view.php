@@ -4,137 +4,152 @@
  * @var \App\Model\Entity\Section $section
  */
 ?>
-<div class="row">
-    <aside class="column">
-        <div class="side-nav">
-            <h4 class="heading"><?= __('Actions') ?></h4>
-            <?= $this->Html->link(__('Edit Section'), ['action' => 'edit', $section->id], ['class' => 'side-nav-item']) ?>
-            <?= $this->Form->postLink(__('Delete Section'), ['action' => 'delete', $section->id], ['confirm' => __('Are you sure you want to delete # {0}?', $section->id), 'class' => 'side-nav-item']) ?>
-            <?= $this->Html->link(__('List Sections'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
-            <?= $this->Html->link(__('New Section'), ['action' => 'add'], ['class' => 'side-nav-item']) ?>
-        </div>
-    </aside>
-    <div class="column column-80">
-        <div class="sections view content">
-            <h3><?= h($section->section_name) ?></h3>
-            <table>
+<?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
+
+<?php $this->start('tb_actions'); ?>
+<li><?= $this->Html->link(__('Edit Section'), ['action' => 'edit', $section->id], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Form->postLink(__('Delete Section'), ['action' => 'delete', $section->id], ['confirm' => __('Are you sure you want to delete # {0}?', $section->id), 'class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('List Sections'), ['action' => 'index'], ['class' => 'nav-link']) ?> </li>
+<li><?= $this->Html->link(__('New Section'), ['action' => 'add'], ['class' => 'nav-link']) ?> </li>
+<li><?= $this->Html->link(__('List Participant Types'), ['controller' => 'ParticipantTypes', 'action' => 'index'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('New Participant Type'), ['controller' => 'ParticipantTypes', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('List Groups'), ['controller' => 'Groups', 'action' => 'index'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('New Group'), ['controller' => 'Groups', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('List Participants'), ['controller' => 'Participants', 'action' => 'index'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('New Participant'), ['controller' => 'Participants', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('List Events'), ['controller' => 'Events', 'action' => 'index'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('New Event'), ['controller' => 'Events', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
+<?php $this->end(); ?>
+<?php $this->assign('tb_sidebar', '<ul class="nav flex-column">' . $this->fetch('tb_actions') . '</ul>'); ?>
+
+<div class="sections view large-9 medium-8 columns content">
+    <h3><?= h($section->section_name) ?></h3>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <tr>
+                <th scope="row"><?= __('Id') ?></th>
+                <td><?= h($section->id) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Section Name') ?></th>
+                <td><?= h($section->section_name) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Participant Type') ?></th>
+                <td><?= $section->hasValue('participant_type') ? $this->Html->link($section->participant_type->participant_type, ['controller' => 'ParticipantTypes', 'action' => 'view', $section->participant_type->id]) : '' ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Group') ?></th>
+                <td><?= $section->hasValue('group') ? $this->Html->link($section->group->group_name, ['controller' => 'Groups', 'action' => 'view', $section->group->id]) : '' ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Osm Section Id') ?></th>
+                <td><?= $section->osm_section_id === null ? '' : $this->Number->format($section->osm_section_id) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Created') ?></th>
+                <td><?= h($section->created) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Modified') ?></th>
+                <td><?= h($section->modified) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Deleted') ?></th>
+                <td><?= h($section->deleted) ?></td>
+            </tr>
+        </table>
+    </div>
+    <div class="related">
+        <h4><?= __('Related Events') ?></h4>
+        <?php if (!empty($section->events)): ?>
+        <div class="table-responsive">
+            <table class="table table-striped">
                 <tr>
-                    <th><?= __('Section Name') ?></th>
-                    <td><?= h($section->section_name) ?></td>
+                    <th scope="col"><?= __('Id') ?></th>
+                    <th scope="col"><?= __('Event Name') ?></th>
+                    <th scope="col"><?= __('Event Description') ?></th>
+                    <th scope="col"><?= __('Booking Code') ?></th>
+                    <th scope="col"><?= __('Start Time') ?></th>
+                    <th scope="col"><?= __('Bookable') ?></th>
+                    <th scope="col"><?= __('Finished') ?></th>
+                    <th scope="col"><?= __('Entry Count') ?></th>
+                    <th scope="col"><?= __('Participant Count') ?></th>
+                    <th scope="col"><?= __('Checked In Count') ?></th>
+                    <th scope="col"><?= __('Created') ?></th>
+                    <th scope="col"><?= __('Modified') ?></th>
+                    <th scope="col"><?= __('Deleted') ?></th>
+                    <th scope="col" class="actions"><?= __('Actions') ?></th>
                 </tr>
+                <?php foreach ($section->events as $events): ?>
                 <tr>
-                    <th><?= __('Participant Type') ?></th>
-                    <td><?= $section->hasValue('participant_type') ? $this->Html->link($section->participant_type->participant_type, ['controller' => 'ParticipantTypes', 'action' => 'view', $section->participant_type->id]) : '' ?></td>
+                    <td><?= h($events->id) ?></td>
+                    <td><?= h($events->event_name) ?></td>
+                    <td><?= h($events->event_description) ?></td>
+                    <td><?= h($events->booking_code) ?></td>
+                    <td><?= h($events->start_time) ?></td>
+                    <td><?= h($events->bookable) ?></td>
+                    <td><?= h($events->finished) ?></td>
+                    <td><?= h($events->entry_count) ?></td>
+                    <td><?= h($events->participant_count) ?></td>
+                    <td><?= h($events->checked_in_count) ?></td>
+                    <td><?= h($events->created) ?></td>
+                    <td><?= h($events->modified) ?></td>
+                    <td><?= h($events->deleted) ?></td>
+                    <td class="actions">
+                        <?= $this->Html->link(__('View'), ['controller' => 'Events', 'action' => 'view', $events->id], ['class' => 'btn btn-secondary']) ?>
+                        <?= $this->Html->link(__('Edit'), ['controller' => 'Events', 'action' => 'edit', $events->id], ['class' => 'btn btn-secondary']) ?>
+                        <?= $this->Form->postLink( __('Delete'), ['controller' => 'Events', 'action' => 'delete', $events->id], ['confirm' => __('Are you sure you want to delete # {0}?', $events->id), 'class' => 'btn btn-danger']) ?>
+                    </td>
                 </tr>
-                <tr>
-                    <th><?= __('Group') ?></th>
-                    <td><?= $section->hasValue('group') ? $this->Html->link($section->group->group_name, ['controller' => 'Groups', 'action' => 'view', $section->group->id]) : '' ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('OSM Section Id') ?></th>
-                    <td><?= $section->osm_section_id === null ? '' : $section->osm_section_id ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Created') ?></th>
-                    <td><?= h($section->created) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Modified') ?></th>
-                    <td><?= h($section->modified) ?></td>
-                </tr>
+                <?php endforeach; ?>
             </table>
-            <div class="related">
-                <h4><?= __('Related Events') ?></h4>
-                <?php if (!empty($section->events)) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('Event Name') ?></th>
-                            <th><?= __('Event Description') ?></th>
-                            <th><?= __('Booking Code') ?></th>
-                            <th><?= __('Start Time') ?></th>
-                            <th><?= __('Bookable') ?></th>
-                            <th><?= __('Finished') ?></th>
-                            <th><?= __('Entry Count') ?></th>
-                            <th><?= __('Participant Count') ?></th>
-                            <th><?= __('Checked In Count') ?></th>
-                            <th><?= __('Created') ?></th>
-                            <th><?= __('Modified') ?></th>
-                            <th><?= __('Deleted') ?></th>
-                            <th class="actions"><?= __('Actions') ?></th>
-                        </tr>
-                        <?php foreach ($section->events as $event) : ?>
-                        <tr>
-                            <td><?= h($event->id) ?></td>
-                            <td><?= h($event->event_name) ?></td>
-                            <td><?= h($event->event_description) ?></td>
-                            <td><?= h($event->booking_code) ?></td>
-                            <td><?= h($event->start_time) ?></td>
-                            <td><?= h($event->bookable) ?></td>
-                            <td><?= h($event->finished) ?></td>
-                            <td><?= h($event->entry_count) ?></td>
-                            <td><?= h($event->participant_count) ?></td>
-                            <td><?= h($event->checked_in_count) ?></td>
-                            <td><?= h($event->created) ?></td>
-                            <td><?= h($event->modified) ?></td>
-                            <td><?= h($event->deleted) ?></td>
-                            <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'Events', 'action' => 'view', $event->id]) ?>
-                                <?= $this->Html->link(__('Edit'), ['controller' => 'Events', 'action' => 'edit', $event->id]) ?>
-                                <?= $this->Form->postLink(__('Delete'), ['controller' => 'Events', 'action' => 'delete', $event->id], ['confirm' => __('Are you sure you want to delete # {0}?', $event->id)]) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="related">
-                <h4><?= __('Related Participants') ?></h4>
-                <?php if (!empty($section->participants)) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('First Name') ?></th>
-                            <th><?= __('Last Name') ?></th>
-                            <th><?= __('Entry Id') ?></th>
-                            <th><?= __('Participant Type Id') ?></th>
-                            <th><?= __('Section Id') ?></th>
-                            <th><?= __('Checked In') ?></th>
-                            <th><?= __('Checked Out') ?></th>
-                            <th><?= __('Created') ?></th>
-                            <th><?= __('Modified') ?></th>
-                            <th><?= __('Deleted') ?></th>
-                            <th><?= __('Highest Check In Sequence') ?></th>
-                            <th class="actions"><?= __('Actions') ?></th>
-                        </tr>
-                        <?php foreach ($section->participants as $participant) : ?>
-                        <tr>
-                            <td><?= h($participant->id) ?></td>
-                            <td><?= h($participant->first_name) ?></td>
-                            <td><?= h($participant->last_name) ?></td>
-                            <td><?= h($participant->entry_id) ?></td>
-                            <td><?= h($participant->participant_type_id) ?></td>
-                            <td><?= h($participant->section_id) ?></td>
-                            <td><?= h($participant->checked_in) ?></td>
-                            <td><?= h($participant->checked_out) ?></td>
-                            <td><?= h($participant->created) ?></td>
-                            <td><?= h($participant->modified) ?></td>
-                            <td><?= h($participant->deleted) ?></td>
-                            <td><?= h($participant->highest_check_in_sequence) ?></td>
-                            <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'Participants', 'action' => 'view', $participant->id]) ?>
-                                <?= $this->Html->link(__('Edit'), ['controller' => 'Participants', 'action' => 'edit', $participant->id]) ?>
-                                <?= $this->Form->postLink(__('Delete'), ['controller' => 'Participants', 'action' => 'delete', $participant->id], ['confirm' => __('Are you sure you want to delete # {0}?', $participant->id)]) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-                <?php endif; ?>
-            </div>
         </div>
+        <?php endif; ?>
+    </div>
+    <div class="related">
+        <h4><?= __('Related Participants') ?></h4>
+        <?php if (!empty($section->participants)): ?>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <tr>
+                    <th scope="col"><?= __('Id') ?></th>
+                    <th scope="col"><?= __('First Name') ?></th>
+                    <th scope="col"><?= __('Last Name') ?></th>
+                    <th scope="col"><?= __('Entry Id') ?></th>
+                    <th scope="col"><?= __('Participant Type Id') ?></th>
+                    <th scope="col"><?= __('Section Id') ?></th>
+                    <th scope="col"><?= __('Checked In') ?></th>
+                    <th scope="col"><?= __('Checked Out') ?></th>
+                    <th scope="col"><?= __('Created') ?></th>
+                    <th scope="col"><?= __('Modified') ?></th>
+                    <th scope="col"><?= __('Deleted') ?></th>
+                    <th scope="col"><?= __('Highest Check In Sequence') ?></th>
+                    <th scope="col" class="actions"><?= __('Actions') ?></th>
+                </tr>
+                <?php foreach ($section->participants as $participants): ?>
+                <tr>
+                    <td><?= h($participants->id) ?></td>
+                    <td><?= h($participants->first_name) ?></td>
+                    <td><?= h($participants->last_name) ?></td>
+                    <td><?= h($participants->entry_id) ?></td>
+                    <td><?= h($participants->participant_type_id) ?></td>
+                    <td><?= h($participants->section_id) ?></td>
+                    <td><?= h($participants->checked_in) ?></td>
+                    <td><?= h($participants->checked_out) ?></td>
+                    <td><?= h($participants->created) ?></td>
+                    <td><?= h($participants->modified) ?></td>
+                    <td><?= h($participants->deleted) ?></td>
+                    <td><?= h($participants->highest_check_in_sequence) ?></td>
+                    <td class="actions">
+                        <?= $this->Html->link(__('View'), ['controller' => 'Participants', 'action' => 'view', $participants->id], ['class' => 'btn btn-secondary']) ?>
+                        <?= $this->Html->link(__('Edit'), ['controller' => 'Participants', 'action' => 'edit', $participants->id], ['class' => 'btn btn-secondary']) ?>
+                        <?= $this->Form->postLink( __('Delete'), ['controller' => 'Participants', 'action' => 'delete', $participants->id], ['confirm' => __('Are you sure you want to delete # {0}?', $participants->id), 'class' => 'btn btn-danger']) ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+        <?php endif; ?>
     </div>
 </div>

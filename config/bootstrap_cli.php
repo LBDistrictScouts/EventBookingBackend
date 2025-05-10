@@ -15,7 +15,9 @@ declare(strict_types=1);
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Aws\Sqs\SqsClient;
 use Cake\Core\Configure;
+use Enqueue\Sqs\SqsConnectionFactory;
 
 /*
  * Additional bootstrapping and configuration for CLI environments should
@@ -33,3 +35,15 @@ if (Configure::check('Log.debug')) {
 if (Configure::check('Log.error')) {
     Configure::write('Log.error.file', 'cli-error');
 }
+
+$factory = new SqsConnectionFactory([
+    'key' => env('AWS_ACCESS_KEY_ID'),
+    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+    'region' => env('AWS_REGION', 'eu-west-1'),
+    'queue_url' => env('AWS_SQS_QUEUE_URL'),
+]);
+
+$context = $factory->createContext();
+
+// Store globally for reuse
+Configure::write('QueueContext', $context);

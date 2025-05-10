@@ -8,7 +8,6 @@ use Cake\ORM\Entity;
 /**
  * ParticipantsCheckIn Entity
  *
- * @property string $id
  * @property string $check_in_id
  * @property string $participant_id
  * @property \Cake\I18n\DateTime $created

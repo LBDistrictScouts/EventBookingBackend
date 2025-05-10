@@ -31,9 +31,16 @@ class CheckInsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
-        $checkIn = $this->CheckIns->get($id, contain: ['Checkpoints', 'Entries', 'Participants']);
+        $checkIn = $this->CheckIns->get($id, contain: [
+            'Checkpoints',
+            'Entries',
+            'Participants' => [
+                'Sections',
+                'ParticipantTypes',
+            ],
+        ]);
         $this->set(compact('checkIn'));
     }
 
@@ -42,11 +49,19 @@ class CheckInsController extends AppController
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add(?string $entryId = null)
     {
         $checkIn = $this->CheckIns->newEmptyEntity();
+        if ($entryId) {
+            $checkIn->set('entry_id', $entryId);
+        }
+
         if ($this->request->is('post')) {
-            $checkIn = $this->CheckIns->patchEntity($checkIn, $this->request->getData());
+            $checkIn = $this->CheckIns->patchEntity(
+                entity: $checkIn,
+                data: $this->request->getData(),
+                options: ['associated' => 'Participants'],
+            );
             if ($this->CheckIns->save($checkIn)) {
                 $this->Flash->success(__('The check in has been saved.'));
 
@@ -54,10 +69,48 @@ class CheckInsController extends AppController
             }
             $this->Flash->error(__('The check in could not be saved. Please, try again.'));
         }
-        $checkpoints = $this->CheckIns->Checkpoints->find('list', limit: 200)->all();
-        $entries = $this->CheckIns->Entries->find('list', limit: 200)->all();
-        $participants = $this->CheckIns->Participants->find('list', limit: 200)->all();
-        $this->set(compact('checkIn', 'checkpoints', 'entries', 'participants'));
+        $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
+
+        $checkpoints = $this->CheckIns->Checkpoints->find()
+            ->orderByAsc('checkpoint_sequence')
+            ->limit(100)
+            ->all();
+        $checkpoints = collection($checkpoints)
+            ->combine('id', function ($checkpoint) {
+                return '[' . $checkpoint->checkpoint_sequence . '] ' . $checkpoint->checkpoint_name;
+            })
+            ->toArray();
+
+        $entryFixed = false;
+
+        if ($entryId) {
+            $entries = $this->CheckIns->Entries->find('list', conditions: ['id' => $entryId], limit: 200)->all();
+            $entryFixed = true;
+            $participants = $this->CheckIns->Participants->find(
+                'list',
+                valueField: 'full_name',
+                keyField: 'id',
+                conditions: [
+                    'entry_id' => $entryId,
+                    'checked_out' => false,
+                ],
+                limit: 200,
+            )->all();
+        } else {
+            $entries = $this->CheckIns->Entries->find('list', limit: 200)->all();
+            $participants = $this->CheckIns->Participants->find(
+                'list',
+                valueField: 'full_name',
+                keyField: 'id',
+                groupField: 'entry.entry_name',
+                conditions: [
+                    'checked_out' => false,
+                ],
+                contain: 'Entries',
+            )->all();
+        }
+
+        $this->set(compact('checkIn', 'checkpoints', 'entries', 'participants', 'entryFixed'));
     }
 
     /**
@@ -67,7 +120,7 @@ class CheckInsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $checkIn = $this->CheckIns->get($id, contain: ['Participants']);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -92,7 +145,7 @@ class CheckInsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $checkIn = $this->CheckIns->get($id);

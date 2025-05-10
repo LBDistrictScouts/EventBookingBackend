@@ -38,39 +38,36 @@ $this->start('tb_body_start');
         >
             <span class="navbar-toggler-icon"></span>
         </button>
-        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
-        <ul class="navbar-nav px-3">
-            <li class="nav-item text-nowrap">
-                <?= $this->Html->link('Home', '/', ['class' => 'nav-link']) ?>
-            </li>
-            <li class="nav-item text-nowrap">
-                <?= $this->Html->link(
-                    'Groups',
-                    ['controller' => 'Groups', 'action' => 'index'],
-                    ['class' => 'nav-link'],
-                ) ?>
-            </li>
-            <li class="nav-item text-nowrap">
-                <?= $this->Html->link(
-                    'Events',
-                    ['controller' => 'Events', 'action' => 'index'],
-                    ['class' => 'nav-link'],
-                ) ?>
-            </li>
-            <li class="nav-item text-nowrap">
-                <?= $this->Html->link(
-                    'Entries',
-                    ['controller' => 'Entries', 'action' => 'index'],
-                    ['class' => 'nav-link'],
-                ) ?>
-            </li>
-        </ul>
     </header>
 
     <div class="container-fluid">
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="">
                 <div class="position-sticky pt-3">
+                    <ul class="navbar-nav px-3 w-100">
+                        <li class="nav-item text-nowrap">
+                            <?= $this->Html->link(
+                                'Groups',
+                                ['controller' => 'Groups', 'action' => 'index'],
+                                ['class' => 'nav-link'],
+                            ) ?>
+                        </li>
+                        <li class="nav-item text-nowrap">
+                            <?= $this->Html->link(
+                                'Events',
+                                ['controller' => 'Events', 'action' => 'index'],
+                                ['class' => 'nav-link'],
+                            ) ?>
+                        </li>
+                        <li class="nav-item text-nowrap">
+                            <?= $this->Html->link(
+                                'Entries',
+                                ['controller' => 'Entries', 'action' => 'index'],
+                                ['class' => 'nav-link'],
+                            ) ?>
+                        </li>
+                    </ul>
+                    <hr/>
                     <?= $this->fetch('tb_sidebar') ?>
                 </div>
             </nav>

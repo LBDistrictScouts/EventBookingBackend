@@ -16,7 +16,6 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th scope="col"><?= $this->Paginator->sort('id') ?></th>
         <th scope="col"><?= $this->Paginator->sort('event_id') ?></th>
         <th scope="col"><?= $this->Paginator->sort('created') ?></th>
         <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
@@ -26,14 +25,15 @@
     <tbody>
         <?php foreach ($questions as $question) : ?>
         <tr>
-            <td><?= h($question->id) ?></td>
-            <td><?= $question->hasValue('event') ? $this->Html->link($question->event->event_name, ['controller' => 'Events', 'action' => 'view', $question->event->id]) : '' ?></td>
+            <td><?= $question->hasValue('event') ? $this->Html->link($question->event->event_name, [
+                    'controller' => 'Events',
+                    'action' => 'view',
+                    $question->event->id,
+                ]) : '' ?></td>
             <td><?= h($question->created) ?></td>
             <td><?= h($question->modified) ?></td>
             <td class="actions">
-                <?= $this->Html->link($this->Html->icon('eye'), ['action' => 'view', $question->id], ['title' => __('View'), 'class' => 'btn btn-sm btn-secondary', 'escape' => false]) ?>
-                <?= $this->Html->link($this->Html->icon('pencil-square'), ['action' => 'edit', $question->id], ['title' => __('Edit'), 'class' => 'btn btn-sm btn-secondary', 'escape' => false]) ?>
-                <?= $this->Form->postLink($this->Html->icon('trash3'), ['action' => 'delete', $question->id], ['confirm' => __('Are you sure you want to delete # {0}?', $question->id), 'title' => __('Delete'), 'class' => 'btn btn-sm btn-danger', 'escape' => false]) ?>
+                <?= $this->Actions->buttons($question) ?>
             </td>
         </tr>
         <?php endforeach; ?>

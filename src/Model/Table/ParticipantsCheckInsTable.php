@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Model\Entity\ParticipantsCheckIn;
+use ArrayObject;
+use Cake\Database\Expression\QueryExpression;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
 use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -13,7 +18,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\BelongsTo $CheckIns
  * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\BelongsTo $Participants
- *
  * @method \App\Model\Entity\ParticipantsCheckIn newEmptyEntity()
  * @method \App\Model\Entity\ParticipantsCheckIn newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\ParticipantsCheckIn> newEntities(array $data, array $options = [])
@@ -27,7 +31,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class ParticipantsCheckInsTable extends Table
@@ -47,7 +50,11 @@ class ParticipantsCheckInsTable extends Table
         $this->setPrimaryKey(['check_in_id', 'participant_id']);
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Muffin/Trash.Trash');
+        $this->addBehavior('CounterCache', [
+            'CheckIns' => [
+                'participant_count',
+            ],
+        ]);
 
         $this->belongsTo('CheckIns', [
             'foreignKey' => 'check_in_id',
@@ -72,6 +79,10 @@ class ParticipantsCheckInsTable extends Table
             ->requirePresence('id', 'create')
             ->notEmptyString('id');
 
+        $validator
+            ->dateTime('deleted')
+            ->allowEmptyDateTime('deleted');
+
         return $validator;
     }
 
@@ -88,5 +99,83 @@ class ParticipantsCheckInsTable extends Table
         $rules->add($rules->existsIn(['participant_id'], 'Participants'), ['errorField' => 'participant_id']);
 
         return $rules;
+    }
+
+    /**
+     * @param string $participantId
+     * @return void
+     */
+    public function refreshCounter(string $participantId): void
+    {
+        // Get the current max for this participant
+        $currentAgg = $this->Participants->find()
+            ->select([
+                'max' => $this->CheckIns->Checkpoints->find()->func()->max('Checkpoints.checkpoint_sequence'),
+                'min' => $this->CheckIns->Checkpoints->find()->func()->min('Checkpoints.checkpoint_sequence'),
+            ])
+            ->matching('CheckIns.Checkpoints')
+
+            ->where(function (QueryExpression $exp, SelectQuery $q) {
+                return $exp
+                    ->gt('Checkpoints.checkpoint_sequence', -2);
+            })
+            ->where([
+                'ParticipantsCheckIns.participant_id' => $participantId,
+            ])
+            ->firstOrFail();
+
+        $currentMax = $currentAgg->max;
+
+        if ($currentAgg->min < 0) {
+            $checkpoints = $this->Participants->Entries->Events->find()
+                ->select([
+                    'count_checkpoints' =>
+                        $this->CheckIns->Checkpoints->find()->func()->count('Checkpoints.id'),
+                ])
+                ->matching('Checkpoints')
+                ->where(function (QueryExpression $exp, SelectQuery $q) {
+                    return $exp
+                        ->gt('Checkpoints.checkpoint_sequence', 0);
+                })
+                ->firstOrFail()->count_checkpoints;
+
+            if ($checkpoints == $currentMax) {
+                $currentMax += 1;
+            }
+        }
+
+        // Update the participant record
+        $this->Participants->updateAll(
+            [
+                'highest_check_in_sequence' => $currentMax,
+                'checked_in' => true,
+                'checked_out' => ($currentAgg->min < 0),
+            ],
+            [
+                'id' => $participantId,
+            ],
+        );
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param \App\Model\Entity\ParticipantsCheckIn $entity
+     * @param \ArrayObject $options
+     * @return void
+     */
+    public function afterSave(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        $this->refreshCounter($entity->get('id'));
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param \App\Model\Entity\ParticipantsCheckIn $entity
+     * @param \ArrayObject $options
+     * @return void
+     */
+    public function afterDelete(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        $this->refreshCounter($entity->get('id'));
     }
 }

@@ -54,4 +54,14 @@ class Participant extends Entity
         'section' => true,
         'check_ins' => true,
     ];
+
+    protected array $_virtual = ['full_name'];
+
+    /**
+     * @return string
+     */
+    protected function _getFullName()
+    {
+        return $this->first_name . '  ' . $this->last_name;
+    }
 }

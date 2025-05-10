@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
+use ArrayObject;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -14,6 +16,7 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\CheckpointsTable&\Cake\ORM\Association\BelongsTo $Checkpoints
  * @property \App\Model\Table\EntriesTable&\Cake\ORM\Association\BelongsTo $Entries
  * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\BelongsToMany $Participants
+ * @property \App\Model\Table\ParticipantsCheckInsTable&\Cake\ORM\Association\HasMany $ParticipantsCheckIns
  *
  * @method \App\Model\Entity\CheckIn newEmptyEntity()
  * @method \App\Model\Entity\CheckIn newEntity(array $data, array $options = [])
@@ -30,6 +33,7 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn> deleteManyOrFail(iterable $entities, array $options = [])
  *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @mixin \Muffin\Trash\Model\Behavior\TrashBehavior
  */
 class CheckInsTable extends Table
 {
@@ -62,6 +66,10 @@ class CheckInsTable extends Table
             'foreignKey' => 'check_in_id',
             'targetForeignKey' => 'participant_id',
             'joinTable' => 'participants_check_ins',
+            'through' => 'ParticipantsCheckIns',
+        ]);
+        $this->hasMany('ParticipantsCheckIns', [
+            'foreignKey' => 'check_in_id',
         ]);
     }
 
@@ -88,7 +96,6 @@ class CheckInsTable extends Table
 
         $validator
             ->integer('participant_count')
-            ->requirePresence('participant_count', 'create')
             ->notEmptyString('participant_count');
 
         return $validator;
@@ -107,5 +114,20 @@ class CheckInsTable extends Table
         $rules->add($rules->existsIn(['entry_id'], 'Entries'), ['errorField' => 'entry_id']);
 
         return $rules;
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param \App\Model\Entity\ParticipantsCheckIn $entity
+     * @param \ArrayObject $options
+     * @return void
+     */
+    public function afterDelete(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        $participants = $this->Participants->find()->matching('CheckIns');
+
+        foreach ($participants as $participant) {
+            $this->ParticipantsCheckIns->refreshCounter($participant->get('id'));
+        }
     }
 }

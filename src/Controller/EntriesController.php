@@ -33,10 +33,18 @@ class EntriesController extends AppController
      */
     public function view($id = null)
     {
-        $entry = $this->Entries->get($id, contain: ['Events', 'CheckIns', 'Participants' => [
-            'Sections',
-            'ParticipantTypes',
-        ]]);
+        $entry = $this->Entries->get($id, contain: [
+            'Events',
+            'CheckIns' => [
+                'sort' => 'Checkpoints.checkpoint_sequence',
+                'Checkpoints',
+                'Entries',
+            ],
+            'Participants' => [
+                'Sections',
+                'ParticipantTypes',
+            ],
+        ]);
         $this->set(compact('entry'));
     }
 
