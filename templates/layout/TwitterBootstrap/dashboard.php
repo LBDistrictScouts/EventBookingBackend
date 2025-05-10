@@ -1,6 +1,17 @@
 <?php
 /**
- * @var \Cake\View\View $this
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         0.10.0
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @var \App\View\AppView $this
  */
 use Cake\Core\Configure;
 
@@ -30,7 +41,28 @@ $this->start('tb_body_start');
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="#">Sign out</a>
+                <?= $this->Html->link('Home', '/', ['class' => 'nav-link']) ?>
+            </li>
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link(
+                    'Groups',
+                    ['controller' => 'Groups', 'action' => 'index'],
+                    ['class' => 'nav-link'],
+                ) ?>
+            </li>
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link(
+                    'Events',
+                    ['controller' => 'Events', 'action' => 'index'],
+                    ['class' => 'nav-link'],
+                ) ?>
+            </li>
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link(
+                    'Entries',
+                    ['controller' => 'Entries', 'action' => 'index'],
+                    ['class' => 'nav-link'],
+                ) ?>
             </li>
         </ul>
     </header>

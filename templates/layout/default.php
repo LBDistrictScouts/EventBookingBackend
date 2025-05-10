@@ -13,45 +13,93 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  * @var \App\View\AppView $this
  */
+use Cake\Core\Configure;
 
-$cakeDescription = 'LBA Scouts Events';
+$this->Html->css('BootstrapUI.dashboard', ['block' => true]);
+$this->prepend(
+    name: 'tb_body_attrs',
+    value: ' class="' .
+        implode(' ', [h($this->request->getParam('controller')), h($this->request->getParam('action'))]) .
+        '" ',
+);
+$this->start('tb_body_start');
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <?= $this->Html->charset() ?>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>
-        <?= $cakeDescription ?>:
-        <?= $this->fetch('title') ?>
-    </title>
-    <?= $this->Html->meta('icon') ?>
+<body <?= $this->fetch('tb_body_attrs') ?>>
+    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <?= $this->Html->link(
+            title: Configure::read('App.title', 'LBD Event Booking'),
+            url: '/',
+            options: ['class' => 'navbar-brand col-md-3 col-lg-2 me-0 px-3'],
+        ) ?>
+        <button
+            class="navbar-toggler position-absolute d-md-none collapsed" type="button"
+            data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link('Home', '/', ['class' => 'nav-link']) ?>
+            </li>
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link(
+                    'Groups',
+                    ['controller' => 'Groups', 'action' => 'index'],
+                    ['class' => 'nav-link'],
+                ) ?>
+            </li>
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link(
+                    'Events',
+                    ['controller' => 'Events', 'action' => 'index'],
+                    ['class' => 'nav-link'],
+                ) ?>
+            </li>
+            <li class="nav-item text-nowrap">
+                <?= $this->Html->link(
+                    'Entries',
+                    ['controller' => 'Entries', 'action' => 'index'],
+                    ['class' => 'nav-link'],
+                ) ?>
+            </li>
+        </ul>
+    </header>
 
-    <?= $this->Html->css(['normalize.min', 'milligram.min', 'fonts', 'cake']) ?>
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="">
+                <div class="position-sticky pt-3">
+                    <?= $this->fetch('tb_sidebar') ?>
+                </div>
+            </nav>
 
-    <?= $this->fetch('meta') ?>
-    <?= $this->fetch('css') ?>
-    <?= $this->fetch('script') ?>
-</head>
-<body>
-    <nav class="top-nav">
-        <div class="top-nav-title">
-            <a href="<?= $this->Url->build('/') ?>"><span>Cake</span>PHP</a>
+            <main role="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center
+                            pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2 page-header"><?= h($this->request->getParam('controller')) ?></h1>
+                </div>
+<?php
+/**
+ * Default `flash` block.
+ */
+if (!$this->fetch('tb_flash')) {
+    $this->start('tb_flash');
+    if (isset($this->Flash)) {
+        echo $this->Flash->render();
+    }
+    $this->end();
+}
+$this->end();
+
+$this->start('tb_body_end');
+?>
+            </main>
         </div>
-        <div class="top-nav-links">
-            <?= $this->Html->link('Home', '/') ?>
-            <?= $this->Html->link('Groups', ['controller' => 'Groups', 'action' => 'index']) ?>
-            <?= $this->Html->link('Events', ['controller' => 'Events', 'action' => 'index']) ?>
-            <?= $this->Html->link('Entries', ['controller' => 'Entries', 'action' => 'index']) ?>
-        </div>
-    </nav>
-    <main class="main">
-        <div class="container">
-            <?= $this->Flash->render() ?>
-            <?= $this->fetch('content') ?>
-        </div>
-    </main>
-    <footer>
-    </footer>
+    </div>
 </body>
-</html>
+<?php
+$this->end();
+
+echo $this->fetch('content');
