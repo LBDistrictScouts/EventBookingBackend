@@ -48,6 +48,7 @@ return [
      */
     'App' => [
         'namespace' => 'App',
+        'title' => env('APP_TITLE', 'LBD Event Booking'),
         'encoding' => env('APP_ENCODING', 'UTF-8'),
         'defaultLocale' => env('APP_DEFAULT_LOCALE', 'en_GB'),
         'defaultTimezone' => env('APP_DEFAULT_TIMEZONE', 'Europe/London'),
@@ -229,17 +230,18 @@ return [
              * The keys host, port, timeout, username, password, client and tls
              * are used in SMTP transports
              */
-            'host' => 'localhost',
-            'port' => 25,
+            'host' => 'email-smtp.eu-west-1.amazonaws.com',
+            'port' => 587,
             'timeout' => 30,
+            'log' => true,
             /*
              * It is recommended to set these options through your environment or app_local.php
              */
             //'username' => null,
             //'password' => null,
             'client' => null,
-            'tls' => false,
-            'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
+            'tls' => true,
+//            'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
         ],
     ],
 
@@ -254,13 +256,14 @@ return [
      */
     'Email' => [
         'default' => [
-            'transport' => 'default',
-            'from' => 'you@localhost',
+            'transport' => 'smtp',
+            'from' => ['greenway@lbdscouts.org.uk' => 'Greenway Team'],
+            'emailFormat' => 'both',
             /*
              * Will by default be set to config value of App.encoding, if that exists otherwise to UTF-8.
              */
-            //'charset' => 'utf-8',
-            //'headerCharset' => 'utf-8',
+            'charset' => 'utf-8',
+            'headerCharset' => 'utf-8',
         ],
     ],
 

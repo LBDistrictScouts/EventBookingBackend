@@ -19,10 +19,6 @@
             <h3><?= h($group->group_name) ?></h3>
             <table>
                 <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= h($group->id) ?></td>
-                </tr>
-                <tr>
                     <th><?= __('Group Name') ?></th>
                     <td><?= h($group->group_name) ?></td>
                 </tr>
@@ -50,38 +46,52 @@
             <div class="related">
                 <h4><?= __('Related Sections') ?></h4>
                 <?php if (!empty($group->sections)) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('Section Name') ?></th>
-                            <th><?= __('Participant Type Id') ?></th>
-                            <th><?= __('Group Id') ?></th>
-                            <th><?= __('Osm Section Id') ?></th>
-                            <th><?= __('Created') ?></th>
-                            <th><?= __('Modified') ?></th>
-                            <th><?= __('Deleted') ?></th>
-                            <th class="actions"><?= __('Actions') ?></th>
-                        </tr>
-                        <?php foreach ($group->sections as $section) : ?>
-                        <tr>
-                            <td><?= h($section->id) ?></td>
-                            <td><?= h($section->section_name) ?></td>
-                            <td><?= h($section->participant_type_id) ?></td>
-                            <td><?= h($section->group_id) ?></td>
-                            <td><?= h($section->osm_section_id) ?></td>
-                            <td><?= h($section->created) ?></td>
-                            <td><?= h($section->modified) ?></td>
-                            <td><?= h($section->deleted) ?></td>
-                            <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'Sections', 'action' => 'view', $section->id]) ?>
-                                <?= $this->Html->link(__('Edit'), ['controller' => 'Sections', 'action' => 'edit', $section->id]) ?>
-                                <?= $this->Form->postLink(__('Delete'), ['controller' => 'Sections', 'action' => 'delete', $section->id], ['confirm' => __('Are you sure you want to delete # {0}?', $section->id)]) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
+                    <?php foreach ($group->sections as $section) : ?>
+                        <div class="card">
+                            <div class="card-header"><?= h($section->section_name) ?></div>
+                            <div class="card-body">
+                                <table>
+                                    <tr>
+                                        <th><?= __('Section Name') ?></th>
+                                        <th><?= __('Section Type') ?></th>
+                                        <th><?= __('OSM Section ID') ?></th>
+                                        <th class="actions"><?= __('Actions') ?></th>
+                                    </tr>
+                                    <tr>
+                                        <td><?= h($section->section_name) ?></td>
+                                        <td><?= $section->has('participant_type') ? h($section->participant_type->participant_type) : '' ?></td>
+                                        <td><?= h($section->osm_section_id) ?></td>
+                                        <td class="actions">
+                                            <?= $this->Html->link(__('View'), ['controller' => 'Sections', 'action' => 'view', $section->id]) ?>
+                                            <?= $this->Html->link(__('Edit'), ['controller' => 'Sections', 'action' => 'edit', $section->id]) ?>
+                                            <?= $this->Form->postLink(__('Delete'), ['controller' => 'Sections', 'action' => 'delete', $section->id], ['confirm' => __('Are you sure you want to delete # {0}?', $section->id)]) ?>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <?php if (!empty($section->participants)) : ?>
+                                    <div class="card-body">
+                                        <table  class="table-responsive table-striped">
+                                            <tr>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                                <th>Team Name</th>
+                                                <th>Number in Team</th>
+                                            </tr>
+                                            <?php foreach ($section->participants as $participant) : ?>
+                                                <tr>
+                                                    <td><?= h($participant->first_name) ?></td>
+                                                    <td><?= h($participant->last_name) ?></td>
+                                                    <td><?= h($participant->entry->entry_name) ?></td>
+                                                    <td><?= h($participant->entry->participant_count) ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <hr/>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </div>
         </div>

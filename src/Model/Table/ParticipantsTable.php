@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
+use App\Model\Entity\Participant;
+use ArrayObject;
+use Cake\Event\Event;
+use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -15,7 +18,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\ParticipantTypesTable&\Cake\ORM\Association\BelongsTo $ParticipantTypes
  * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\BelongsTo $Sections
  * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\BelongsToMany $CheckIns
- *
  * @method \App\Model\Entity\Participant newEmptyEntity()
  * @method \App\Model\Entity\Participant newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Participant> newEntities(array $data, array $options = [])
@@ -29,12 +31,13 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  * @mixin \Cake\ORM\Behavior\CounterCacheBehavior
  */
 class ParticipantsTable extends Table
 {
+    use locatorAwareTrait;
+
     /**
      * Initialize method
      *
@@ -53,10 +56,6 @@ class ParticipantsTable extends Table
         $this->addBehavior('Muffin/Trash.Trash');
         $this->addBehavior('CounterCache', [
             'Entries' => [
-                'participant_count',
-                'checked_in_count' => ['conditions' => ['Participants.checked_in' => true],],
-            ],
-            'Events' => [
                 'participant_count',
                 'checked_in_count' => ['conditions' => ['Participants.checked_in' => true],],
             ],
@@ -82,6 +81,54 @@ class ParticipantsTable extends Table
             'targetForeignKey' => 'check_in_id',
             'joinTable' => 'participants_check_ins',
         ]);
+    }
+
+    /**
+     * @param \Cake\Event\Event $event
+     * @param \App\Model\Entity\Participant $entity
+     * @param \ArrayObject $options
+     * @return void
+     */
+    public function afterSave(Event $event, Participant $entity, ArrayObject $options): void
+    {
+        if (!$entity->isNew()) {
+            return;
+        }
+
+        $this->updateEventParticipantCount($entity->entry_id);
+    }
+
+    /**
+     * @param \Cake\Event\Event $event
+     * @param \App\Model\Entity\Participant $entity
+     * @param \ArrayObject $options
+     * @return void
+     */
+    public function afterDelete(Event $event, Participant $entity, ArrayObject $options): void
+    {
+        $this->updateEventParticipantCount($entity->entry_id);
+    }
+
+    /**
+     * Function to generate counts of participants
+     *
+     * @param string $entryId
+     * @return void
+     */
+    protected function updateEventParticipantCount(string $entryId): void
+    {
+        $entriesTable = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entriesTable->get($entryId, contain: ['Events']);
+
+        $participantCount = $this->find()
+            ->matching('Entries', function ($q) use ($entry) {
+                return $q->where(['Entries.event_id' => $entry->event_id]);
+            })
+            ->count();
+
+        $eventsTable = $this->getTableLocator()->get('Events');
+        $eventsTable->updateAll(['participant_count' => $participantCount], ['id' => $entry->event_id]);
     }
 
     /**

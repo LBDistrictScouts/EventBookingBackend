@@ -110,11 +110,9 @@
                 <div class="table-responsive">
                     <table>
                         <tr>
-                            <th><?= __('Id') ?></th>
                             <th><?= __('First Name') ?></th>
                             <th><?= __('Last Name') ?></th>
-                            <th><?= __('Entry Id') ?></th>
-                            <th><?= __('Participant Type Id') ?></th>
+                            <th><?= __('Participant Type') ?></th>
                             <th><?= __('Section Id') ?></th>
                             <th><?= __('Checked In') ?></th>
                             <th><?= __('Checked Out') ?></th>
@@ -126,12 +124,21 @@
                         </tr>
                         <?php foreach ($entry->participants as $participant) : ?>
                         <tr>
-                            <td><?= h($participant->id) ?></td>
                             <td><?= h($participant->first_name) ?></td>
                             <td><?= h($participant->last_name) ?></td>
-                            <td><?= h($participant->entry_id) ?></td>
-                            <td><?= h($participant->participant_type_id) ?></td>
-                            <td><?= h($participant->section_id) ?></td>
+                            <td><?= $participant->has('participant_type') ?
+                                    h($participant->participant_type->participant_type) : '' ?></td>
+                            <td><?= $participant->has('section')
+                                && !is_null($participant->section)
+                                && $participant->section->has('section_name') ?
+                                    $this->Html->link(
+                                        title: $participant->section->section_name,
+                                        url: [
+                                            'controller' => 'Sections',
+                                            'action' => 'view',
+                                            $participant->section_id,
+                                        ]
+                                    ) : '' ?></td>
                             <td><?= h($participant->checked_in) ?></td>
                             <td><?= h($participant->checked_out) ?></td>
                             <td><?= h($participant->created) ?></td>

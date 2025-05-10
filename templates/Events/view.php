@@ -122,8 +122,8 @@
                     <table>
                         <tr>
                             <th><?= __('Entry Name') ?></th>
-                            <th><?= __('Participant Count') ?></th>
-                            <th><?= __('Checked In Count') ?></th>
+                            <th><?= __('P') ?></th>
+                            <th><?= __('C') ?></th>
                             <th><?= __('Created') ?></th>
                             <th><?= __('Entry Email') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>

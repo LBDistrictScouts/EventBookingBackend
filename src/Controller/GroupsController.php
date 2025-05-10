@@ -43,7 +43,15 @@ class GroupsController extends AppController
      */
     public function view(?string $id = null)
     {
-        $group = $this->Groups->get($id, contain: ['Sections']);
+        $group = $this->Groups->get($id, contain: [
+            'Sections' => [
+                'ParticipantTypes',
+                'Participants' => [
+                    'Entries',
+                    'ParticipantTypes',
+                ],
+            ],
+        ]);
         $this->set(compact('group'));
     }
 

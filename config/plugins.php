@@ -2,4 +2,5 @@
 
 return [
     'Muffin/Trash' => [],
+    'BootstrapUI' => [],
 ];
