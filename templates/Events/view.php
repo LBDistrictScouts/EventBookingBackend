@@ -159,7 +159,7 @@
                             <tr>
                                 <th scope="col"><?= __('Reference Number') ?></th>
                                 <th scope="col"><?= __('Entry Name') ?></th>
-                                <th scope="col"><?= __('Active') ?></th>
+<!--                                <th scope="col">--><?php //= __('Active') ?><!--</th>-->
                                 <th scope="col"><?= __('Participant Count') ?></th>
                                 <th scope="col"><?= __('Checked In Count') ?></th>
                                 <th scope="col"><?= __('Created') ?></th>
@@ -170,11 +170,12 @@
                             <tr>
                                 <td><?= h($entries->reference_number) ?></td>
                                 <td><?= h($entries->entry_name) ?></td>
-                                <td><?= h($entries->active) ?></td>
+<!--                                <td>--><?php //= $entries->active ?
+                                // $this->Html->icon('check-circle') : '' ?><!--</td>-->
                                 <td><?= h($entries->participant_count) ?></td>
                                 <td><?= h($entries->checked_in_count) ?></td>
                                 <td><?= h($entries->created) ?></td>
-                                <td><?= h($entries->entry_email) ?></td>
+                                <td><?= $this->Text->autoLinkEmails($entries->entry_email) ?></td>
                                 <td class="actions">
                                     <?= $this->Actions->buttons($entries, ['outline' => true]) ?>
                                 </td>

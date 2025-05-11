@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Event\EventInterface;
+use Cake\View\JsonView;
+
 /**
  * CheckIns Controller
  *
@@ -10,6 +13,26 @@ namespace App\Controller;
  */
 class CheckInsController extends AppController
 {
+    /**
+     * @return array<class-string>
+     */
+    public function viewClasses(): array
+    {
+        return [JsonView::class];
+    }
+
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event): void
+    {
+        parent::beforeFilter($event);
+
+        // 🔹 Bypass authentication for these actions
+        $this->Authentication->allowUnauthenticated(['add']);
+    }
+
     /**
      * Index method
      *
@@ -62,12 +85,37 @@ class CheckInsController extends AppController
                 data: $this->request->getData(),
                 options: ['associated' => 'Participants'],
             );
+
+            if (!$checkIn->hasValue('check_in_time')) {
+                $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
+            }
+
             if ($this->CheckIns->save($checkIn)) {
                 $this->Flash->success(__('The check in has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                if (str_contains($this->request->getPath(), '.json')) {
+                    $this->set(compact('checkIn'));
+                    $this->viewBuilder()->setOption('serialize', ['checkIn']);
+
+                    return;
+                } else {
+                    return $this->redirect([
+                        'controller' => 'Entries',
+                        'action' => 'view',
+                        $checkIn->entry_id,
+                    ]);
+                }
             }
             $this->Flash->error(__('The check in could not be saved. Please, try again.'));
+
+            if (str_contains($this->request->getPath(), '.json')) {
+                $this->response->withStatus(400);
+
+                $this->set(compact('checkIn'));
+                $this->viewBuilder()->setOption('serialize', ['checkIn']);
+
+                return;
+            }
         }
         $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
 
@@ -110,7 +158,9 @@ class CheckInsController extends AppController
             )->all();
         }
 
-        $this->set(compact('checkIn', 'checkpoints', 'entries', 'participants', 'entryFixed'));
+        $this->set(
+            compact('checkIn', 'checkpoints', 'entries', 'participants', 'entryFixed', 'entryId'),
+        );
     }
 
     /**

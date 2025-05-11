@@ -29,10 +29,6 @@
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>
-                <th scope="row"><?= __('Id') ?></th>
-                <td><?= h($participant->id) ?></td>
-            </tr>
-            <tr>
                 <th scope="row"><?= __('First Name') ?></th>
                 <td><?= h($participant->first_name) ?></td>
             </tr>
@@ -42,15 +38,31 @@
             </tr>
             <tr>
                 <th scope="row"><?= __('Entry') ?></th>
-                <td><?= $participant->hasValue('entry') ? $this->Html->link($participant->entry->entry_name, ['controller' => 'Entries', 'action' => 'view', $participant->entry->id]) : '' ?></td>
+                <td><?= $participant->hasValue('entry') ?
+                        $this->Html->link(
+                            title: $participant->entry->entry_name,
+                            url: ['controller' => 'Entries', 'action' => 'view', $participant->entry->id],
+                        ) : '' ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Participant Type') ?></th>
-                <td><?= $participant->hasValue('participant_type') ? $this->Html->link($participant->participant_type->participant_type, ['controller' => 'ParticipantTypes', 'action' => 'view', $participant->participant_type->id]) : '' ?></td>
+                <td><?= $participant->hasValue('participant_type') ?
+                        $this->Html->link(
+                            title: $participant->participant_type->participant_type,
+                            url: [
+                                'controller' => 'ParticipantTypes',
+                                'action' => 'view',
+                                $participant->participant_type->id,
+                            ],
+                        ) : '' ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Section') ?></th>
-                <td><?= $participant->hasValue('section') ? $this->Html->link($participant->section->section_name, ['controller' => 'Sections', 'action' => 'view', $participant->section->id]) : '' ?></td>
+                <td><?= $participant->hasValue('section') ?
+                        $this->Html->link(
+                            title: $participant->section->section_name,
+                            url: ['controller' => 'Sections', 'action' => 'view', $participant->section->id],
+                        ) : '' ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Highest Check In Sequence') ?></th>
@@ -65,49 +77,45 @@
                 <td><?= h($participant->modified) ?></td>
             </tr>
             <tr>
-                <th scope="row"><?= __('Deleted') ?></th>
-                <td><?= h($participant->deleted) ?></td>
-            </tr>
-            <tr>
                 <th scope="row"><?= __('Checked In') ?></th>
-                <td><?= $participant->checked_in ? __('Yes') : __('No'); ?></td>
+                <td><?= $participant->checked_in ? $this->Html->icon('check-circle') : ''; ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Checked Out') ?></th>
-                <td><?= $participant->checked_out ? __('Yes') : __('No'); ?></td>
+                <td><?= $participant->checked_out ? $this->Html->icon('check-circle') : ''; ?></td>
             </tr>
         </table>
     </div>
     <div class="related">
         <h4><?= __('Related Check Ins') ?></h4>
-        <?php if (!empty($participant->check_ins)): ?>
+        <?php if (!empty($participant->check_ins)) : ?>
         <div class="table-responsive">
             <table class="table table-striped">
                 <tr>
-                    <th scope="col"><?= __('Id') ?></th>
-                    <th scope="col"><?= __('Checkpoint Id') ?></th>
-                    <th scope="col"><?= __('Entry Id') ?></th>
+                    <th scope="col"><?= __('#') ?></th>
+                    <th scope="col"><?= __('Checkpoint') ?></th>
                     <th scope="col"><?= __('Check In Time') ?></th>
                     <th scope="col"><?= __('Participant Count') ?></th>
                     <th scope="col"><?= __('Created') ?></th>
                     <th scope="col"><?= __('Modified') ?></th>
-                    <th scope="col"><?= __('Deleted') ?></th>
                     <th scope="col" class="actions"><?= __('Actions') ?></th>
                 </tr>
-                <?php foreach ($participant->check_ins as $checkIns): ?>
+                <?php foreach ($participant->check_ins as $checkIns) : ?>
                 <tr>
-                    <td><?= h($checkIns->id) ?></td>
-                    <td><?= h($checkIns->checkpoint_id) ?></td>
-                    <td><?= h($checkIns->entry_id) ?></td>
+                    <td><?= $checkIns->hasValue('checkpoint') ?
+                            h($checkIns->checkpoint->checkpoint_sequence) : '' ?></td>
+                    <td><?= $checkIns->hasValue('checkpoint') ?
+                            $this->Html->link(
+                                title: $checkIns->checkpoint->checkpoint_name,
+                                url: ['controller' => 'CheckPoints', 'action' => 'view', $checkIns->checkpoint->id],
+                            )
+                            : ''?></td>
                     <td><?= h($checkIns->check_in_time) ?></td>
                     <td><?= h($checkIns->participant_count) ?></td>
                     <td><?= h($checkIns->created) ?></td>
                     <td><?= h($checkIns->modified) ?></td>
-                    <td><?= h($checkIns->deleted) ?></td>
                     <td class="actions">
-                        <?= $this->Html->link(__('View'), ['controller' => 'CheckIns', 'action' => 'view', $checkIns->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Html->link(__('Edit'), ['controller' => 'CheckIns', 'action' => 'edit', $checkIns->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Form->postLink( __('Delete'), ['controller' => 'CheckIns', 'action' => 'delete', $checkIns->id], ['confirm' => __('Are you sure you want to delete # {0}?', $checkIns->id), 'class' => 'btn btn-danger']) ?>
+                        <?= $this->Actions->buttons($checkIns, ['outline' => true]) ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

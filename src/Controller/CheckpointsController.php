@@ -43,7 +43,7 @@ class CheckpointsController extends AppController
      */
     public function view(?string $checkpointId = null)
     {
-        $checkpoint = $this->Checkpoints->get($checkpointId, contain: ['Events', 'CheckIns']);
+        $checkpoint = $this->Checkpoints->get($checkpointId, contain: ['Events', 'CheckIns.Entries']);
         $this->set(compact('checkpoint'));
         $this->viewBuilder()->setOption('serialize', ['checkpoint']);
     }

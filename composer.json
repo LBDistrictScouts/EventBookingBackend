@@ -17,6 +17,7 @@
         "friendsofcake/bootstrap-ui": "^5.1",
         "mobiledetect/mobiledetectlib": "^3.74",
         "muffin/trash": "^4.1",
+        "opis/json-schema": "^2.4",
         "paragonie/sodium_compat": "^2.1",
         "phpseclib/phpseclib": "^3.0"
     },

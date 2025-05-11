@@ -46,10 +46,6 @@
                 <th scope="row"><?= __('Modified') ?></th>
                 <td><?= h($checkpoint->modified) ?></td>
             </tr>
-            <tr>
-                <th scope="row"><?= __('Deleted') ?></th>
-                <td><?= h($checkpoint->deleted) ?></td>
-            </tr>
         </table>
     </div>
     <div class="related">
@@ -58,30 +54,25 @@
         <div class="table-responsive">
             <table class="table table-striped">
                 <tr>
-                    <th scope="col"><?= __('Id') ?></th>
-                    <th scope="col"><?= __('Checkpoint Id') ?></th>
-                    <th scope="col"><?= __('Entry Id') ?></th>
+                    <th scope="col"><?= __('Entry') ?></th>
                     <th scope="col"><?= __('Check In Time') ?></th>
                     <th scope="col"><?= __('Participant Count') ?></th>
                     <th scope="col"><?= __('Created') ?></th>
                     <th scope="col"><?= __('Modified') ?></th>
-                    <th scope="col"><?= __('Deleted') ?></th>
                     <th scope="col" class="actions"><?= __('Actions') ?></th>
                 </tr>
                 <?php foreach ($checkpoint->check_ins as $checkIns): ?>
                 <tr>
-                    <td><?= h($checkIns->id) ?></td>
-                    <td><?= h($checkIns->checkpoint_id) ?></td>
-                    <td><?= h($checkIns->entry_id) ?></td>
+                    <td><?= $this->Html->link(
+                            title: ($checkIns->has('entry') ? $checkIns->entry->entry_name : ''),
+                            url: ['controller' => 'CheckIns', 'action' => 'view', $checkIns->entry_id],
+                        ) ?></td>
                     <td><?= h($checkIns->check_in_time) ?></td>
                     <td><?= h($checkIns->participant_count) ?></td>
                     <td><?= h($checkIns->created) ?></td>
                     <td><?= h($checkIns->modified) ?></td>
-                    <td><?= h($checkIns->deleted) ?></td>
                     <td class="actions">
-                        <?= $this->Html->link(__('View'), ['controller' => 'CheckIns', 'action' => 'view', $checkIns->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Html->link(__('Edit'), ['controller' => 'CheckIns', 'action' => 'edit', $checkIns->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Form->postLink( __('Delete'), ['controller' => 'CheckIns', 'action' => 'delete', $checkIns->id], ['confirm' => __('Are you sure you want to delete # {0}?', $checkIns->id), 'class' => 'btn btn-danger']) ?>
+                        <?= $this->Actions->buttons($checkIns, ['outline' => true]) ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

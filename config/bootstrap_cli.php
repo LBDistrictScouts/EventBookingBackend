@@ -18,6 +18,7 @@ declare(strict_types=1);
 use Aws\Sqs\SqsClient;
 use Cake\Core\Configure;
 use Enqueue\Sqs\SqsConnectionFactory;
+use Opis\JsonSchema\Validator;
 
 /*
  * Additional bootstrapping and configuration for CLI environments should
@@ -36,14 +37,24 @@ if (Configure::check('Log.error')) {
     Configure::write('Log.error.file', 'cli-error');
 }
 
-$factory = new SqsConnectionFactory([
-    'key' => env('AWS_ACCESS_KEY_ID'),
-    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+$client = new SqsClient([
     'region' => env('AWS_REGION', 'eu-west-1'),
-    'queue_url' => env('AWS_SQS_QUEUE_URL'),
+    'profile' => 'lbd',
 ]);
+$factory = new SqsConnectionFactory($client);
 
 $context = $factory->createContext();
 
 // Store globally for reuse
-Configure::write('QueueContext', $context);
+Configure::write('Queue.Factory', $factory);
+Configure::write('Queue.Context', $context);
+
+$validator = new Validator();
+
+// Register our schema
+$validator->resolver()->registerFile(
+    'https://greenway.lbdscouts.org.uk/check-in-schema.json',
+    'config/schema/check-in-schema.json',
+);
+
+Configure::write('Queue.Validator', $validator);

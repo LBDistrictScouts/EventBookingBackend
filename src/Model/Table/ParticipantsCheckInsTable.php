@@ -165,7 +165,7 @@ class ParticipantsCheckInsTable extends Table
      */
     public function afterSave(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
     {
-        $this->refreshCounter($entity->get('id'));
+        $this->refreshCounter($entity->get('participant_id'));
     }
 
     /**
@@ -176,6 +176,6 @@ class ParticipantsCheckInsTable extends Table
      */
     public function afterDelete(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
     {
-        $this->refreshCounter($entity->get('id'));
+        $this->refreshCounter($entity->get('participant_id'));
     }
 }

@@ -83,10 +83,12 @@ class CheckInsTable extends Table
     {
         $validator
             ->uuid('checkpoint_id')
+            ->requirePresence('checkpoint_id', 'create')
             ->notEmptyString('checkpoint_id');
 
         $validator
             ->uuid('entry_id')
+            ->requirePresence('entry_id', 'create')
             ->notEmptyString('entry_id');
 
         $validator

@@ -66,6 +66,10 @@ return function (RouteBuilder $routes): void {
 
         $builder->connect('/book', ['controller' => 'Booking', 'action' => 'add', 'ext' => 'json']);
 
+        $builder->connect('/lookup', ['controller' => 'Entries', 'action' => 'lookup', 'ext' => 'json']);
+
+        $builder->connect('/check-in', ['controller' => 'CheckIns', 'action' => 'add', 'ext' => 'json']);
+
         /*
          * Connect catchall routes for all controllers.
          *

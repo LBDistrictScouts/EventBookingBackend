@@ -6,6 +6,7 @@
  * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Entry> $entries
  * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Participant> $participants
  * @var bool $entryFixed
+ * @var string $entryId
  */
 ?>
 <?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
@@ -27,12 +28,18 @@
         <legend><?= __('Add Check In') ?></legend>
         <?php
             echo $this->Form->control('checkpoint_id', ['options' => $checkpoints]);
-            echo $this->Form->control('entry_id', ['options' => $entries, 'disabled' => $entryFixed]);
+            echo $this->Form->control('entry_id', [
+                'options' => $entries,
+                'disabled' => $entryFixed,
+            ]);
             echo $this->Form->control('check_in_time');
             echo $entryFixed ?
                 $this->Form->multiCheckbox('participants._ids', $participants) :
                 $this->Form->control('participants._ids', ['options' => $participants]);
-        ?>
+            ?>
+        <?php if ($entryFixed) : ?>
+            <?= $this->Form->hidden('entry_id', ['value' => $entryId]) ?>
+        <?php endif; ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>
     <?= $this->Form->end() ?>

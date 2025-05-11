@@ -18,7 +18,6 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th scope="col"><?= $this->Paginator->sort('id') ?></th>
         <th scope="col"><?= $this->Paginator->sort('checkpoint_sequence') ?></th>
         <th scope="col"><?= $this->Paginator->sort('checkpoint_name') ?></th>
         <th scope="col"><?= $this->Paginator->sort('event_id') ?></th>
@@ -31,7 +30,6 @@
     <tbody>
         <?php foreach ($checkpoints as $checkpoint) : ?>
         <tr>
-            <td><?= h($checkpoint->id) ?></td>
             <td><?= $this->Number->format($checkpoint->checkpoint_sequence) ?></td>
             <td><?= h($checkpoint->checkpoint_name) ?></td>
             <td><?= $checkpoint->hasValue('event') ? $this->Html->link($checkpoint->event->event_name, ['controller' => 'Events', 'action' => 'view', $checkpoint->event->id]) : '' ?></td>

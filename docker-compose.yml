@@ -39,6 +39,25 @@ services:
     networks:
       - internal
 
+  worker:
+#    image: 24601/event_booking_php:latest
+    container_name: event_booking_worker
+    working_dir: /var/www/html
+    command: [ "bin/cake", "QueueWorker" ]
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./config/DockerSecrets/aws_credentials:/home/www-data/.aws/credentials:ro
+    env_file:
+      - ./config/DockerSecrets/app.env
+    depends_on:
+      - db
+    networks:
+      - internal
+      - frontend
+
 volumes:
   event_pg_data:
 
@@ -49,9 +68,9 @@ networks:
   frontend:
     driver: bridge
     internal: false
-    ipam:
-      config:
-        - subnet: 10.3.90.1/24
+#    ipam:
+#      config:
+#        - subnet: 10.3.90.1/24
 
 #  podman network create --driver bridge --disable-dns --internal eventbookingbackend_internal
 #  podman network create --driver bridge --subnet 10.3.100.0/24 eventbookingbackend_frontend

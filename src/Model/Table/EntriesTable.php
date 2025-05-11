@@ -77,6 +77,7 @@ class EntriesTable extends Table
         if ($entity->isNew() && isset($entity->event_id)) {
             // Get the current max reference number for this event
             $maxRef = $this->find()
+                ->find('withTrashed')
                 ->select(['max_ref' => $this->find()->func()->max('reference_number')])
                 ->where(['event_id' => $entity->event_id])
                 ->first()

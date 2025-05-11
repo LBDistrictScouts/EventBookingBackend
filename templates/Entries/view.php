@@ -54,7 +54,7 @@
             </tr>
             <tr>
                 <th scope="row"><?= __('Reference Number') ?></th>
-                <td><?= $this->Number->format($entry->reference_number) ?></td>
+                <td><?= $entry->event->booking_code ?>-<?= $this->Number->format($entry->reference_number) ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Created') ?></th>

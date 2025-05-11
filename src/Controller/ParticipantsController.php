@@ -35,7 +35,10 @@ class ParticipantsController extends AppController
      */
     public function view($id = null)
     {
-        $participant = $this->Participants->get($id, contain: ['Entries', 'ParticipantTypes', 'Sections', 'CheckIns']);
+        $participant = $this->Participants->get(
+            $id,
+            contain: ['Entries', 'ParticipantTypes', 'Sections', 'CheckIns.Checkpoints'],
+        );
         $this->set(compact('participant'));
     }
 

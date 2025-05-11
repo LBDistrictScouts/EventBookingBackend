@@ -3,11 +3,15 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Queue\Processor\CheckInProcessor;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
+use Enqueue\Consumption\ChainExtension;
+use Enqueue\Consumption\Extension\ReplyExtension;
+use Enqueue\Consumption\QueueConsumer;
 
 /**
  * QueueWorker command.
@@ -59,13 +63,32 @@ class QueueWorkerCommand extends Command
      *
      * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io
-     * @return int|null|void The exit code or null for success
+     * @return int The exit code or null for success
+     * @throws \Exception
      */
-    public function execute(Arguments $args, ConsoleIo $io)
+    public function execute(Arguments $args, ConsoleIo $io): int
     {
-        $context = Configure::read('QueueContext');
+        /** @var \Enqueue\Sqs\SqsContext $context */
+        $context = Configure::read('Queue.Context');
 
-        debug($context);
+        /** @var string $queueName */
+        $queueName = Configure::read('Queue.QueueName');
+
+//        $queue = $context->createQueue($queueName);
+//        $consumer = $context->createConsumer($queue);
+//
+//        /** @var \Enqueue\Sqs\SqsMessage $message */
+//        $message = $consumer->receive();
+//
+//        $consumer->acknowledge($message);
+
+        $queueConsumer = new QueueConsumer($context, new ChainExtension([
+            new ReplyExtension(),
+        ]));
+
+        $queueConsumer->bind($queueName, new CheckInProcessor());
+
+        $queueConsumer->consume();
 
         return 0;
     }

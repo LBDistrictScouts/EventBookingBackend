@@ -117,6 +117,14 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             // Skip CSRF for API JSON requests and "book" endpoints
             $path = $request->getUri()->getPath();
 
+            if ($path === '/entries/lookup.json') {
+                return true;
+            }
+
+            if (str_contains($path, '/check-ins/add')) {
+                return true;
+            }
+
             return str_contains($path, '/book.json');
         });
 

@@ -2,11 +2,11 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Participant $participant
- * @var \App\Model\Entity\Entry[]|\Cake\Collection\CollectionInterface $entries
- * @var \App\Model\Entity\Event[]|\Cake\Collection\CollectionInterface $events
- * @var \App\Model\Entity\ParticipantType[]|\Cake\Collection\CollectionInterface $participantTypes
- * @var \App\Model\Entity\Section[]|\Cake\Collection\CollectionInterface $sections
- * @var \App\Model\Entity\CheckIn[]|\Cake\Collection\CollectionInterface $checkIns
+ * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Entry> $entries
+ * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Event> $events
+ * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\ParticipantType> $participantTypes
+ * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Section> $sections
+ * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\CheckIn> $checkIns
  */
 ?>
 <?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
@@ -36,12 +36,7 @@
             echo $this->Form->control('entry_id', ['options' => $entries]);
             echo $this->Form->control('participant_type_id', ['options' => $participantTypes]);
             echo $this->Form->control('section_id', ['options' => $sections, 'empty' => true]);
-            echo $this->Form->control('checked_in');
-            echo $this->Form->control('checked_out');
-            echo $this->Form->control('deleted');
-            echo $this->Form->control('highest_check_in_sequence');
-            echo $this->Form->control('check_ins._ids', ['options' => $checkIns]);
-                ?>
+        ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>
     <?= $this->Form->end() ?>

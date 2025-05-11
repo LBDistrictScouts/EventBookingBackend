@@ -105,7 +105,8 @@ class EventsController extends AppController
                         'conditions' => [
                             'Checkpoints.checkpoint_sequence >=' => 0,
                         ],
-                    ]]
+                    ],
+                ],
             );
             $event->setHidden(['Checkpoints.event_id', 'Questions.event_id', 'event_id']);
             $this->set(compact('event'));
@@ -124,8 +125,12 @@ class EventsController extends AppController
                 ],
                 'Questions',
                 'Checkpoints' => ['sort' => 'checkpoint_sequence'],
-                'Entries' => ['Participants', 'CheckIns.Checkpoints'],
-            ]
+                'Entries' => [
+                    'Participants',
+                    'CheckIns.Checkpoints',
+                    'sort' => ['reference_number' => 'ASC'],
+                ],
+            ],
         );
         $this->set(compact('event'));
     }
