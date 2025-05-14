@@ -56,7 +56,15 @@ class SectionsController extends AppController
      */
     public function view($id = null)
     {
-        $section = $this->Sections->get($id, contain: ['ParticipantTypes', 'Groups', 'Events', 'Participants']);
+        $section = $this->Sections->get(
+            $id,
+            contain: [
+                'ParticipantTypes',
+                'Groups',
+                'Events',
+                'Participants' => ['ParticipantTypes', 'Entries']
+            ],
+        );
         $this->set(compact('section'));
     }
 

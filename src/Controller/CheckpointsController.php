@@ -18,16 +18,24 @@ class CheckpointsController extends AppController
     }
 
     /**
+     * @var array $paginate Pagination Default Array.
+     */
+    protected array $paginate = [
+        'limit' => 25,
+        'order' => [
+            'event_id' => 'asc',
+            'checkpoint_sequence' => 'asc',
+        ],
+    ];
+
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()
     {
-        $query = $this->Checkpoints->find()
-            ->orderByAsc('event_id')
-            ->orderByAsc( 'checkpoint_sequence')
-            ->contain(['Events']);
+        $query = $this->Checkpoints->find()->contain(['Events']);
         $checkpoints = $this->paginate($query);
 
         $this->set(compact('checkpoints'));

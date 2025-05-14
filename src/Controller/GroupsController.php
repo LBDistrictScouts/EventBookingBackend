@@ -21,13 +21,23 @@ class GroupsController extends AppController
     }
 
     /**
+     * @var array $paginate Pagination Default Array.
+     */
+    protected array $paginate = [
+        'limit' => 25,
+        'order' => [
+            'sort_order' => 'asc',
+        ],
+    ];
+
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()
     {
-        $query = $this->Groups->find()->orderByAsc('sort_order');
+        $query = $this->Groups->find();
         $groups = $this->paginate($query);
 
         $this->set(compact('groups'));
