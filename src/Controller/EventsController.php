@@ -101,7 +101,7 @@ class EventsController extends AppController
                     ],
                     'Checkpoints' => [
                         'sort' => 'Checkpoints.checkpoint_sequence',
-                        'fields' => ['checkpoint_sequence', 'checkpoint_name', 'event_id'],
+                        'fields' => ['id', 'checkpoint_sequence', 'checkpoint_name', 'event_id'],
                         'conditions' => [
                             'Checkpoints.checkpoint_sequence >=' => 0,
                         ],

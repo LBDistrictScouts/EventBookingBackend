@@ -125,6 +125,14 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 return true;
             }
 
+            if (str_contains($path, '/check-in.json')) {
+                return true;
+            }
+
+            if (str_contains($path, '/lookup.json')) {
+                return true;
+            }
+
             return str_contains($path, '/book.json');
         });
 

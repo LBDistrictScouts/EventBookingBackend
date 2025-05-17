@@ -74,15 +74,34 @@ class CheckInsController extends AppController
      */
     public function add(?string $entryId = null)
     {
+        if ($this->request->is(['options'])) {
+            $message = 'OPTIONS YES';
+            $this->set(compact('message'));
+            $this->viewBuilder()->setOption('serialize', ['message']);
+
+            return;
+        }
+
         $checkIn = $this->CheckIns->newEmptyEntity();
         if ($entryId) {
             $checkIn->set('entry_id', $entryId);
         }
 
         if ($this->request->is('post')) {
+            /** @var array $data */
+            $data = $this->request->getData();
+
+            if (array_key_exists('participants', $data)) {
+                $participants = $data['participants'];
+
+                if (!array_key_exists('_ids', $participants)) {
+                    $data['participants'] = ['_ids' => $participants];
+                }
+            }
+
             $checkIn = $this->CheckIns->patchEntity(
                 entity: $checkIn,
-                data: $this->request->getData(),
+                data: $data,
                 options: ['associated' => 'Participants'],
             );
 

@@ -47,13 +47,19 @@ class ParticipantsController extends AppController
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add($entryId = null)
     {
         $participant = $this->Participants->newEmptyEntity();
+        $participant->set('entry_id', $entryId);
+
         if ($this->request->is('post')) {
             $participant = $this->Participants->patchEntity($participant, $this->request->getData());
             if ($this->Participants->save($participant)) {
                 $this->Flash->success(__('The participant has been saved.'));
+
+                if ($entryId) {
+                    return $this->redirect(['controller' => 'Entries', 'action' => 'view', $entryId]);
+                }
 
                 return $this->redirect(['action' => 'index']);
             }
@@ -61,7 +67,15 @@ class ParticipantsController extends AppController
         }
         $entries = $this->Participants->Entries->find('list', limit: 200)->all();
         $participantTypes = $this->Participants->ParticipantTypes->find('list', limit: 200)->all();
-        $sections = $this->Participants->Sections->find('list', limit: 200)->all();
+        $sections = $this->Participants->Sections->find(
+            'list',
+            limit: 200,
+            contain: ['Groups', 'ParticipantTypes'],
+            keyField: 'id',
+            valueField: 'section_name',
+            groupField: 'group.group_name',
+            sort: ['Groups.sort_order' => 'ASC', 'ParticipantTypes.sort_order' => 'ASC'],
+        )->all();
         $checkIns = $this->Participants->CheckIns->find('list', limit: 200)->all();
         $this->set(compact('participant', 'entries', 'participantTypes', 'sections', 'checkIns'));
     }
@@ -87,7 +101,15 @@ class ParticipantsController extends AppController
         }
         $entries = $this->Participants->Entries->find('list', limit: 200)->all();
         $participantTypes = $this->Participants->ParticipantTypes->find('list', limit: 200)->all();
-        $sections = $this->Participants->Sections->find('list', limit: 200)->all();
+        $sections = $this->Participants->Sections->find(
+            'list',
+            limit: 200,
+            contain: ['Groups', 'ParticipantTypes'],
+            keyField: 'id',
+            valueField: 'section_name',
+            groupField: 'group.group_name',
+            sort: ['Groups.sort_order' => 'ASC', 'ParticipantTypes.sort_order' => 'ASC'],
+        )->all();
         $checkIns = $this->Participants->CheckIns->find('list', limit: 200)->all();
         $this->set(compact('participant', 'entries', 'participantTypes', 'sections', 'checkIns'));
     }

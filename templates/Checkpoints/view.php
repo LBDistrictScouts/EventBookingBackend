@@ -65,7 +65,7 @@
                 <tr>
                     <td><?= $this->Html->link(
                             title: ($checkIns->has('entry') ? $checkIns->entry->entry_name : ''),
-                            url: ['controller' => 'CheckIns', 'action' => 'view', $checkIns->entry_id],
+                            url: ['controller' => 'Entries', 'action' => 'view', $checkIns->entry_id],
                         ) ?></td>
                     <td><?= h($checkIns->check_in_time) ?></td>
                     <td><?= h($checkIns->participant_count) ?></td>

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Core\Configure;
+use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
 use Cake\View\JsonView;
 
@@ -127,34 +129,64 @@ class EntriesController extends AppController
     /**
      * Lookup method
      *
-     * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
+     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      */
     public function lookup()
     {
-        $this->request->allowMethod(['post']);
+        $this->request->allowMethod(['post', 'options']);
 
-        /** @var \App\Model\Entity\Entry $entry */
-        $entry = $this->Entries->find()
-            ->where([
-                'reference_number' => $this->request->getData('reference_number'),
-                'security_code' => $this->request->getData('security_code'),
-            ])
-            ->contain(['Participants'])
-            ->firstOrFail();
+        if ($this->request->is('options')) {
+            $message = 'OPTIONS YES';
+            $this->set(compact('message'));
+            $this->viewBuilder()->setOption('serialize', ['message']);
 
-        $entry = $entry->setHidden(
-            fields: [
-                'security_code',
-                'entry_email',
-                'entry_mobile',
-                'active',
-                'deleted',
-            ],
-            merge: true,
-        );
+            return;
+        }
 
-        $this->set(compact('entry'));
-        $this->viewBuilder()->setOption('serialize', ['entry']);
+        $reference_number = $this->request->getData('reference_number');
+
+        if (empty($reference_number) || !is_numeric($reference_number)) {
+            $message = 'Invalid Lookup Data';
+            $this->set(compact('message'));
+            $this->viewBuilder()->setOption('serialize', ['message']);
+
+            $this->response = $this->response->withStatus(400);
+
+            return;
+        }
+
+        try {
+            /** @var \App\Model\Entity\Entry $entry */
+            $entry = $this->Entries->find()
+                ->where([
+                    'reference_number' => $reference_number,
+                    'security_code' => $this->request->getData('security_code'),
+                ])
+                ->contain(['Participants'])
+                ->firstOrFail();
+
+            $entry = $entry->setHidden(
+                fields: [
+                    'security_code',
+                    'entry_email',
+                    'entry_mobile',
+                    'active',
+                    'deleted',
+                ],
+                merge: true,
+            );
+
+            $this->set(compact('entry'));
+            $this->viewBuilder()->setOption('serialize', ['entry']);
+        } catch (RecordNotFoundException $e) {
+            $message = 'Invalid Lookup';
+            $this->set(compact('message'));
+            $this->viewBuilder()->setOption('serialize', ['message']);
+
+            $this->response = $this->response->withStatus(404);
+
+            return;
+        }
     }
 
     /**
