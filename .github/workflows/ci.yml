@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   testsuite:
     name: PHPUnit Test Suite
@@ -53,7 +56,7 @@ jobs:
             dependencies: 'lowest'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -88,7 +91,7 @@ jobs:
         psql -h 127.0.0.1 -U postgres -d event_booking -c 'CREATE SCHEMA IF NOT EXISTS test;'
 
     - name: Composer install
-      uses: ramsey/composer-install@v2
+      uses: ramsey/composer-install@v3
       with:
         dependency-versions: ${{ matrix.dependencies }}
 
@@ -114,7 +117,7 @@ jobs:
       COGNITO_USER_POOL_ID: eu-west-1_testpool
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -125,7 +128,7 @@ jobs:
         tools: cs2pr, phpstan:2.1.22
 
     - name: Composer install
-      uses: ramsey/composer-install@v2
+      uses: ramsey/composer-install@v3
 
     - name: Prepare AWS profile
       run: |

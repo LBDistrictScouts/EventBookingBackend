@@ -1,53 +1,142 @@
-# CakePHP Application Skeleton
+# Event Booking Backend
 
-![Build Status](https://github.com/cakephp/app/actions/workflows/ci.yml/badge.svg?branch=master)
-[![Total Downloads](https://img.shields.io/packagist/dt/cakephp/app.svg?style=flat-square)](https://packagist.org/packages/cakephp/app)
-[![PHPStan](https://img.shields.io/badge/PHPStan-level%207-brightgreen.svg?style=flat-square)](https://github.com/phpstan/phpstan)
+Backend application for event bookings, check-ins, participant management, and booking confirmation mailers. The app is built on CakePHP 5 and integrates with AWS Cognito for authentication and SQS-backed queue processing.
 
-A skeleton for creating applications with [CakePHP](https://cakephp.org) 5.x.
+## Stack
 
-The framework source code can be found here: [cakephp/cakephp](https://github.com/cakephp/cakephp).
+- PHP 8.4+
+- CakePHP 5
+- PostgreSQL
+- PHPUnit 13
+- PHPStan 2
+- PHP_CodeSniffer
+- AWS Cognito
+- AWS SQS
 
-## Installation
+## Main Features
 
-1. Download [Composer](https://getcomposer.org/doc/00-intro.md) or update `composer self-update`.
-2. Run `php composer.phar create-project --prefer-dist cakephp/app [app_name]`.
+- Event, section, group, entry, participant, checkpoint, and check-in management
+- Public booking and entry lookup endpoints
+- Cognito-based authentication flow
+- Booking confirmation mailer
+- Queue worker command for asynchronous check-in processing
 
-If Composer is installed globally, run
+## Local Setup
+
+1. Install dependencies:
 
 ```bash
-composer create-project --prefer-dist cakephp/app
+composer install
 ```
 
-In case you want to use a custom app dir name (e.g. `/myapp/`):
+2. Create local config:
 
 ```bash
-composer create-project --prefer-dist cakephp/app myapp
+cp config/app_local.example.php config/app_local.php
 ```
 
-You can now either use your machine's webserver to view the default home page, or start
-up the built-in webserver with:
+3. Set application secrets and service configuration.
+
+Minimum environment/config values you need:
+
+- `SECURITY_SALT`
+- `DATABASE_URL`
+- `DATABASE_TEST_URL`
+- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_URL`
+- `AWS_SQS_QUEUE_NAME`
+- `COGNITO_DOMAIN`
+- `COGNITO_CLIENT_ID`
+- `COGNITO_CLIENT_SECRET`
+- `COGNITO_USER_POOL_ID`
+
+4. Create the Postgres schemas used by the app and tests:
+
+```sql
+CREATE SCHEMA IF NOT EXISTS data;
+CREATE SCHEMA IF NOT EXISTS test;
+```
+
+The app expects PostgreSQL schema-separated connections. In CI the main connection uses `schema=data` and the test connection uses `schema=test`.
+
+5. Run migrations as needed:
+
+```bash
+bin/cake migrations migrate
+```
+
+6. Start the local server:
 
 ```bash
 bin/cake server -p 8765
 ```
 
-Then visit `http://localhost:8765` to see the welcome page.
+## Testing And Quality
 
-## Update
+Run the test suite:
 
-Since this skeleton is a starting point for your application and various files
-would have been modified as per your needs, there isn't a way to provide
-automated upgrades, so you have to do any updates manually.
+```bash
+composer test
+```
 
-## Configuration
+Run static analysis:
 
-Read and edit the environment specific `config/app_local.php` and set up the
-`'Datasources'` and any other configuration relevant for your application.
-Other environment agnostic settings can be changed in `config/app.php`.
+```bash
+composer stan
+```
 
-## Layout
+Run coding standards:
 
-The app skeleton uses [Milligram](https://milligram.io/) (v1.3) minimalist CSS
-framework by default. You can, however, replace it with any other library or
-custom styles.
+```bash
+composer cs-check
+```
+
+Run the full local quality gate:
+
+```bash
+composer check
+```
+
+Current local `composer check` is expected to pass cleanly.
+
+## Queue Worker
+
+The project includes a queue worker command:
+
+```bash
+bin/cake QueueWorker
+```
+
+The CLI bootstrap expects an AWS profile named `lbd` unless the relevant environment/config overrides are provided. CI creates that profile explicitly.
+
+## Docker
+
+A `docker-compose.yml` file is included with these services:
+
+- `app`: PHP application container
+- `web`: nginx frontend on `https://localhost:8443`
+- `db`: PostgreSQL
+- `worker`: background queue worker running `bin/cake QueueWorker`
+
+Secrets for Docker are expected under `config/DockerSecrets/`.
+
+## Project Structure
+
+- [src/Controller](/Users/jacob/Development/EventBookingBackend/src/Controller)
+- [src/Model](/Users/jacob/Development/EventBookingBackend/src/Model)
+- [src/Mailer](/Users/jacob/Development/EventBookingBackend/src/Mailer)
+- [src/Queue](/Users/jacob/Development/EventBookingBackend/src/Queue)
+- [config/Migrations](/Users/jacob/Development/EventBookingBackend/config/Migrations)
+- [tests/TestCase](/Users/jacob/Development/EventBookingBackend/tests/TestCase)
+
+## CI Notes
+
+GitHub Actions runs:
+
+- PHPUnit against PostgreSQL
+- PHP_CodeSniffer
+- PHPStan
+
+The workflow is configured for Node 24-compatible GitHub Actions runtimes and uses explicit Cognito/AWS test values so CI does not depend on local machine configuration.
