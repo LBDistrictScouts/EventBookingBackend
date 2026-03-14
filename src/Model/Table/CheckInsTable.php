@@ -13,25 +13,10 @@ use Cake\Validation\Validator;
 /**
  * CheckIns Model
  *
- * @property \App\Model\Table\CheckpointsTable&\Cake\ORM\Association\BelongsTo $Checkpoints
- * @property \App\Model\Table\EntriesTable&\Cake\ORM\Association\BelongsTo $Entries
- * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\BelongsToMany $Participants
- * @property \App\Model\Table\ParticipantsCheckInsTable&\Cake\ORM\Association\HasMany $ParticipantsCheckIns
- * @method \App\Model\Entity\CheckIn newEmptyEntity()
- * @method \App\Model\Entity\CheckIn newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\CheckIn> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\CheckIn get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\CheckIn findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\CheckIn patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\CheckIn> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\CheckIn|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\CheckIn saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
- * @mixin \Muffin\Trash\Model\Behavior\TrashBehavior
+ * @property \App\Model\Table\CheckpointsTable $Checkpoints
+ * @property \App\Model\Table\EntriesTable $Entries
+ * @property \App\Model\Table\ParticipantsTable $Participants
+ * @property \App\Model\Table\ParticipantsCheckInsTable $ParticipantsCheckIns
  */
 class CheckInsTable extends Table
 {
@@ -117,9 +102,9 @@ class CheckInsTable extends Table
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @param \App\Model\Entity\ParticipantsCheckIn $entity
-     * @param \ArrayObject $options
+     * @param \ArrayObject<string, mixed> $options
      * @return void
      */
     public function afterDelete(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
@@ -127,7 +112,14 @@ class CheckInsTable extends Table
         $participants = $this->Participants->find()->matching('CheckIns');
 
         foreach ($participants as $participant) {
-            $this->ParticipantsCheckIns->refreshCounter($participant->get('id'));
+            if (!$participant instanceof EntityInterface) {
+                continue;
+            }
+
+            $participantId = $participant->get('id');
+            if (is_string($participantId)) {
+                $this->ParticipantsCheckIns->refreshCounter($participantId);
+            }
         }
     }
 }

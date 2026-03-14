@@ -10,23 +10,9 @@ use Cake\Validation\Validator;
 /**
  * Events Model
  *
- * @property \App\Model\Table\CheckpointsTable&\Cake\ORM\Association\HasMany $Checkpoints
- * @property \App\Model\Table\EntriesTable&\Cake\ORM\Association\HasMany $Entries
- * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\BelongsToMany $Sections
- * @method \App\Model\Entity\Event newEmptyEntity()
- * @method \App\Model\Entity\Event newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\Event> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Event get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\Event findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\Event patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\Event> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\Event|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\Event saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @property \App\Model\Table\CheckpointsTable $Checkpoints
+ * @property \App\Model\Table\EntriesTable $Entries
+ * @property \App\Model\Table\SectionsTable $Sections
  */
 class EventsTable extends Table
 {

@@ -11,7 +11,7 @@ use RuntimeException;
 class JwksUtility
 {
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getJwks(bool $forceRefresh = false): array
     {
@@ -26,7 +26,8 @@ class JwksUtility
             Cache::delete('jwks-' . md5($jwksUrl));
         }
 
-        return Cache::remember('jwks-' . md5($jwksUrl), function () use ($jwksUrl) {
+        /** @var array<string, mixed> $jwks */
+        $jwks = Cache::remember('jwks-' . md5($jwksUrl), function () use ($jwksUrl) {
             $http = new Client();
             $response = $http->get($jwksUrl);
 
@@ -34,7 +35,9 @@ class JwksUtility
                 throw new RuntimeException('Failed to fetch JWKS keys from Cognito');
             }
 
-            return $response->getJson();
+            return (array)$response->getJson();
         });
+
+        return $jwks;
     }
 }

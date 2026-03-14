@@ -5,6 +5,7 @@ namespace App\Mailer\Preview;
 
 use Cake\Mailer\Mailer;
 use DebugKit\Mailer\MailPreview;
+use RuntimeException;
 
 class BookingMailPreview extends MailPreview
 {
@@ -20,8 +21,13 @@ class BookingMailPreview extends MailPreview
             'Participants',
         ])->first();
 
-        return $this->getMailer('Booking')
-            ->confirmation($entry);
-//            ->setViewVars(compact('entry'));
+        if ($entry === null) {
+            throw new RuntimeException('No entry available for booking mail preview.');
+        }
+
+        /** @var \App\Mailer\BookingMailer $mailer */
+        $mailer = $this->getMailer('Booking');
+
+        return $mailer->confirmation($entry);
     }
 }

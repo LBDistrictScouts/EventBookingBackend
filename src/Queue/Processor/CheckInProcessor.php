@@ -32,7 +32,7 @@ class CheckInProcessor implements Processor
             $this->log(
                 message: 'Message Received Not Valid',
                 level: LOG_WARNING,
-                context: $result,
+                context: ['validationResult' => (string)json_encode($result->error(), JSON_THROW_ON_ERROR)],
             );
 
             return self::REJECT;

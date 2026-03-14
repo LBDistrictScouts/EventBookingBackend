@@ -5,6 +5,7 @@ namespace App\Model\Table;
 
 use App\Model\Entity\Entry;
 use ArrayObject;
+use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -13,24 +14,9 @@ use Cake\Validation\Validator;
 /**
  * Entries Model
  *
- * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
- * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\HasMany $CheckIns
- * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\HasMany $Participants
- * @method \App\Model\Entity\Entry newEmptyEntity()
- * @method \App\Model\Entity\Entry newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\Entry> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Entry get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\Entry findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\Entry patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\Entry> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\Entry|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\Entry saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Entry>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Entry> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
- * @mixin \Cake\ORM\Behavior\CounterCacheBehavior
+ * @property \App\Model\Table\EventsTable $Events
+ * @property \App\Model\Table\CheckInsTable $CheckIns
+ * @property \App\Model\Table\ParticipantsTable $Participants
  */
 class EntriesTable extends Table
 {
@@ -67,9 +53,9 @@ class EntriesTable extends Table
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @param \App\Model\Entity\Entry $entity
-     * @param \ArrayObject $options
+     * @param \ArrayObject<string, mixed> $options
      * @return void
      */
     public function beforeSave(EventInterface $event, Entry $entity, ArrayObject $options): void
@@ -167,7 +153,11 @@ class EntriesTable extends Table
             ->all();
 
         foreach ($participants as $participant) {
-            $participant->entry_id = $persistingEntryId;
+            if (!$participant instanceof EntityInterface) {
+                continue;
+            }
+
+            $participant->set('entry_id', $persistingEntryId);
             $this->Participants->save($participant);
 
             if ($participant->getErrors()) {

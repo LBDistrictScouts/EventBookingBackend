@@ -10,21 +10,7 @@ use Cake\Validation\Validator;
 /**
  * Questions Model
  *
- * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
- * @method \App\Model\Entity\Question newEmptyEntity()
- * @method \App\Model\Entity\Question newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\Question> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Question get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\Question findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\Question patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\Question> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\Question|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\Question saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\Question>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Question>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Question>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Question> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Question>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Question>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Question>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Question> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @property \App\Model\Table\EventsTable $Events
  */
 class QuestionsTable extends Table
 {

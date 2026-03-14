@@ -60,9 +60,11 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         if (PHP_SAPI === 'cli') {
             $this->bootstrapCli();
         } else {
+            /** @var \Cake\Datasource\Locator\LocatorInterface<\Cake\Datasource\RepositoryInterface> $tableLocator */
+            $tableLocator = (new TableLocator())->allowFallbackClass(false);
             FactoryLocator::add(
                 'Table',
-                (new TableLocator())->allowFallbackClass(false),
+                $tableLocator,
             );
         }
 
@@ -186,8 +188,11 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'returnPayload' => false,
             'skipAuthorization' => true,
             'skip' => function (ServerRequestInterface $request) {
+                $params = $request->getAttribute('params');
+                $plugin = is_array($params) ? ($params['plugin'] ?? null) : null;
+
                 // ✅ Skip for DebugKit plugin requests
-                if ($request->getParam('plugin') === 'DebugKit') {
+                if ($plugin === 'DebugKit') {
                     return true;
                 }
 

@@ -26,7 +26,7 @@ use Exception;
  * Add your application-wide methods in the class below, your controllers
  * will inherit them
  *
- * @property \App\Controller\AuthenticationComponent $Authentication.
+ * @property \Authentication\Controller\Component\AuthenticationComponent $Authentication
  * @link https://book.cakephp.org/4/en/controllers.html#the-app-controller
  */
 class AppController extends Controller
@@ -60,7 +60,7 @@ class AppController extends Controller
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @return void
      */
     public function beforeFilter(EventInterface $event): void
@@ -77,7 +77,12 @@ class AppController extends Controller
 
         // 🔹 Allow DebugKit requests to bypass authentication
         if ($this->request->getParam('plugin') === 'DebugKit') {
-            $this->Authentication->allowUnauthenticated();
+            /** @var \Authentication\Controller\Component\AuthenticationComponent $authentication */
+            $authentication = $this->Authentication;
+            $action = $this->request->getParam('action');
+            if (is_string($action)) {
+                $authentication->allowUnauthenticated([$action]);
+            }
         }
     }
 }

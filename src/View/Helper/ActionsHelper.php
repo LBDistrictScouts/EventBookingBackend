@@ -8,18 +8,22 @@ use Cake\Utility\Inflector;
 use Cake\View\Helper;
 
 /**
- * @property \Cake\View\Helper\HtmlHelper $Html
+ * @extends \Cake\View\Helper<\App\View\AppView>
+ * @property \BootstrapUI\View\Helper\HtmlHelper $Html
  * @property \Cake\View\Helper\FormHelper $Form
  */
 class ActionsHelper extends Helper
 {
+    /**
+     * @var array<int, string>
+     */
     protected array $helpers = ['Html', 'Form'];
 
     /**
      * Renders a Bootstrap 5 action button group
      *
      * @param \Cake\Datasource\EntityInterface $entity
-     * @param array $options Optional customization for button classes, icons, visibility
+     * @param array<string, mixed> $options Optional customization for button classes, icons, visibility
      * @return string
      */
     public function buttons(EntityInterface $entity, array $options = []): string

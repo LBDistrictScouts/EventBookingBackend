@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
+use Cake\Http\Response;
 use Cake\View\JsonView;
 
 /**
@@ -23,7 +24,7 @@ class EntriesController extends AppController
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @return void
      */
     public function beforeFilter(EventInterface $event): void
@@ -35,7 +36,7 @@ class EntriesController extends AppController
     }
 
     /**
-     * @var array $paginate Pagination Default Array.
+     * @var array<string, mixed> Pagination defaults.
      */
     protected array $paginate = [
         'limit' => 25,
@@ -48,9 +49,9 @@ class EntriesController extends AppController
     /**
      * Index method
      *
-     * @return \Cake\Http\Response|null Renders view
+     * @return void
      */
-    public function index()
+    public function index(): void
     {
         $query = $this->Entries->find()
             ->contain(['Events']);
@@ -63,9 +64,9 @@ class EntriesController extends AppController
      * View method
      *
      * @param string|null $entryId
-     * @return \Cake\Http\Response|null Renders view
+     * @return void
      */
-    public function view(?string $entryId = null)
+    public function view(?string $entryId = null): void
     {
         $entry = $this->Entries->get($entryId, contain: [
             'Events',
@@ -87,7 +88,7 @@ class EntriesController extends AppController
      *
      * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add(): ?Response
     {
         $entry = $this->Entries->newEmptyEntity();
         if ($this->request->is('post')) {
@@ -101,6 +102,8 @@ class EntriesController extends AppController
         }
         $events = $this->Entries->Events->find('list', limit: 200)->all();
         $this->set(compact('entry', 'events'));
+
+        return null;
     }
 
     /**
@@ -109,7 +112,7 @@ class EntriesController extends AppController
      * @param string|null $entryId
      * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
      */
-    public function edit(?string $entryId = null)
+    public function edit(?string $entryId = null): ?Response
     {
         $entry = $this->Entries->get($entryId, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -123,14 +126,16 @@ class EntriesController extends AppController
         }
         $events = $this->Entries->Events->find('list', limit: 200)->all();
         $this->set(compact('entry', 'events'));
+
+        return null;
     }
 
     /**
      * Lookup method
      *
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
+     * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
      */
-    public function lookup()
+    public function lookup(): ?Response
     {
         $this->request->allowMethod(['post', 'options']);
 
@@ -139,7 +144,7 @@ class EntriesController extends AppController
             $this->set(compact('message'));
             $this->viewBuilder()->setOption('serialize', ['message']);
 
-            return;
+            return null;
         }
 
         $reference_number = $this->request->getData('reference_number');
@@ -151,7 +156,7 @@ class EntriesController extends AppController
 
             $this->response = $this->response->withStatus(400);
 
-            return;
+            return null;
         }
 
         try {
@@ -184,8 +189,10 @@ class EntriesController extends AppController
 
             $this->response = $this->response->withStatus(404);
 
-            return;
+            return null;
         }
+
+        return null;
     }
 
     /**

@@ -153,8 +153,8 @@ class Installer
         };
 
         $walker = function (string $dir) use (&$walker, $changePerms): void {
-            /** @phpstan-ignore-next-line */
-            $files = array_diff(scandir($dir), ['.', '..']);
+            /** @var list<string> $files */
+            $files = array_values(array_diff(scandir($dir) ?: [], ['.', '..']));
             foreach ($files as $file) {
                 $path = $dir . '/' . $file;
 

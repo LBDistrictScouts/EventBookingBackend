@@ -22,7 +22,7 @@ class EventsController extends AppController
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @return void
      */
     public function beforeFilter(EventInterface $event): void

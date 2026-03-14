@@ -26,6 +26,7 @@
         "cakephp/cakephp-codesniffer": "^5.3",
         "cakephp/debug_kit": "^5.2",
         "josegonzalez/dotenv": "^4.0",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^13.0"
     },
     "suggest": {
@@ -50,7 +51,8 @@
         "post-create-project-cmd": "App\\Console\\Installer::postInstall",
         "check": [
             "@test",
-            "@cs-check"
+            "@cs-check",
+            "@stan"
         ],
         "cs-check": "phpcs --colors -p",
         "cs-fix": "phpcbf --colors -p",

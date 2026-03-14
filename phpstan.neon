@@ -1,5 +1,7 @@
 parameters:
     level: 8
     treatPhpDocTypesAsCertain: false
+    bootstrapFiles:
+        - vendor/cakephp/cakephp/src/functions.php
     paths:
         - src/

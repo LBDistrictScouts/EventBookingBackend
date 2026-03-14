@@ -14,25 +14,11 @@ use Cake\Validation\Validator;
 /**
  * Participants Model
  *
- * @property \App\Model\Table\EntriesTable&\Cake\ORM\Association\BelongsTo $Entries
- * @property \App\Model\Table\ParticipantTypesTable&\Cake\ORM\Association\BelongsTo $ParticipantTypes
- * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\BelongsTo $Sections
- * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\BelongsToMany $CheckIns
- * @method \App\Model\Entity\Participant newEmptyEntity()
- * @method \App\Model\Entity\Participant newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\Participant> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Participant get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\Participant findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\Participant patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\Participant> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\Participant|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\Participant saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\Participant>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Participant> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
- * @mixin \Cake\ORM\Behavior\CounterCacheBehavior
+ * @property \App\Model\Table\EntriesTable $Entries
+ * @property \App\Model\Table\EventsTable $Events
+ * @property \App\Model\Table\ParticipantTypesTable $ParticipantTypes
+ * @property \App\Model\Table\SectionsTable $Sections
+ * @property \App\Model\Table\CheckInsTable $CheckIns
  */
 class ParticipantsTable extends Table
 {
@@ -85,9 +71,9 @@ class ParticipantsTable extends Table
     }
 
     /**
-     * @param \Cake\Event\Event $event
+     * @param \Cake\Event\Event<static> $event
      * @param \App\Model\Entity\Participant $entity
-     * @param \ArrayObject $options
+     * @param \ArrayObject<string, mixed> $options
      * @return void
      */
     public function afterSave(Event $event, Participant $entity, ArrayObject $options): void
@@ -100,9 +86,9 @@ class ParticipantsTable extends Table
     }
 
     /**
-     * @param \Cake\Event\Event $event
+     * @param \Cake\Event\Event<static> $event
      * @param \App\Model\Entity\Participant $entity
-     * @param \ArrayObject $options
+     * @param \ArrayObject<string, mixed> $options
      * @return void
      */
     public function afterDelete(Event $event, Participant $entity, ArrayObject $options): void

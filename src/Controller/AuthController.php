@@ -19,7 +19,7 @@ use RuntimeException;
 class AuthController extends AppController
 {
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @return void
      */
     public function beforeFilter(EventInterface $event): void
@@ -99,7 +99,7 @@ class AuthController extends AppController
 
     /**
      * @param string $code
-     * @return array
+     * @return array<string, mixed>
      */
     private function fetchTokens(string $code): array
     {
@@ -124,14 +124,17 @@ class AuthController extends AppController
             throw new UnauthorizedException('Failed to retrieve token: ' . $response->getBody());
         }
 
-        return $response->getJson();
+        /** @var array<string, mixed> $tokens */
+        $tokens = (array)$response->getJson();
+
+        return $tokens;
     }
 
     /**
      * @param string $kid The Key ID from the JWT header.
-     * @return string|null The matching public key in PEM format.
+     * @return string The matching public key in PEM format.
      */
-    private function getPublicKey(string $kid): ?string
+    private function getPublicKey(string $kid): string
     {
         $jwksUtil = new JwksUtility();
         $jwks = $jwksUtil->getJwks();
@@ -157,7 +160,7 @@ class AuthController extends AppController
     /**
      * Converts a JWK (JSON Web Key) to a PEM public key.
      *
-     * @param array $jwk The JSON Web Key from Cognito.
+     * @param array<string, mixed> $jwk The JSON Web Key from Cognito.
      * @return string The PEM-formatted public key.
      */
     private function convertJwkToPem(array $jwk): string

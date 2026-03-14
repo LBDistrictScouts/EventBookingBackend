@@ -21,7 +21,7 @@ class GroupsController extends AppController
     }
 
     /**
-     * @var array $paginate Pagination Default Array.
+     * @var array<string, mixed> Pagination defaults.
      */
     protected array $paginate = [
         'limit' => 25,

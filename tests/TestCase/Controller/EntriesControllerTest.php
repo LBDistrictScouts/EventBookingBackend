@@ -166,6 +166,7 @@ class EntriesControllerTest extends TestCase
     public function testLookupReturnsEntry(): void
     {
         $entries = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Entity\Entry $entry */
         $entry = $entries->newEntity([
             'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
             'entry_name' => 'Lookup Entry',

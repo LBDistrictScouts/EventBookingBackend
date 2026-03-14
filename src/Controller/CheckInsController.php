@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Event\EventInterface;
+use Cake\Http\Response;
 use Cake\View\JsonView;
+use RuntimeException;
 
 /**
  * CheckIns Controller
@@ -22,7 +24,7 @@ class CheckInsController extends AppController
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @return void
      */
     public function beforeFilter(EventInterface $event): void
@@ -70,16 +72,16 @@ class CheckInsController extends AppController
     /**
      * Add method
      *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
      */
-    public function add(?string $entryId = null)
+    public function add(?string $entryId = null): ?Response
     {
         if ($this->request->is(['options'])) {
             $message = 'OPTIONS YES';
             $this->set(compact('message'));
             $this->viewBuilder()->setOption('serialize', ['message']);
 
-            return;
+            return null;
         }
 
         $checkIn = $this->CheckIns->newEmptyEntity();
@@ -88,13 +90,13 @@ class CheckInsController extends AppController
         }
 
         if ($this->request->is('post')) {
-            /** @var array $data */
+            /** @var array<string, mixed> $data */
             $data = $this->request->getData();
 
             if (array_key_exists('participants', $data)) {
                 $participants = $data['participants'];
 
-                if (!array_key_exists('_ids', $participants)) {
+                if (is_array($participants) && !array_key_exists('_ids', $participants)) {
                     $data['participants'] = ['_ids' => $participants];
                 }
             }
@@ -116,24 +118,29 @@ class CheckInsController extends AppController
                     $this->set(compact('checkIn'));
                     $this->viewBuilder()->setOption('serialize', ['checkIn']);
 
-                    return;
+                    return null;
                 } else {
+                    $savedEntryId = $checkIn->get('entry_id');
+                    if (!is_string($savedEntryId)) {
+                        throw new RuntimeException('Saved check-in is missing an entry id.');
+                    }
+
                     return $this->redirect([
                         'controller' => 'Entries',
                         'action' => 'view',
-                        $checkIn->entry_id,
+                        $savedEntryId,
                     ]);
                 }
             }
             $this->Flash->error(__('The check in could not be saved. Please, try again.'));
 
             if (str_contains($this->request->getPath(), '.json')) {
-                $this->response->withStatus(400);
+                $this->response = $this->response->withStatus(400);
 
                 $this->set(compact('checkIn'));
                 $this->viewBuilder()->setOption('serialize', ['checkIn']);
 
-                return;
+                return null;
             }
         }
         $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
@@ -142,11 +149,16 @@ class CheckInsController extends AppController
             ->orderByAsc('checkpoint_sequence')
             ->limit(100)
             ->all();
-        $checkpoints = collection($checkpoints)
-            ->combine('id', function ($checkpoint) {
-                return '[' . $checkpoint->checkpoint_sequence . '] ' . $checkpoint->checkpoint_name;
-            })
-            ->toArray();
+        /** @var iterable<\App\Model\Entity\Checkpoint> $checkpoints */
+        $checkpointOptions = [];
+        foreach ($checkpoints as $checkpoint) {
+            $checkpointOptions[$checkpoint->id] = sprintf(
+                '[%s] %s',
+                $checkpoint->checkpoint_sequence,
+                $checkpoint->checkpoint_name,
+            );
+        }
+        $checkpoints = $checkpointOptions;
 
         $entryFixed = false;
 
@@ -180,14 +192,16 @@ class CheckInsController extends AppController
         $this->set(
             compact('checkIn', 'checkpoints', 'entries', 'participants', 'entryFixed', 'entryId'),
         );
+
+        return null;
     }
 
     /**
      * Add method
      *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
      */
-    public function checkpoint(?string $checkpointId = null)
+    public function checkpoint(?string $checkpointId = null): ?Response
     {
         $checkIn = $this->CheckIns->newEmptyEntity();
         if ($checkpointId) {
@@ -195,13 +209,13 @@ class CheckInsController extends AppController
         }
 
         if ($this->request->is('post')) {
-            /** @var array $data */
+            /** @var array<string, mixed> $data */
             $data = $this->request->getData();
 
             if (array_key_exists('participants', $data)) {
                 $participants = $data['participants'];
 
-                if (!array_key_exists('_ids', $participants)) {
+                if (is_array($participants) && !array_key_exists('_ids', $participants)) {
                     $data['participants'] = ['_ids' => $participants];
                 }
             }
@@ -223,24 +237,29 @@ class CheckInsController extends AppController
                     $this->set(compact('checkIn'));
                     $this->viewBuilder()->setOption('serialize', ['checkIn']);
 
-                    return;
+                    return null;
                 } else {
+                    $savedEntryId = $checkIn->get('entry_id');
+                    if (!is_string($savedEntryId)) {
+                        throw new RuntimeException('Saved check-in is missing an entry id.');
+                    }
+
                     return $this->redirect([
                         'controller' => 'Entries',
                         'action' => 'view',
-                        $checkIn->entry_id,
+                        $savedEntryId,
                     ]);
                 }
             }
             $this->Flash->error(__('The check in could not be saved. Please, try again.'));
 
             if (str_contains($this->request->getPath(), '.json')) {
-                $this->response->withStatus(400);
+                $this->response = $this->response->withStatus(400);
 
                 $this->set(compact('checkIn'));
                 $this->viewBuilder()->setOption('serialize', ['checkIn']);
 
-                return;
+                return null;
             }
         }
         $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
@@ -249,11 +268,16 @@ class CheckInsController extends AppController
             ->orderByAsc('checkpoint_sequence')
             ->limit(100)
             ->all();
-        $checkpoints = collection($checkpoints)
-            ->combine('id', function ($checkpoint) {
-                return '[' . $checkpoint->checkpoint_sequence . '] ' . $checkpoint->checkpoint_name;
-            })
-            ->toArray();
+        /** @var iterable<\App\Model\Entity\Checkpoint> $checkpoints */
+        $checkpointOptions = [];
+        foreach ($checkpoints as $checkpoint) {
+            $checkpointOptions[$checkpoint->id] = sprintf(
+                '[%s] %s',
+                $checkpoint->checkpoint_sequence,
+                $checkpoint->checkpoint_name,
+            );
+        }
+        $checkpoints = $checkpointOptions;
 
         $checkpointFixed = false;
 
@@ -279,6 +303,8 @@ class CheckInsController extends AppController
                 'checkpointId',
             ),
         );
+
+        return null;
     }
 
     /**

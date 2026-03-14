@@ -15,22 +15,8 @@ use Cake\Validation\Validator;
 /**
  * ParticipantsCheckIns Model
  *
- * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\BelongsTo $CheckIns
- * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\BelongsTo $Participants
- * @method \App\Model\Entity\ParticipantsCheckIn newEmptyEntity()
- * @method \App\Model\Entity\ParticipantsCheckIn newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\ParticipantsCheckIn> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\ParticipantsCheckIn get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\ParticipantsCheckIn findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\ParticipantsCheckIn patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\ParticipantsCheckIn> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\ParticipantsCheckIn|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\ParticipantsCheckIn saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantsCheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantsCheckIn> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @property \App\Model\Table\CheckInsTable $CheckIns
+ * @property \App\Model\Table\ParticipantsTable $Participants
  */
 class ParticipantsCheckInsTable extends Table
 {
@@ -157,9 +143,9 @@ class ParticipantsCheckInsTable extends Table
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @param \App\Model\Entity\ParticipantsCheckIn $entity
-     * @param \ArrayObject $options
+     * @param \ArrayObject<string, mixed> $options
      * @return void
      */
     public function afterSave(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
@@ -168,9 +154,9 @@ class ParticipantsCheckInsTable extends Table
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @param \App\Model\Entity\ParticipantsCheckIn $entity
-     * @param \ArrayObject $options
+     * @param \ArrayObject<string, mixed> $options
      * @return void
      */
     public function afterDelete(EventInterface $event, EntityInterface $entity, ArrayObject $options): void

@@ -8,23 +8,6 @@ use Cake\ORM\Table;
 
 /**
  * EventsSections Model
- *
- * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\BelongsTo $Sections
- * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
- * @method \App\Model\Entity\EventsSection newEmptyEntity()
- * @method \App\Model\Entity\EventsSection newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\EventsSection> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\EventsSection get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\EventsSection findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\EventsSection patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\EventsSection> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\EventsSection|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\EventsSection saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class EventsSectionsTable extends Table
 {

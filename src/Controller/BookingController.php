@@ -5,9 +5,10 @@ namespace App\Controller;
 
 use App\Model\Table\EntriesTable;
 use Cake\Event\EventInterface;
+use Cake\Http\Response;
 use Cake\Mailer\MailerAwareTrait;
-use Cake\ORM\Table;
 use Cake\View\JsonView;
+use RuntimeException;
 
 /**
  * Entries Controller
@@ -18,7 +19,7 @@ class BookingController extends AppController
 {
     use MailerAwareTrait;
 
-    private EntriesTable|Table $Entries;
+    private EntriesTable $Entries;
 
     /**
      * @return void
@@ -26,7 +27,9 @@ class BookingController extends AppController
     public function initialize(): void
     {
         parent::initialize();
-        $this->Entries = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Table\EntriesTable $entries */
+        $entries = $this->getTableLocator()->get('Entries');
+        $this->Entries = $entries;
     }
 
     /**
@@ -38,7 +41,7 @@ class BookingController extends AppController
     }
 
     /**
-     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Event\EventInterface<static> $event
      * @return void
      */
     public function beforeFilter(EventInterface $event): void
@@ -52,9 +55,9 @@ class BookingController extends AppController
     /**
      * Index method
      *
-     * @return \Cake\Http\Response|null|void Renders view
+     * @return void
      */
-    public function index()
+    public function index(): void
     {
         $query = $this->Entries->find()
             ->contain(['Events']);
@@ -67,10 +70,10 @@ class BookingController extends AppController
      * View method
      *
      * @param string|null $id Entry id.
-     * @return \Cake\Http\Response|null|void Renders view
+     * @return void
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view(?string $id = null)
+    public function view(?string $id = null): void
     {
         $entry = $this->Entries->get($id, contain: ['Events', 'CheckIns', 'Participants']);
         $this->set(compact('entry'));
@@ -79,9 +82,9 @@ class BookingController extends AppController
     /**
      * Add method
      *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add(): ?Response
     {
         $this->request->allowMethod(['post', 'put', 'options']);
 
@@ -90,7 +93,7 @@ class BookingController extends AppController
             $this->set(compact('message'));
             $this->viewBuilder()->setOption('serialize', ['message']);
 
-            return;
+            return null;
         }
 
         // Filter out empty keys in incoming arrays.
@@ -112,7 +115,12 @@ class BookingController extends AppController
             $message = 'Saved';
             $errors = [];
 
-            $entry = $this->Entries->get($entry->id, contain: [
+            $entryId = $entry->get('id');
+            if (!is_string($entryId)) {
+                throw new RuntimeException('Saved entry is missing an id.');
+            }
+
+            $entry = $this->Entries->get($entryId, contain: [
                 'Events' => ['Checkpoints', 'Questions'],
                 'CheckIns',
                 'Participants',
@@ -128,16 +136,18 @@ class BookingController extends AppController
         }
         $this->set(compact('success', 'entry', 'message', 'errors'));
         $this->viewBuilder()->setOption('serialize', ['success', 'entry', 'message', 'errors']);
+
+        return null;
     }
 
     /**
      * Edit method
      *
      * @param string|null $id Entry id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
+     * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit(?string $id = null)
+    public function edit(?string $id = null): ?Response
     {
         $entry = $this->Entries->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -149,8 +159,10 @@ class BookingController extends AppController
             }
             $this->Flash->error(__('The entry could not be saved. Please, try again.'));
         }
-        $events = $this->Entries->Events->find('list', limit: 200)->all();
+        $events = $this->fetchTable('Events')->find('list', limit: 200)->all();
         $this->set(compact('entry', 'events'));
+
+        return null;
     }
 
     /**

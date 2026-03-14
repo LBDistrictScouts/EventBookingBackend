@@ -10,23 +10,6 @@ use Cake\Validation\Validator;
 
 /**
  * ParticipantTypes Model
- *
- * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\HasMany $Participants
- * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\HasMany $Sections
- * @method \App\Model\Entity\ParticipantType newEmptyEntity()
- * @method \App\Model\Entity\ParticipantType newEntity(array $data, array $options = [])
- * @method array<\App\Model\Entity\ParticipantType> newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\ParticipantType get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \App\Model\Entity\ParticipantType findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \App\Model\Entity\ParticipantType patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\App\Model\Entity\ParticipantType> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\ParticipantType|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \App\Model\Entity\ParticipantType saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\App\Model\Entity\ParticipantType>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\ParticipantType> deleteManyOrFail(iterable $entities, array $options = [])
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class ParticipantTypesTable extends Table
 {
