@@ -15,7 +15,12 @@
  */
 use Cake\Core\Configure;
 
-$this->Html->css('BootstrapUI.dashboard', ['block' => true]);
+foreach ((array)Configure::read('Theme.stylesheets', []) as $stylesheet) {
+    $this->Html->css($stylesheet, ['block' => true]);
+}
+foreach ((array)Configure::read('Theme.scripts', []) as $script) {
+    $this->Html->script($script, ['block' => true]);
+}
 $this->prepend(
     name: 'tb_body_attrs',
     value: ' class="' .

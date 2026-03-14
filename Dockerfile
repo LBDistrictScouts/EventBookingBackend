@@ -11,7 +11,7 @@ ENV TAR_OPTIONS="--no-same-owner"
 WORKDIR /tmp
 
 RUN apk update
-RUN apk add bash zip unzip postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
+RUN apk add bash zip unzip nodejs npm postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
 
 RUN docker-php-ext-configure intl || true
 RUN docker-php-ext-configure pgsql

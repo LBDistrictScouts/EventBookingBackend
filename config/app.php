@@ -99,6 +99,18 @@ return [
         'QueueName' => env('AWS_SQS_QUEUE_NAME'),
     ],
 
+    'Theme' => [
+        'package' => '@lbd-scouts/district-styles',
+        'packageVersion' => 'latest',
+        'distDir' => 'dist',
+        'sourcePath' => '../district-styles',
+        'sourceEntry' => 'scss/style.scss',
+        'outputCss' => 'theme.css',
+        'assetPath' => 'theme',
+        'stylesheets' => ['theme/theme.css'],
+        'scripts' => [],
+    ],
+
     /*
      * Apply timestamps with the last modified time to static assets (js, css, images).
      * Will append a querystring parameter containing the time the file was modified.

@@ -62,7 +62,9 @@
         "cs-fix": "phpcbf --colors -p",
         "stan": "phpstan analyse",
         "test": "phpunit --colors=always",
-        "migrate": "bin/cake migrations migrate"
+        "migrate": "bin/cake migrations migrate",
+        "style-install": "bin/cake bootstrap install",
+        "theme-build": "sh bin/build-theme-assets.sh"
     },
     "prefer-stable": true,
     "config": {

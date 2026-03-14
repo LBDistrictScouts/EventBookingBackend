@@ -11,14 +11,31 @@ x-backend-service: &backend-service
     - ./.env.compose
   depends_on:
     - db
+  networks:
+    - internal
+    - frontend
 
 services:
   app:
     image: 24601/event_booking_php:latest
     <<: *backend-service
     container_name: event_booking_php
-    networks:
-      - internal
+
+  assets:
+    profiles: [ "assets" ]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: "8.5"
+    container_name: event_booking_assets
+    working_dir: /var/www/html
+    env_file:
+      - ./.env.compose
+    command: [ "composer", "run", "theme-build" ]
+    volumes:
+      - .:/var/www/html
+      - ../district-styles:/var/www/district-styles:ro
 
   web:
     image: nginx:latest
@@ -53,9 +70,6 @@ services:
     container_name: event_booking_worker
     command: [ "php", "bin/cake.php", "QueueWorker" ]
     restart: always
-    networks:
-      - internal
-      - frontend
 
   deploy:
     profiles: [ "deploy" ]
@@ -64,8 +78,6 @@ services:
     command: [ "sh", "bin/deploy.sh" ]
     environment:
       CREATE_TEST_SCHEMA: ${CREATE_TEST_SCHEMA:-false}
-    networks:
-      - internal
 
 volumes:
   event_pgres_data:
