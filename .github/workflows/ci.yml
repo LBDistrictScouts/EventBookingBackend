@@ -17,7 +17,7 @@ jobs:
     name: PHPUnit Test Suite
     runs-on: ubuntu-22.04
     env:
-      SECURITY_SALT: ci-security-salt-for-tests-only
+      SECURITY_SALT: ci-security-salt-for-tests-only-0123456789abcdef
       DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/event_booking?schema=data
       DATABASE_TEST_URL: postgres://postgres:postgres@127.0.0.1:5432/event_booking?schema=test
       AWS_REGION: eu-west-1
@@ -102,7 +102,7 @@ jobs:
     name: Coding Standard & Static Analysis
     runs-on: ubuntu-22.04
     env:
-      SECURITY_SALT: ci-security-salt-for-analysis-only
+      SECURITY_SALT: ci-security-salt-for-analysis-only-0123456789abcdef
       AWS_REGION: eu-west-1
       AWS_ACCESS_KEY_ID: testing
       AWS_SECRET_ACCESS_KEY: testing

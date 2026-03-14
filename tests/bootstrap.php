@@ -45,11 +45,12 @@ $jwksUrl = sprintf(
 );
 Cache::write('jwks-' . md5($jwksUrl), ['keys' => [['kid' => 'test-key']]], 'default');
 
-if (!TransportFactory::configured('smtp')) {
-    TransportFactory::setConfig('smtp', [
-        'className' => 'Debug',
-    ]);
+if (in_array('smtp', TransportFactory::configured(), true)) {
+    TransportFactory::drop('smtp');
 }
+TransportFactory::setConfig('smtp', [
+    'className' => 'Debug',
+]);
 
 // DebugKit skips settings these connection config if PHP SAPI is CLI / PHPDBG.
 // But since PagesControllerTest is run with debug enabled and DebugKit is loaded
