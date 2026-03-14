@@ -54,10 +54,15 @@
             "@cs-check",
             "@stan"
         ],
+        "prepare": [
+            "@post-install-cmd",
+            "@migrate"
+        ],
         "cs-check": "phpcs --colors -p",
         "cs-fix": "phpcbf --colors -p",
         "stan": "phpstan analyse",
-        "test": "phpunit --colors=always"
+        "test": "phpunit --colors=always",
+        "migrate": "bin/cake migrations migrate"
     },
     "prefer-stable": true,
     "config": {

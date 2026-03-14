@@ -1,4 +1,5 @@
-FROM php:8.3-fpm-alpine
+ARG PHP_VERSION=8.5
+FROM php:${PHP_VERSION}-fpm-alpine
 LABEL authors="Jacob Tyler, Letchworth, Baldock & Ashwell Scouts"
 
 ARG user=www-data
@@ -10,7 +11,7 @@ ENV TAR_OPTIONS="--no-same-owner"
 WORKDIR /tmp
 
 RUN apk update
-RUN apk add bash zip unzip postgresql17-client icu-dev libpq-dev php83-pdo_pgsql php83-pgsql
+RUN apk add bash zip unzip postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
 
 RUN docker-php-ext-configure intl || true
 RUN docker-php-ext-configure pgsql

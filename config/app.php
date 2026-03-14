@@ -89,6 +89,16 @@ return [
         ],
     ],
 
+    'Queue' => [
+        'key' => env('AWS_ACCESS_KEY_ID'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        'sessionToken' => env('AWS_SESSION_TOKEN'),
+        'region' => env('AWS_REGION', 'eu-west-1'),
+        'profile' => env('AWS_PROFILE', 'lbd'),
+        'url' => env('AWS_SQS_QUEUE_URL', env('AWS_URL')),
+        'QueueName' => env('AWS_SQS_QUEUE_NAME'),
+    ],
+
     /*
      * Apply timestamps with the last modified time to static assets (js, css, images).
      * Will append a querystring parameter containing the time the file was modified.
@@ -226,22 +236,18 @@ return [
     'EmailTransport' => [
         'default' => [
             'className' => MailTransport::class,
-            /*
-             * The keys host, port, timeout, username, password, client and tls
-             * are used in SMTP transports
-             */
-            'host' => 'email-smtp.eu-west-1.amazonaws.com',
-            'port' => 587,
-            'timeout' => 30,
-            'log' => true,
-            /*
-             * It is recommended to set these options through your environment or app_local.php
-             */
-            //'username' => null,
-            //'password' => null,
-            'client' => null,
-            'tls' => true,
-//            'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
+        ],
+        'smtp' => [
+            'className' => 'Smtp',
+            'host' => env('SMTP_HOST', 'email-smtp.eu-west-1.amazonaws.com'),
+            'port' => (int)env('SMTP_PORT', 587),
+            'timeout' => (int)env('SMTP_TIMEOUT', 30),
+            'log' => filter_var(env('SMTP_LOG', true), FILTER_VALIDATE_BOOLEAN),
+            'username' => env('SMTP_USERNAME'),
+            'password' => env('SMTP_PASSWORD'),
+            'client' => env('SMTP_CLIENT'),
+            'tls' => filter_var(env('SMTP_TLS', true), FILTER_VALIDATE_BOOLEAN),
+            'url' => env('EMAIL_TRANSPORT_SMTP_URL', null),
         ],
     ],
 
@@ -296,6 +302,7 @@ return [
             'driver' => Postgres::class,
             'persistent' => false,
             'timezone' => 'UTC',
+            'url' => env('DATABASE_URL', null),
 
             /*
              * For MariaDB/MySQL the internal default changed from utf8 to utf8mb4, aka full utf-8 support, in CakePHP 3.6
@@ -339,6 +346,7 @@ return [
             'driver' => Postgres::class,
             'persistent' => false,
             'timezone' => 'UTC',
+            'url' => env('DATABASE_TEST_URL', null),
             //'encoding' => 'utf8mb4',
             'flags' => [],
             'cacheMetadata' => true,

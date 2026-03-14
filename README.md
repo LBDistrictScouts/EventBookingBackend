@@ -45,12 +45,30 @@ Minimum environment/config values you need:
 - `AWS_REGION`
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
-- `AWS_URL`
+- `AWS_SQS_QUEUE_URL`
 - `AWS_SQS_QUEUE_NAME`
 - `COGNITO_DOMAIN`
 - `COGNITO_CLIENT_ID`
 - `COGNITO_CLIENT_SECRET`
 - `COGNITO_USER_POOL_ID`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+Optional runtime values:
+
+- `AWS_SESSION_TOKEN`
+- `AWS_PROFILE` for non-container local CLI development when you want to use a named AWS profile instead of explicit credentials
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_TIMEOUT`
+- `SMTP_TLS`
+- `SMTP_LOG`
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `SMTP_CLIENT`
+- `EMAIL_TRANSPORT_SMTP_URL`
+
+For containerized `app` and `worker` services, Compose reads runtime secrets from `.env.compose` instead of `.env`, so `AWS_PROFILE` is not injected into containers.
 
 4. Create the Postgres schemas used by the app and tests:
 
@@ -60,12 +78,21 @@ CREATE SCHEMA IF NOT EXISTS test;
 ```
 
 The app expects PostgreSQL schema-separated connections. In CI the main connection uses `schema=data` and the test connection uses `schema=test`.
+When using the bundled Docker Compose database, the `app` and `worker` containers derive their internal `DATABASE_URL` values from `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD`, so there is only one DB source of truth inside Compose.
 
 5. Run migrations as needed:
 
 ```bash
 bin/cake migrations migrate
 ```
+
+For containerized deployments, use the one-shot deploy service to run the Composer post-install hook and database migrations:
+
+```bash
+docker compose --profile deploy run --rm deploy
+```
+
+Set `CREATE_TEST_SCHEMA=true` in `.env.compose` if you also want the deploy container to create the `test` schema.
 
 6. Start the local server:
 
@@ -120,7 +147,10 @@ A `docker-compose.yml` file is included with these services:
 - `db`: PostgreSQL
 - `worker`: background queue worker running `bin/cake QueueWorker`
 
-Secrets for Docker are expected under `config/DockerSecrets/`.
+Containers now read runtime configuration from environment variables rather than files under `config/DockerSecrets/`.
+Provide those variables through your shell, a local uncommitted `.env`, your deployment platform's secret store, or GitHub Actions environment/repository secrets.
+Use [.env.example](/Users/jacob/Development/EventBookingBackend/.env.example) as the canonical starting point for both local and Docker environments.
+Inside Docker Compose, the app connection strings are derived from `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD`. The standalone `DATABASE_URL` values in `.env` are for non-Docker local runs on the host.
 
 ## Project Structure
 
@@ -138,5 +168,58 @@ GitHub Actions runs:
 - PHPUnit against PostgreSQL
 - PHP_CodeSniffer
 - PHPStan
+- Docker image builds for pull requests and pushes to `ghcr.io/<owner>/<repo>` from `main`, version tags like `v1.2.3`, or manual workflow dispatch
 
 The workflow is configured for Node 24-compatible GitHub Actions runtimes and uses explicit Cognito/AWS test values so CI does not depend on local machine configuration.
+
+## Container Publishing
+
+The repository includes a `Docker Publish` workflow that:
+
+- builds the Docker image on every pull request
+- pushes container images to GitHub Container Registry on `main`
+- pushes versioned images when you create tags matching `v*`
+- supports manual publishing from the Actions tab
+- uses a GitHub Environment for protected releases on `main` and manual dispatches
+
+Published image names default to:
+
+```text
+ghcr.io/<github-owner>/<repository>
+```
+
+If your package visibility is private, consumers will need appropriate GitHub package permissions to pull it.
+
+## GitHub Environment Secrets
+
+For deployments, create a GitHub Environment such as `production` and store runtime secrets there instead of in the repository.
+
+Recommended environment secrets:
+
+- `SECURITY_SALT`
+- `DATABASE_URL`
+- `DATABASE_TEST_URL`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
+- `AWS_SQS_QUEUE_URL`
+- `AWS_SQS_QUEUE_NAME`
+- `COGNITO_DOMAIN`
+- `COGNITO_CLIENT_ID`
+- `COGNITO_CLIENT_SECRET`
+- `COGNITO_USER_POOL_ID`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_TIMEOUT`
+- `SMTP_TLS`
+- `SMTP_LOG`
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `SMTP_CLIENT`
+- `EMAIL_TRANSPORT_SMTP_URL`
+
+The publish workflow does not consume these values because image builds should remain secret-free. Use them only in the deployment step that starts the container.

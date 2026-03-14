@@ -3,6 +3,7 @@
 /config/app_local.php
 /config/.env
 .env
+/.env.compose
 /logs/*
 /tmp/*
 /vendor/*

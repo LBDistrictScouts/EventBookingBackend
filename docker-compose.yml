@@ -1,15 +1,22 @@
+x-backend-build: &backend-build
+  context: .
+  dockerfile: Dockerfile
+  args:
+    PHP_VERSION: "8.5"
+
+x-backend-service: &backend-service
+  build: *backend-build
+  working_dir: /var/www/html
+  env_file:
+    - ./.env.compose
+  depends_on:
+    - db
+
 services:
   app:
     image: 24601/event_booking_php:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *backend-service
     container_name: event_booking_php
-    working_dir: /var/www/html
-    env_file:
-      - ./config/DockerSecrets/app.env
-    depends_on:
-      - db
     networks:
       - internal
 
@@ -32,31 +39,33 @@ services:
   db:
     image: postgres:latest
     container_name: event_booking_db
-    env_file:
-      - ./config/DockerSecrets/db.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - event_pgres_data:/var/lib/postgresql
     networks:
       - internal
 
   worker:
-#    image: 24601/event_booking_php:latest
+    <<: *backend-service
     container_name: event_booking_worker
-    working_dir: /var/www/html
-    command: [ "bin/cake", "QueueWorker" ]
+    command: [ "php", "bin/cake.php", "QueueWorker" ]
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./config/DockerSecrets/aws_credentials:/home/www-data/.aws/credentials:ro
-    env_file:
-      - ./config/DockerSecrets/app.env
-    depends_on:
-      - db
     networks:
       - internal
       - frontend
+
+  deploy:
+    profiles: [ "deploy" ]
+    container_name: event_booking_deploy
+    <<: *backend-service
+    command: [ "sh", "bin/deploy.sh" ]
+    environment:
+      CREATE_TEST_SCHEMA: ${CREATE_TEST_SCHEMA:-false}
+    networks:
+      - internal
 
 volumes:
   event_pgres_data:

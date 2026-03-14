@@ -1,0 +1,138 @@
+name: Docker Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      release_environment:
+        description: GitHub Environment used to gate manual releases
+        required: false
+        default: production
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  docker-build:
+    name: Build Docker Image
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-publish:
+    name: Publish Docker Image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.release_environment || 'production' }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Publish release guidance
+        run: |
+          {
+            echo "## Runtime Secrets"
+            echo ""
+            echo "This workflow only publishes the image."
+            echo "Inject application secrets at container runtime via your deploy platform or docker compose."
+            echo ""
+            echo "Recommended GitHub Environment secrets for deployments:"
+            echo "- SECURITY_SALT"
+            echo "- DATABASE_URL"
+            echo "- DATABASE_TEST_URL"
+            echo "- POSTGRES_DB"
+            echo "- POSTGRES_USER"
+            echo "- POSTGRES_PASSWORD"
+            echo "- AWS_REGION"
+            echo "- AWS_ACCESS_KEY_ID"
+            echo "- AWS_SECRET_ACCESS_KEY"
+            echo "- AWS_SESSION_TOKEN"
+            echo "- AWS_SQS_QUEUE_URL"
+            echo "- AWS_SQS_QUEUE_NAME"
+            echo "- COGNITO_DOMAIN"
+            echo "- COGNITO_CLIENT_ID"
+            echo "- COGNITO_CLIENT_SECRET"
+            echo "- COGNITO_USER_POOL_ID"
+            echo "- SMTP_HOST"
+            echo "- SMTP_PORT"
+            echo "- SMTP_TIMEOUT"
+            echo "- SMTP_TLS"
+            echo "- SMTP_LOG"
+            echo "- SMTP_USERNAME"
+            echo "- SMTP_PASSWORD"
+            echo "- SMTP_CLIENT"
+            echo "- EMAIL_TRANSPORT_SMTP_URL"
+          } >> "$GITHUB_STEP_SUMMARY"

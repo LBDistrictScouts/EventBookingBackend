@@ -37,10 +37,28 @@ if (Configure::check('Log.error')) {
     Configure::write('Log.error.file', 'cli-error');
 }
 
-$client = new SqsClient([
-    'region' => env('AWS_REGION', 'eu-west-1'),
-    'profile' => 'lbd',
-]);
+$queueConfig = (array)Configure::read('Queue');
+$isContainerizedCli = env('container') !== null || is_file('/.dockerenv');
+
+$clientConfig = [
+    'region' => $queueConfig['region'] ?? env('AWS_REGION', 'eu-west-1'),
+];
+
+$key = $queueConfig['key'] ?? null;
+$secret = $queueConfig['secret'] ?? null;
+$sessionToken = $queueConfig['sessionToken'] ?? null;
+
+if ($key && $secret) {
+    $clientConfig['credentials'] = array_filter([
+        'key' => $key,
+        'secret' => $secret,
+        'token' => $sessionToken,
+    ]);
+} elseif (!$isContainerizedCli && !empty($queueConfig['profile'])) {
+    $clientConfig['profile'] = $queueConfig['profile'];
+}
+
+$client = new SqsClient($clientConfig);
 $factory = new SqsConnectionFactory($client);
 
 $context = $factory->createContext();
@@ -48,6 +66,7 @@ $context = $factory->createContext();
 // Store globally for reuse
 Configure::write('Queue.Factory', $factory);
 Configure::write('Queue.Context', $context);
+Configure::write('Queue.QueueName', $queueConfig['QueueName'] ?? null);
 
 $validator = new Validator();
 

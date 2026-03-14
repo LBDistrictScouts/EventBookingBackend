@@ -1,4 +1,0 @@
-*.env
-!*.default.env
-
-aws_credentials
