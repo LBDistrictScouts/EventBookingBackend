@@ -35,7 +35,7 @@ services:
     env_file:
       - ./config/DockerSecrets/db.env
     volumes:
-      - event_pg_data:/var/lib/postgresql/data
+      - event_pgres_data:/var/lib/postgresql
     networks:
       - internal
 
@@ -59,7 +59,7 @@ services:
       - frontend
 
 volumes:
-  event_pg_data:
+  event_pgres_data:
 
 networks:
   internal:

@@ -85,6 +85,13 @@ class GroupsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $duplicate = $this->Groups->newEntity([
+            'group_name' => 'Lorem ipsum dolor sit amet',
+            'visible' => true,
+            'sort_order' => 2,
+        ]);
+
+        $this->assertFalse($this->Groups->save($duplicate));
+        $this->assertNotEmpty($duplicate->getError('group_name'));
     }
 }

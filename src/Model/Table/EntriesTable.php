@@ -152,4 +152,38 @@ class EntriesTable extends Table
 
         return $rules;
     }
+
+
+    public function mergeEntries(string $persistingEntryId, string $mergingEntryId): int|false
+    {
+        $participants = $this->Participants->find()
+            ->where(['entry_id' => $mergingEntryId])
+            ->all();
+
+        foreach ($participants as $participant) {
+            $participant->entry_id = $persistingEntryId;
+            $this->Participants->save($participant);
+
+            if ($participant->getErrors()) {
+                return false;
+            }
+        }
+
+        $participantCount = $this->Participants->find()
+            ->where(['entry_id' => $mergingEntryId])
+            ->all()
+            ->count();
+
+        if ($participantCount === 0) {
+            $mergingEntry = $this->get($mergingEntryId);
+            $this->delete($mergingEntry);
+
+            return $this->Participants->find()
+                ->where(['entry_id' => $persistingEntryId])
+                ->all()
+                ->count();
+        }
+
+        return false;
+    }
 }

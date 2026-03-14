@@ -68,7 +68,38 @@ class ParticipantsTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $participant = $this->Participants->newEntity([
+            'first_name' => 'Joe',
+            'last_name' => 'Bloggs',
+            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+
+        $this->assertEmpty($participant->getErrors());
+
+        $invalid = $this->Participants->newEntity([
+            'first_name' => '',
+            'last_name' => '',
+            'entry_id' => 'not-a-uuid',
+            'participant_type_id' => '',
+            'section_id' => 'not-a-uuid',
+            'checked_in' => 'yes',
+            'checked_out' => 'no',
+            'highest_check_in_sequence' => 'top',
+        ]);
+
+        $this->assertArrayHasKey('first_name', $invalid->getErrors());
+        $this->assertArrayHasKey('last_name', $invalid->getErrors());
+        $this->assertArrayHasKey('entry_id', $invalid->getErrors());
+        $this->assertArrayHasKey('participant_type_id', $invalid->getErrors());
+        $this->assertArrayHasKey('section_id', $invalid->getErrors());
+        $this->assertArrayHasKey('checked_in', $invalid->getErrors());
+        $this->assertArrayHasKey('checked_out', $invalid->getErrors());
+        $this->assertArrayHasKey('highest_check_in_sequence', $invalid->getErrors());
     }
 
     /**
@@ -127,6 +158,20 @@ class ParticipantsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $invalid = $this->Participants->newEntity([
+            'first_name' => 'Joe',
+            'last_name' => 'Bloggs',
+            'entry_id' => 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+            'participant_type_id' => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+            'section_id' => 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+
+        $this->assertFalse($this->Participants->save($invalid));
+        $this->assertNotEmpty($invalid->getError('entry_id'));
+        $this->assertNotEmpty($invalid->getError('participant_type_id'));
+        $this->assertNotEmpty($invalid->getError('section_id'));
     }
 }

@@ -62,6 +62,34 @@ class GroupsController extends AppController
                 ],
             ],
         ]);
+
+        $eventId = $this->request->getQuery('event_id');
+
+        if ($eventId) {
+            $billing = $this->Groups->find()
+                ->contain([
+                    'Sections.Participants' => [
+                        'ParticipantTypes',
+                        'Entries',
+                    ],
+                ])
+                ->where([
+                    'Entries.event_id' => $eventId,
+                    'Participants.checked_in' => true,
+                    'ParticipantTypes.uniformed' => true,
+                    'ParticipantTypes.adult' => false,
+                ])
+                ->select([
+                    'Sections.id',
+                    'uniformed_members' => $this->Groups->find()->func()->count('Participants.id'),
+                ])
+                ->groupBy([
+                    'Sections.id',
+                ]);
+
+            $this->set('billing', $billing);
+        }
+
         $this->set(compact('group'));
     }
 

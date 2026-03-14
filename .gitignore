@@ -55,3 +55,4 @@ yarn-error.log
 /config/Migrations/schema-dump-default.lock
 /package.xml
 /tree.txt
+/boot

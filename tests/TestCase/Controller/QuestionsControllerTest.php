@@ -15,6 +15,7 @@ use Cake\TestSuite\TestCase;
 class QuestionsControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+    use AuthSessionTrait;
 
     /**
      * Fixtures
@@ -32,9 +33,17 @@ class QuestionsControllerTest extends TestCase
      * @return void
      * @uses \App\Controller\QuestionsController::index()
      */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loginUser();
+    }
+
     public function testIndex(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/questions');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 
     /**
@@ -45,7 +54,9 @@ class QuestionsControllerTest extends TestCase
      */
     public function testView(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/questions/view/3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Convallis morbi fringilla');
     }
 
     /**
@@ -56,7 +67,16 @@ class QuestionsControllerTest extends TestCase
      */
     public function testAdd(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/questions/add', [
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'question_text' => 'Dietary requirements?',
+            'answer_text' => 'Please list them.',
+        ]);
+
+        $this->assertRedirectContains('/questions');
+        $questions = $this->getTableLocator()->get('Questions');
+        $this->assertSame(1, $questions->find()->where(['question_text' => 'Dietary requirements?'])->count());
     }
 
     /**
@@ -67,7 +87,16 @@ class QuestionsControllerTest extends TestCase
      */
     public function testEdit(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/questions/edit/3a6d9419-b621-45cf-a13e-4db9647bf5bc', [
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'question_text' => 'Updated Question',
+            'answer_text' => 'Updated Answer',
+        ]);
+
+        $this->assertRedirectContains('/questions');
+        $questions = $this->getTableLocator()->get('Questions');
+        $this->assertSame('Updated Question', $questions->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc')->question_text);
     }
 
     /**
@@ -78,6 +107,12 @@ class QuestionsControllerTest extends TestCase
      */
     public function testDelete(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->delete('/questions/delete/3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+
+        $this->assertRedirectContains('/questions');
+        $questions = $this->getTableLocator()->get('Questions');
+        $deleted = $questions->find('withTrashed')->where(['id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc'])->firstOrFail();
+        $this->assertNotNull($deleted->deleted);
     }
 }

@@ -15,6 +15,7 @@ use Cake\TestSuite\TestCase;
 class GroupsControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+    use AuthSessionTrait;
 
     /**
      * Fixtures
@@ -33,9 +34,19 @@ class GroupsControllerTest extends TestCase
      * @return void
      * @uses \App\Controller\GroupsController::index()
      */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loginUser();
+    }
+
     public function testIndex(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/groups/index.json');
+        $this->assertResponseOk();
+        $data = json_decode((string)$this->_response->getBody(), true);
+        $this->assertArrayHasKey('groups', $data);
+        $this->assertCount(1, $data['groups']);
     }
 
     /**
@@ -46,7 +57,9 @@ class GroupsControllerTest extends TestCase
      */
     public function testView(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/groups/view/873b0f71-5389-46f9-baae-7d4855406b64');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 
     /**
@@ -57,7 +70,16 @@ class GroupsControllerTest extends TestCase
      */
     public function testAdd(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/groups/add', [
+            'group_name' => 'Integration Group',
+            'visible' => true,
+            'sort_order' => 2,
+        ]);
+
+        $this->assertRedirectContains('/groups');
+        $groups = $this->getTableLocator()->get('Groups');
+        $this->assertSame(1, $groups->find()->where(['group_name' => 'Integration Group'])->count());
     }
 
     /**
@@ -68,7 +90,16 @@ class GroupsControllerTest extends TestCase
      */
     public function testEdit(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/groups/edit/873b0f71-5389-46f9-baae-7d4855406b64', [
+            'group_name' => 'Renamed Group',
+            'visible' => true,
+            'sort_order' => 3,
+        ]);
+
+        $this->assertRedirectContains('/groups');
+        $groups = $this->getTableLocator()->get('Groups');
+        $this->assertSame('Renamed Group', $groups->get('873b0f71-5389-46f9-baae-7d4855406b64')->group_name);
     }
 
     /**
@@ -79,6 +110,20 @@ class GroupsControllerTest extends TestCase
      */
     public function testDelete(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->delete('/groups/delete/873b0f71-5389-46f9-baae-7d4855406b64');
+
+        $this->assertRedirectContains('/groups');
+        $groups = $this->getTableLocator()->get('Groups');
+        $deleted = $groups->find('withTrashed')->where(['id' => '873b0f71-5389-46f9-baae-7d4855406b64'])->firstOrFail();
+        $this->assertNotNull($deleted->deleted);
+    }
+
+    public function testViewWithBillingQuery(): void
+    {
+        $this->get('/groups/view/873b0f71-5389-46f9-baae-7d4855406b64?event_id=3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 }

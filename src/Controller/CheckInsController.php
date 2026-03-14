@@ -183,6 +183,105 @@ class CheckInsController extends AppController
     }
 
     /**
+     * Add method
+     *
+     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     */
+    public function checkpoint(?string $checkpointId = null)
+    {
+        $checkIn = $this->CheckIns->newEmptyEntity();
+        if ($checkpointId) {
+            $checkIn->set('checkpoint_id', $checkpointId);
+        }
+
+        if ($this->request->is('post')) {
+            /** @var array $data */
+            $data = $this->request->getData();
+
+            if (array_key_exists('participants', $data)) {
+                $participants = $data['participants'];
+
+                if (!array_key_exists('_ids', $participants)) {
+                    $data['participants'] = ['_ids' => $participants];
+                }
+            }
+
+            $checkIn = $this->CheckIns->patchEntity(
+                entity: $checkIn,
+                data: $data,
+                options: ['associated' => 'Participants'],
+            );
+
+            if (!$checkIn->hasValue('check_in_time')) {
+                $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
+            }
+
+            if ($this->CheckIns->save($checkIn)) {
+                $this->Flash->success(__('The check in has been saved.'));
+
+                if (str_contains($this->request->getPath(), '.json')) {
+                    $this->set(compact('checkIn'));
+                    $this->viewBuilder()->setOption('serialize', ['checkIn']);
+
+                    return;
+                } else {
+                    return $this->redirect([
+                        'controller' => 'Entries',
+                        'action' => 'view',
+                        $checkIn->entry_id,
+                    ]);
+                }
+            }
+            $this->Flash->error(__('The check in could not be saved. Please, try again.'));
+
+            if (str_contains($this->request->getPath(), '.json')) {
+                $this->response->withStatus(400);
+
+                $this->set(compact('checkIn'));
+                $this->viewBuilder()->setOption('serialize', ['checkIn']);
+
+                return;
+            }
+        }
+        $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
+
+        $checkpoints = $this->CheckIns->Checkpoints->find()
+            ->orderByAsc('checkpoint_sequence')
+            ->limit(100)
+            ->all();
+        $checkpoints = collection($checkpoints)
+            ->combine('id', function ($checkpoint) {
+                return '[' . $checkpoint->checkpoint_sequence . '] ' . $checkpoint->checkpoint_name;
+            })
+            ->toArray();
+
+        $checkpointFixed = false;
+
+        $entries = $this->CheckIns->Entries->find('list', limit: 200)->all();
+        $participants = $this->CheckIns->Participants->find(
+            'list',
+            valueField: 'full_name',
+            keyField: 'id',
+            groupField: 'entry.entry_name',
+            conditions: [
+                'checked_out' => false,
+            ],
+            contain: 'Entries',
+        )->all();
+
+        $this->set(
+            compact(
+                'checkIn',
+                'checkpoints',
+                'entries',
+                'participants',
+                'checkpointFixed',
+                'checkpointId'
+            ),
+        );
+    }
+
+    /**
      * Edit method
      *
      * @param string|null $id Check In id.

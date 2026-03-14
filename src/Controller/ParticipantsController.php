@@ -19,11 +19,24 @@ class ParticipantsController extends AppController
     {
         $query = $this->Participants->find()
             ->contain(['Entries', 'ParticipantTypes', 'Sections']);
+
+        $checkedIn = $this->request->getQuery('checked-in') ?? false;
+        if ($checkedIn) {
+            $query->where(['checked_in' => true]);
+        }
+
+        $checkedOut = $this->request->getQuery('checked-out') ?? false;
+        if ($checkedOut) {
+            $query->where(['checked_out' => true]);
+        }
+
         $participants = $this->paginate($query);
 
-        $enhanced = $this->request->getQuery('enhanced') ?? false;
-
-        $this->set(compact('participants', 'enhanced'));
+        $this->set(compact(
+            'participants',
+            'checkedIn',
+            'checkedOut',
+        ));
     }
 
     /**
@@ -33,7 +46,7 @@ class ParticipantsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $participant = $this->Participants->get(
             $id,
@@ -87,7 +100,7 @@ class ParticipantsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $participant = $this->Participants->get($id, contain: ['CheckIns']);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -121,7 +134,7 @@ class ParticipantsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $participant = $this->Participants->get($id);

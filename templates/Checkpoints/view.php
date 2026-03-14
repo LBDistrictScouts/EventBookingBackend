@@ -7,14 +7,7 @@
 <?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
 
 <?php $this->start('tb_actions'); ?>
-<li><?= $this->Html->link(__('Edit Checkpoint'), ['action' => 'edit', $checkpoint->id], ['class' => 'nav-link']) ?></li>
-<li><?= $this->Form->postLink(__('Delete Checkpoint'), ['action' => 'delete', $checkpoint->id], ['confirm' => __('Are you sure you want to delete # {0}?', $checkpoint->id), 'class' => 'nav-link']) ?></li>
-<li><?= $this->Html->link(__('List Checkpoints'), ['action' => 'index'], ['class' => 'nav-link']) ?> </li>
-<li><?= $this->Html->link(__('New Checkpoint'), ['action' => 'add'], ['class' => 'nav-link']) ?> </li>
-<li><?= $this->Html->link(__('List Events'), ['controller' => 'Events', 'action' => 'index'], ['class' => 'nav-link']) ?></li>
-<li><?= $this->Html->link(__('New Event'), ['controller' => 'Events', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
-<li><?= $this->Html->link(__('List Check Ins'), ['controller' => 'CheckIns', 'action' => 'index'], ['class' => 'nav-link']) ?></li>
-<li><?= $this->Html->link(__('New Check In'), ['controller' => 'CheckIns', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
+<li><?= $this->Html->link(__('Check In Walkers'), ['controller' => 'CheckIns', 'action' => 'add', 0, $checkpoint->id], ['class' => 'nav-link']) ?></li>
 <?php $this->end(); ?>
 <?php $this->assign('tb_sidebar', '<ul class="nav flex-column">' . $this->fetch('tb_actions') . '</ul>'); ?>
 

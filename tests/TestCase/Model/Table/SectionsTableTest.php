@@ -87,6 +87,25 @@ class SectionsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $duplicate = $this->Sections->newEntity([
+            'section_name' => 'Different Name',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'group_id' => '873b0f71-5389-46f9-baae-7d4855406b64',
+            'osm_section_id' => 1,
+        ]);
+
+        $this->assertFalse($this->Sections->save($duplicate));
+        $this->assertNotEmpty($duplicate->getError('osm_section_id'));
+
+        $invalid = $this->Sections->newEntity([
+            'section_name' => 'Missing Links',
+            'participant_type_id' => 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+            'group_id' => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+            'osm_section_id' => 99,
+        ]);
+
+        $this->assertFalse($this->Sections->save($invalid));
+        $this->assertNotEmpty($invalid->getError('participant_type_id'));
+        $this->assertNotEmpty($invalid->getError('group_id'));
     }
 }

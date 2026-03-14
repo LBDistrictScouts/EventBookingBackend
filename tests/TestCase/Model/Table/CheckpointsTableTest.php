@@ -65,7 +65,23 @@ class CheckpointsTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $checkpoint = $this->Checkpoints->newEntity([
+            'checkpoint_sequence' => 2,
+            'checkpoint_name' => 'Start',
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+        ]);
+
+        $this->assertEmpty($checkpoint->getErrors());
+
+        $invalid = $this->Checkpoints->newEntity([
+            'checkpoint_sequence' => 'invalid',
+            'checkpoint_name' => '',
+            'event_id' => 'not-a-uuid',
+        ]);
+
+        $this->assertArrayHasKey('checkpoint_sequence', $invalid->getErrors());
+        $this->assertArrayHasKey('checkpoint_name', $invalid->getErrors());
+        $this->assertArrayHasKey('event_id', $invalid->getErrors());
     }
 
     /**
@@ -76,6 +92,22 @@ class CheckpointsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $duplicate = $this->Checkpoints->newEntity([
+            'checkpoint_sequence' => 1,
+            'checkpoint_name' => 'Duplicate',
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+        ]);
+
+        $this->assertFalse($this->Checkpoints->save($duplicate));
+        $this->assertNotEmpty($duplicate->getError('checkpoint_sequence'));
+
+        $invalidEvent = $this->Checkpoints->newEntity([
+            'checkpoint_sequence' => 99,
+            'checkpoint_name' => 'Missing Event',
+            'event_id' => 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        ]);
+
+        $this->assertFalse($this->Checkpoints->save($invalidEvent));
+        $this->assertNotEmpty($invalidEvent->getError('event_id'));
     }
 }

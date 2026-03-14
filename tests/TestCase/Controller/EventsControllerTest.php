@@ -14,6 +14,7 @@ use Cake\TestSuite\TestCase;
 class EventsControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+    use AuthSessionTrait;
 
     /**
      * Fixtures
@@ -37,6 +38,12 @@ class EventsControllerTest extends TestCase
 
         'app.Questions',
     ];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loginUser();
+    }
 
     /**
      * Test index method
@@ -103,7 +110,15 @@ class EventsControllerTest extends TestCase
      */
     public function testView(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/events/view/3a6d9419-b621-45cf-a13e-4db9647bf5bc.json');
+        $this->assertResponseOk();
+
+        $resultData = json_decode((string)$this->_response->getBody(), true);
+        $this->assertArrayHasKey('event', $resultData);
+        $this->assertSame('Lorem ipsum dolor sit amet', $resultData['event']['event_name']);
+        $this->assertArrayHasKey('sections', $resultData['event']);
+        $this->assertArrayHasKey('questions', $resultData['event']);
+        $this->assertArrayHasKey('checkpoints', $resultData['event']);
     }
 
     /**
@@ -114,7 +129,23 @@ class EventsControllerTest extends TestCase
      */
     public function testAdd(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/events/add', [
+            'event_name' => 'Controller Event',
+            'event_description' => 'A new event',
+            'booking_code' => 'CTRL2026',
+            'start_time' => '2026-03-20 10:00:00',
+            'bookable' => true,
+            'finished' => false,
+            'entry_count' => 0,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'sections' => ['_ids' => ['95116a77-0675-4e1a-9d0c-74e3d40d92c1']],
+        ]);
+
+        $this->assertRedirectContains('/events');
+        $events = $this->getTableLocator()->get('Events');
+        $this->assertSame(1, $events->find()->where(['event_name' => 'Controller Event'])->count());
     }
 
     /**
@@ -125,7 +156,23 @@ class EventsControllerTest extends TestCase
      */
     public function testEdit(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/events/edit/3a6d9419-b621-45cf-a13e-4db9647bf5bc', [
+            'event_name' => 'Updated Event',
+            'event_description' => 'Updated description',
+            'booking_code' => 'Lorem ipsum dolor ',
+            'start_time' => '2025-01-16 09:00:00',
+            'bookable' => true,
+            'finished' => false,
+            'entry_count' => 1,
+            'participant_count' => 1,
+            'checked_in_count' => 1,
+            'sections' => ['_ids' => ['95116a77-0675-4e1a-9d0c-74e3d40d92c1']],
+        ]);
+
+        $this->assertRedirectContains('/events');
+        $events = $this->getTableLocator()->get('Events');
+        $this->assertSame('Updated Event', $events->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc')->event_name);
     }
 
     /**
@@ -136,6 +183,12 @@ class EventsControllerTest extends TestCase
      */
     public function testDelete(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->delete('/events/delete/3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+
+        $this->assertRedirectContains('/events');
+        $events = $this->getTableLocator()->get('Events');
+        $deleted = $events->find('withTrashed')->where(['id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc'])->firstOrFail();
+        $this->assertNotNull($deleted->deleted);
     }
 }

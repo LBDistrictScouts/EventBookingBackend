@@ -68,7 +68,11 @@ class ParticipantsCheckInsTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $validator = $this->ParticipantsCheckIns->getValidator('default');
+
+        $this->assertArrayHasKey('id', $validator->validate([]));
+        $this->assertArrayHasKey('id', $validator->validate(['id' => 'not-a-uuid']));
+        $this->assertSame([], $validator->validate(['id' => '11111111-1111-4111-8111-111111111111']));
     }
 
     /**
@@ -79,6 +83,13 @@ class ParticipantsCheckInsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $invalid = $this->ParticipantsCheckIns->newEmptyEntity();
+        $invalid->set('id', '11111111-1111-4111-8111-111111111111');
+        $invalid->set('check_in_id', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+        $invalid->set('participant_id', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+
+        $this->assertFalse($this->ParticipantsCheckIns->save($invalid));
+        $this->assertNotEmpty($invalid->getError('check_in_id'));
+        $this->assertNotEmpty($invalid->getError('participant_id'));
     }
 }

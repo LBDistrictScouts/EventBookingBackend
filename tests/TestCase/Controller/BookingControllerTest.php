@@ -14,6 +14,7 @@ use Cake\TestSuite\TestCase;
 class BookingControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+    use AuthSessionTrait;
 
     /**
      * Fixtures
@@ -37,6 +38,12 @@ class BookingControllerTest extends TestCase
 
         'app.Questions',
     ];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loginUser();
+    }
 
     /**
      * Test index method
@@ -157,7 +164,9 @@ class BookingControllerTest extends TestCase
      */
     public function testView(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->disableErrorHandlerMiddleware();
+        $this->expectException(\Cake\View\Exception\MissingTemplateException::class);
+        $this->get('/booking/view/2342ad37-13f0-4fd1-bd3f-2032273626ce');
     }
 
     /**
@@ -168,7 +177,9 @@ class BookingControllerTest extends TestCase
      */
     public function testAdd(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->put('/book.json', []);
+        $this->assertResponseCode(400);
     }
 
     /**
@@ -179,7 +190,21 @@ class BookingControllerTest extends TestCase
      */
     public function testEdit(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/booking/edit/2342ad37-13f0-4fd1-bd3f-2032273626ce', [
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'entry_name' => 'Booking Edit',
+            'active' => true,
+            'participant_count' => 1,
+            'checked_in_count' => 1,
+            'entry_email' => 'edited@example.com',
+            'entry_mobile' => '07123456789',
+            'security_code' => 'ABCDE',
+        ]);
+
+        $this->assertRedirectContains('/booking');
+        $entries = $this->getTableLocator()->get('Entries');
+        $this->assertSame('Booking Edit', $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce')->entry_name);
     }
 
     /**
@@ -190,6 +215,12 @@ class BookingControllerTest extends TestCase
      */
     public function testDelete(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->delete('/booking/delete/2342ad37-13f0-4fd1-bd3f-2032273626ce');
+
+        $this->assertRedirectContains('/booking');
+        $entries = $this->getTableLocator()->get('Entries');
+        $deleted = $entries->find('withTrashed')->where(['id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce'])->firstOrFail();
+        $this->assertNotNull($deleted->deleted);
     }
 }

@@ -17,11 +17,14 @@ declare(strict_types=1);
 namespace App\Test\TestCase;
 
 use App\Application;
+use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\MiddlewareQueue;
+use Cake\Http\ServerRequest;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use Cake\Routing\Router;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use InvalidArgumentException;
@@ -79,7 +82,8 @@ class ApplicationTest extends TestCase
             ->onlyMethods(['addPlugin'])
             ->getMock();
 
-        $app->method('addPlugin')
+        $app->expects($this->atLeastOnce())
+            ->method('addPlugin')
             ->will($this->throwException(new InvalidArgumentException('test exception.')));
 
         $app->bootstrap();
@@ -102,5 +106,31 @@ class ApplicationTest extends TestCase
         $this->assertInstanceOf(AssetMiddleware::class, $middleware->current());
         $middleware->seek(2);
         $this->assertInstanceOf(RoutingMiddleware::class, $middleware->current());
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetAuthenticationService(): void
+    {
+        Configure::write('AWS.Cognito.Region', 'eu-west-1');
+        Configure::write('AWS.Cognito.UserPoolId', 'pool-id');
+        $jwksUrl = 'https://cognito-idp.eu-west-1.amazonaws.com/pool-id/.well-known/jwks.json';
+        Cache::write('jwks-' . md5($jwksUrl), ['keys' => [['kid' => 'abc']]], 'default');
+
+        Router::reload();
+        Router::fullBaseUrl('http://localhost');
+        $routes = require dirname(dirname(__DIR__)) . '/config/routes.php';
+        $routes(Router::createRouteBuilder('/'));
+
+        $app = new Application(dirname(dirname(__DIR__)) . '/config');
+        $service = $app->getAuthenticationService(new ServerRequest(['url' => '/']));
+
+        $this->assertSame(
+            'http://localhost/auth/login',
+            $service->getConfig('unauthenticatedRedirect')
+        );
+        $this->assertSame('redirect', $service->getConfig('queryParam'));
+        $this->assertCount(2, $service->authenticators());
     }
 }

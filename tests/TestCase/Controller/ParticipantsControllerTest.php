@@ -15,6 +15,7 @@ use Cake\TestSuite\TestCase;
 class ParticipantsControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+    use AuthSessionTrait;
 
     /**
      * Fixtures
@@ -40,9 +41,17 @@ class ParticipantsControllerTest extends TestCase
      * @return void
      * @uses \App\Controller\ParticipantsController::index()
      */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loginUser();
+    }
+
     public function testIndex(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/participants');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 
     /**
@@ -53,7 +62,9 @@ class ParticipantsControllerTest extends TestCase
      */
     public function testView(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 
     /**
@@ -64,7 +75,21 @@ class ParticipantsControllerTest extends TestCase
      */
     public function testAdd(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/participants/add/2342ad37-13f0-4fd1-bd3f-2032273626ce', [
+            'first_name' => 'New',
+            'last_name' => 'Participant',
+            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+
+        $this->assertRedirectContains('/entries/view/2342ad37-13f0-4fd1-bd3f-2032273626ce');
+        $participants = $this->getTableLocator()->get('Participants');
+        $this->assertSame(1, $participants->find()->where(['first_name' => 'New', 'last_name' => 'Participant'])->count());
     }
 
     /**
@@ -75,7 +100,21 @@ class ParticipantsControllerTest extends TestCase
      */
     public function testEdit(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->post('/participants/edit/5045fd83-55db-4d36-8a8a-63222e50e3fd', [
+            'first_name' => 'Updated',
+            'last_name' => 'Participant',
+            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+
+        $this->assertRedirectContains('/participants');
+        $participants = $this->getTableLocator()->get('Participants');
+        $this->assertSame('Updated', $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd')->first_name);
     }
 
     /**
@@ -86,6 +125,36 @@ class ParticipantsControllerTest extends TestCase
      */
     public function testDelete(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableFormTokens();
+        $this->delete('/participants/delete/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+
+        $this->assertRedirectContains('/participants');
+        $participants = $this->getTableLocator()->get('Participants');
+        $deleted = $participants->find('withTrashed')->where(['id' => '5045fd83-55db-4d36-8a8a-63222e50e3fd'])->firstOrFail();
+        $this->assertNotNull($deleted->deleted);
+    }
+
+    public function testIndexCanFilterCheckedInParticipants(): void
+    {
+        $this->get('/participants?checked-in=1');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
+    }
+
+    public function testAddPageLoadsWithoutEntryId(): void
+    {
+        $this->get('/participants/add');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('participant-type-id');
+    }
+
+    public function testAddPageLoadsForSpecificEntry(): void
+    {
+        $this->get('/participants/add/2342ad37-13f0-4fd1-bd3f-2032273626ce');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('section-id');
     }
 }

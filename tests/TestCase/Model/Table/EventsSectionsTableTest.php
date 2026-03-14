@@ -64,7 +64,12 @@ class EventsSectionsTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $link = $this->EventsSections->newEntity([
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+        ]);
+
+        $this->assertEmpty($link->getErrors());
     }
 
     /**
@@ -75,6 +80,12 @@ class EventsSectionsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $invalid = $this->EventsSections->newEmptyEntity();
+        $invalid->set('section_id', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+        $invalid->set('event_id', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+
+        $this->assertFalse($this->EventsSections->save($invalid));
+        $this->assertNotEmpty($invalid->getError('section_id'));
+        $this->assertNotEmpty($invalid->getError('event_id'));
     }
 }

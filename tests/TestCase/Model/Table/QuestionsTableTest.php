@@ -60,7 +60,23 @@ class QuestionsTableTest extends TestCase
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $question = $this->Questions->newEntity([
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'question_text' => 'What is your emergency contact?',
+            'answer_text' => 'Please provide a name and number.',
+        ]);
+
+        $this->assertEmpty($question->getErrors());
+
+        $invalid = $this->Questions->newEntity([
+            'event_id' => 'not-a-uuid',
+            'question_text' => '',
+            'answer_text' => '',
+        ]);
+
+        $this->assertArrayHasKey('event_id', $invalid->getErrors());
+        $this->assertArrayHasKey('question_text', $invalid->getErrors());
+        $this->assertArrayHasKey('answer_text', $invalid->getErrors());
     }
 
     /**
@@ -71,6 +87,13 @@ class QuestionsTableTest extends TestCase
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $invalid = $this->Questions->newEntity([
+            'event_id' => 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+            'question_text' => 'Question',
+            'answer_text' => 'Answer',
+        ]);
+
+        $this->assertFalse($this->Questions->save($invalid));
+        $this->assertNotEmpty($invalid->getError('event_id'));
     }
 }
