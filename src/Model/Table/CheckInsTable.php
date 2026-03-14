@@ -17,7 +17,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\EntriesTable&\Cake\ORM\Association\BelongsTo $Entries
  * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\BelongsToMany $Participants
  * @property \App\Model\Table\ParticipantsCheckInsTable&\Cake\ORM\Association\HasMany $ParticipantsCheckIns
- *
  * @method \App\Model\Entity\CheckIn newEmptyEntity()
  * @method \App\Model\Entity\CheckIn newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\CheckIn> newEntities(array $data, array $options = [])
@@ -31,7 +30,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\CheckIn>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\CheckIn> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  * @mixin \Muffin\Trash\Model\Behavior\TrashBehavior
  */

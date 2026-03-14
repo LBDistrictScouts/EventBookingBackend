@@ -15,8 +15,10 @@ declare(strict_types=1);
  * @license   https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
+use Cake\Mailer\TransportFactory;
 use Migrations\TestSuite\Migrator;
 
 /**
@@ -31,6 +33,22 @@ require dirname(__DIR__) . '/config/bootstrap.php';
 
 if (empty($_SERVER['HTTP_HOST']) && !Configure::read('App.fullBaseUrl')) {
     Configure::write('App.fullBaseUrl', 'http://localhost');
+}
+
+// Tests should not depend on local app_local.php secrets or external network calls.
+Configure::write('AWS.Cognito.Region', env('AWS_REGION', 'eu-west-1'));
+Configure::write('AWS.Cognito.UserPoolId', env('COGNITO_USER_POOL_ID', 'eu-west-1_testpool'));
+$jwksUrl = sprintf(
+    'https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json',
+    Configure::read('AWS.Cognito.Region'),
+    Configure::read('AWS.Cognito.UserPoolId'),
+);
+Cache::write('jwks-' . md5($jwksUrl), ['keys' => [['kid' => 'test-key']]], 'default');
+
+if (!TransportFactory::configured('smtp')) {
+    TransportFactory::setConfig('smtp', [
+        'className' => 'Debug',
+    ]);
 }
 
 // DebugKit skips settings these connection config if PHP SAPI is CLI / PHPDBG.

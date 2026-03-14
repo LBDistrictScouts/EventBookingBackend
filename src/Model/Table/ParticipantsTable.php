@@ -190,7 +190,10 @@ class ParticipantsTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->existsIn(['entry_id'], 'Entries'), ['errorField' => 'entry_id']);
-        $rules->add($rules->existsIn(['participant_type_id'], 'ParticipantTypes'), ['errorField' => 'participant_type_id']);
+        $rules->add(
+            $rules->existsIn(['participant_type_id'], 'ParticipantTypes'),
+            ['errorField' => 'participant_type_id'],
+        );
         $rules->add($rules->existsIn(['section_id'], 'Sections'), ['errorField' => 'section_id']);
 
         return $rules;

@@ -49,10 +49,12 @@ class AppView extends UIView
             'sortDesc' => '<a href="{{url}}" class="text-decoration-none text-body">{{text}} ▼</a>',
 
             // Pagination controls
-            'nextActive' => '<li class="page-item"><a class="page-link" href="{{url}}" title="Next page">{{text}}</a></li>',
+            'nextActive' => '<li class="page-item">'
+                . '<a class="page-link" href="{{url}}" title="Next page">{{text}}</a></li>',
             'nextDisabled' => '<li class="page-item disabled"><span class="page-link">{{text}}</span></li>',
 
-            'prevActive' => '<li class="page-item"><a class="page-link" href="{{url}}" title="Previous page">{{text}}</a></li>',
+            'prevActive' => '<li class="page-item">'
+                . '<a class="page-link" href="{{url}}" title="Previous page">{{text}}</a></li>',
             'prevDisabled' => '<li class="page-item disabled"><span class="page-link">{{text}}</span></li>',
 
             'first' => '<li class="page-item"><a class="page-link" href="{{url}}" title="First page">{{text}}</a></li>',

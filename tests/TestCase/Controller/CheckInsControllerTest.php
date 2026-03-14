@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\CheckInsController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Cake\View\Exception\MissingTemplateException;
 
 /**
  * App\Controller\CheckInsController Test Case
@@ -155,7 +155,7 @@ class CheckInsControllerTest extends TestCase
     public function testCheckpointPageLoads(): void
     {
         $this->disableErrorHandlerMiddleware();
-        $this->expectException(\Cake\View\Exception\MissingTemplateException::class);
+        $this->expectException(MissingTemplateException::class);
         $this->get('/check-ins/checkpoint/8454694e-a2f3-4775-b75d-1fd3e57cc4b7');
     }
 

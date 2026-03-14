@@ -58,9 +58,10 @@ class ParticipantsController extends AppController
     /**
      * Add method
      *
+     * @param string|null $entryId
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
-    public function add($entryId = null)
+    public function add(?string $entryId = null)
     {
         $participant = $this->Participants->newEmptyEntity();
         $participant->set('entry_id', $entryId);

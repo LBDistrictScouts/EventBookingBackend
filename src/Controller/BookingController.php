@@ -94,13 +94,13 @@ class BookingController extends AppController
         }
 
         // Filter out empty keys in incoming arrays.
-        $data = array_filter($this->request->getData(), fn ($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+        $data = array_filter($this->request->getData(), fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
 
         // Ensure 'participants' exists and is an array before processing
         if (!empty($data['participants']) && is_array($data['participants'])) {
             foreach ($data['participants'] as &$participant) {
                 // Filter out empty keys in each participant
-                $participant = array_filter($participant, fn ($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+                $participant = array_filter($participant, fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
             }
             unset($participant); // Unset reference to prevent unexpected behavior
         }

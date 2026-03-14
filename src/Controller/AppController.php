@@ -16,7 +16,6 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
-use Authentication\Controller\Component\AuthenticationComponent;
 use Cake\Controller\Controller;
 use Cake\Event\EventInterface;
 use Exception;
@@ -27,8 +26,7 @@ use Exception;
  * Add your application-wide methods in the class below, your controllers
  * will inherit them
  *
- * @property AuthenticationComponent $Authentication.
- *
+ * @property \App\Controller\AuthenticationComponent $Authentication.
  * @link https://book.cakephp.org/4/en/controllers.html#the-app-controller
  */
 class AppController extends Controller

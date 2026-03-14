@@ -128,7 +128,7 @@ class ApplicationTest extends TestCase
 
         $this->assertSame(
             'http://localhost/auth/login',
-            $service->getConfig('unauthenticatedRedirect')
+            $service->getConfig('unauthenticatedRedirect'),
         );
         $this->assertSame('redirect', $service->getConfig('queryParam'));
         $this->assertCount(2, $service->authenticators());

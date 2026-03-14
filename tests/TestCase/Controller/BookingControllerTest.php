@@ -5,6 +5,7 @@ namespace App\Test\TestCase\Controller;
 
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Cake\View\Exception\MissingTemplateException;
 
 /**
  * App\Controller\EventsController Test Case
@@ -78,7 +79,7 @@ class BookingControllerTest extends TestCase
                         'section_id' => $section->id,
                     ],
                 ],
-            ]
+            ],
         );
 
         $this->assertResponseOk();
@@ -165,7 +166,7 @@ class BookingControllerTest extends TestCase
     public function testView(): void
     {
         $this->disableErrorHandlerMiddleware();
-        $this->expectException(\Cake\View\Exception\MissingTemplateException::class);
+        $this->expectException(MissingTemplateException::class);
         $this->get('/booking/view/2342ad37-13f0-4fd1-bd3f-2032273626ce');
     }
 

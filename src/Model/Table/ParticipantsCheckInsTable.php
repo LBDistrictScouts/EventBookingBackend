@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use App\Model\Entity\ParticipantsCheckIn;
 use ArrayObject;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;

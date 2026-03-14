@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -14,7 +13,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\CheckpointsTable&\Cake\ORM\Association\HasMany $Checkpoints
  * @property \App\Model\Table\EntriesTable&\Cake\ORM\Association\HasMany $Entries
  * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\BelongsToMany $Sections
- *
  * @method \App\Model\Entity\Event newEmptyEntity()
  * @method \App\Model\Entity\Event newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Event> newEntities(array $data, array $options = [])
@@ -28,7 +26,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Event>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Event> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class EventsTable extends Table

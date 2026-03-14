@@ -12,6 +12,9 @@ use Cake\View\JsonView;
  */
 class CheckpointsController extends AppController
 {
+    /**
+     * @return array<class-string>
+     */
     public function viewClasses(): array
     {
         return [JsonView::class];

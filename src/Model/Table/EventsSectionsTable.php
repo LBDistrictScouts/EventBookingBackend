@@ -3,17 +3,14 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
-use Cake\Validation\Validator;
 
 /**
  * EventsSections Model
  *
  * @property \App\Model\Table\SectionsTable&\Cake\ORM\Association\BelongsTo $Sections
  * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
- *
  * @method \App\Model\Entity\EventsSection newEmptyEntity()
  * @method \App\Model\Entity\EventsSection newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\EventsSection> newEntities(array $data, array $options = [])
@@ -27,7 +24,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\EventsSection>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\EventsSection> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class EventsSectionsTable extends Table

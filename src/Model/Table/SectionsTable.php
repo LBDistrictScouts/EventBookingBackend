@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -15,7 +14,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\GroupsTable&\Cake\ORM\Association\BelongsTo $Groups
  * @property \App\Model\Table\ParticipantsTable&\Cake\ORM\Association\HasMany $Participants
  * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsToMany $Events
- *
  * @method \App\Model\Entity\Section newEmptyEntity()
  * @method \App\Model\Entity\Section newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Section> newEntities(array $data, array $options = [])
@@ -29,7 +27,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Section>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Section> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Section>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Section>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Section>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Section> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class SectionsTable extends Table
@@ -108,8 +105,14 @@ class SectionsTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['osm_section_id'], ['allowMultipleNulls' => true]), ['errorField' => 'osm_section_id']);
-        $rules->add($rules->existsIn(['participant_type_id'], 'ParticipantTypes'), ['errorField' => 'participant_type_id']);
+        $rules->add(
+            $rules->isUnique(['osm_section_id'], ['allowMultipleNulls' => true]),
+            ['errorField' => 'osm_section_id'],
+        );
+        $rules->add(
+            $rules->existsIn(['participant_type_id'], 'ParticipantTypes'),
+            ['errorField' => 'participant_type_id'],
+        );
         $rules->add($rules->existsIn(['group_id'], 'Groups'), ['errorField' => 'group_id']);
 
         return $rules;

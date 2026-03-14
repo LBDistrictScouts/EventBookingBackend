@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
  * @property \App\Model\Table\CheckInsTable&\Cake\ORM\Association\HasMany $CheckIns
- *
  * @method \App\Model\Entity\Checkpoint newEmptyEntity()
  * @method \App\Model\Entity\Checkpoint newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Checkpoint> newEntities(array $data, array $options = [])
@@ -27,7 +25,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Checkpoint>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Checkpoint> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Checkpoint>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Checkpoint>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Checkpoint>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Checkpoint> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class CheckpointsTable extends Table

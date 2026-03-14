@@ -153,7 +153,13 @@ class EntriesTable extends Table
         return $rules;
     }
 
-
+    /**
+     * Merge one entry into another by moving participants and deleting the merged entry.
+     *
+     * @param string $persistingEntryId
+     * @param string $mergingEntryId
+     * @return int|false
+     */
     public function mergeEntries(string $persistingEntryId, string $mergingEntryId): int|false
     {
         $participants = $this->Participants->find()

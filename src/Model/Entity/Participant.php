@@ -60,7 +60,7 @@ class Participant extends Entity
     /**
      * @return string
      */
-    protected function _getFullName()
+    protected function _getFullName(): string
     {
         return $this->first_name . '  ' . $this->last_name;
     }

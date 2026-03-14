@@ -276,7 +276,7 @@ class CheckInsController extends AppController
                 'entries',
                 'participants',
                 'checkpointFixed',
-                'checkpointId'
+                'checkpointId',
             ),
         );
     }

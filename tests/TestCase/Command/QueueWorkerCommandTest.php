@@ -13,7 +13,6 @@ use Interop\Queue\Consumer;
 use Interop\Queue\Context;
 use Interop\Queue\Destination;
 use Interop\Queue\Exception\PurgeQueueNotSupportedException;
-use Interop\Queue\Exception\SubscriptionConsumerNotSupportedException;
 use Interop\Queue\Exception\TemporaryQueueNotSupportedException;
 use Interop\Queue\Message;
 use Interop\Queue\Producer;
@@ -95,7 +94,7 @@ class QueueWorkerCommandTest extends TestCase
             }
         };
 
-        $consumer = new class($queue) implements Consumer {
+        $consumer = new class ($queue) implements Consumer {
             public function __construct(private Queue $queue)
             {
             }
@@ -137,7 +136,7 @@ class QueueWorkerCommandTest extends TestCase
         $subscriptionConsumer->expects($this->never())
             ->method('unsubscribeAll');
 
-        $context = new class($queue, $consumer, $subscriptionConsumer) implements Context {
+        $context = new class ($queue, $consumer, $subscriptionConsumer) implements Context {
             public function __construct(
                 private Queue $queue,
                 private Consumer $consumer,
