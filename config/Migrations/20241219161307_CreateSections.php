@@ -23,18 +23,18 @@ class CreateSections extends BaseMigration
             'null' => false,
         ]);
         $table->addColumn('participant_type_id', 'uuid', ['null' => false]);
-        $table->addForeignKeyWithName(
-            'fk_section_participant_types',
+        $table->addForeignKey(
             'participant_type_id',
             'participant_types',
             'id',
+            ['constraint' => 'fk_section_participant_types'],
         );
         $table->addColumn('group_id', 'uuid', ['null' => false]);
-        $table->addForeignKeyWithName(
-            'fk_section_groups',
+        $table->addForeignKey(
             'group_id',
             'groups',
             'id',
+            ['constraint' => 'fk_section_groups'],
         );
         $table->addColumn('osm_section_id', 'integer', [
             'default' => null,

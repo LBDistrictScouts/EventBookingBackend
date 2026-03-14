@@ -20,7 +20,7 @@ class CreateEntries extends BaseMigration
         $table->addColumn('event_id', 'uuid', [
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_entry_events', 'event_id', 'events', 'id');
+        $table->addForeignKey('event_id', 'events', 'id', ['constraint' => 'fk_entry_events']);
         $table->addColumn('entry_name', 'string', [
             'default' => null,
             'limit' => 32,

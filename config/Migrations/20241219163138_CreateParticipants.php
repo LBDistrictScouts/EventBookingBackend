@@ -30,29 +30,29 @@ class CreateParticipants extends BaseMigration
         $table->addColumn('entry_id', 'uuid', [
             'null' => false,
         ]);
-        $table->addForeignKeyWithName(
-            'fk_participant_entries',
+        $table->addForeignKey(
             'entry_id',
             'entries',
             'id',
+            ['constraint' => 'fk_participant_entries'],
         );
         $table->addColumn('participant_type_id', 'uuid', [
             'null' => false,
         ]);
-        $table->addForeignKeyWithName(
-            'fk_participant_participant_types',
+        $table->addForeignKey(
             'participant_type_id',
             'participant_types',
             'id',
+            ['constraint' => 'fk_participant_participant_types'],
         );
         $table->addColumn('section_id', 'uuid', [
             'null' => true,
         ]);
-        $table->addForeignKeyWithName(
-            'fk_participant_sections',
+        $table->addForeignKey(
             'section_id',
             'sections',
             'id',
+            ['constraint' => 'fk_participant_sections'],
         );
         $table->addColumn('checked_in', 'boolean', [
             'default' => false,

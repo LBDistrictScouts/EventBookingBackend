@@ -28,11 +28,11 @@ class CreateCheckpoints extends BaseMigration
             'null' => false,
         ]);
         $table->addColumn('event_id', 'uuid', ['null' => false]);
-        $table->addForeignKeyWithName(
-            'fk_checkpoint_events',
+        $table->addForeignKey(
             'event_id',
             'events',
             'id',
+            ['constraint' => 'fk_checkpoint_events'],
         );
         $table->addIndex(['event_id', 'checkpoint_sequence'], ['unique' => true]);
         $table->addColumn('created', 'datetime', [

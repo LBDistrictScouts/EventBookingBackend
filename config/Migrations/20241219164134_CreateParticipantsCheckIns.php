@@ -22,20 +22,20 @@ class CreateParticipantsCheckIns extends BaseMigration
         $table->addColumn('check_in_id', 'uuid', [
             'null' => false,
         ]);
-        $table->addForeignKeyWithName(
-            'fk_participant_check_in_check_ins',
+        $table->addForeignKey(
             'check_in_id',
             'check_ins',
             'id',
+            ['constraint' => 'fk_participant_check_in_check_ins'],
         );
         $table->addColumn('participant_id', 'uuid', [
             'null' => false,
         ]);
-        $table->addForeignKeyWithName(
-            'fk_participant_check_in_participants',
+        $table->addForeignKey(
             'participant_id',
             'participants',
-            'id'
+            'id',
+            ['constraint' => 'fk_participant_check_in_participants'],
         );
         $table->addColumn('created', 'datetime', [
             'default' => null,

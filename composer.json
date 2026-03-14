@@ -5,7 +5,7 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "aws/aws-sdk-php": "^3.373",
         "cakephp/authentication": "^4.0",
         "cakephp/cakephp": "^5.3",

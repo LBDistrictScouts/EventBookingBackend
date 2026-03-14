@@ -19,7 +19,7 @@ class CreateQuestions extends BaseMigration
         $table->addColumn('event_id', 'uuid', [
             'null' => false,
         ]);
-        $table->addForeignKeyWithName('fk_questions_events',  'event_id', 'events', 'id');
+        $table->addForeignKey('event_id', 'events', 'id', ['constraint' => 'fk_questions_events']);
         $table->addColumn('question_text', 'text', [
             'default' => null,
             'null' => false,
