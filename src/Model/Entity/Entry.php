@@ -32,6 +32,17 @@ use Random\RandomException;
 class Entry extends Entity
 {
     /**
+     * @var list<string>
+     */
+    public const PUBLIC_HIDDEN_FIELDS = [
+        'security_code',
+        'entry_email',
+        'entry_mobile',
+        'active',
+        'deleted',
+    ];
+
+    /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *
      * Note that when '*' is set to true, this allows all unspecified fields to
@@ -70,5 +81,16 @@ class Entry extends Entity
         }
 
         return $securityCode;
+    }
+
+    /**
+     * @return static
+     */
+    public function hidePublicFields(): static
+    {
+        return $this->setHidden(
+            fields: self::PUBLIC_HIDDEN_FIELDS,
+            merge: true,
+        );
     }
 }

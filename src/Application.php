@@ -135,7 +135,11 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 return true;
             }
 
-            return str_contains($path, '/book.json');
+            if (str_contains($path, '/book.json')) {
+                return true;
+            }
+
+            return str_contains($path, '/booking/edit/');
         });
 
         // Ensure routing middleware is added to the queue before CSRF protection middleware.

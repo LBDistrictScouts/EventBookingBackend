@@ -140,6 +140,37 @@ class EntriesTable extends Table
     }
 
     /**
+     * @param string $entryId
+     * @return \App\Model\Entity\Entry
+     */
+    public function getPublicEntryById(string $entryId): Entry
+    {
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $this->get($entryId, contain: ['Participants']);
+
+        return $entry->hidePublicFields();
+    }
+
+    /**
+     * @param int $referenceNumber
+     * @param string $securityCode
+     * @return \App\Model\Entity\Entry
+     */
+    public function getPublicEntryByLookup(int $referenceNumber, string $securityCode): Entry
+    {
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $this->find()
+            ->where([
+                'reference_number' => $referenceNumber,
+                'security_code' => $securityCode,
+            ])
+            ->contain(['Participants'])
+            ->firstOrFail();
+
+        return $entry->hidePublicFields();
+    }
+
+    /**
      * Merge one entry into another by moving participants and deleting the merged entry.
      *
      * @param string $persistingEntryId
