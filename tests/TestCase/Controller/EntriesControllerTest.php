@@ -322,5 +322,15 @@ class EntriesControllerTest extends TestCase
         $this->assertSame('Lookup', $data['entry']['participants'][0]['first_name']);
         $this->assertSame('Participant', $data['entry']['participants'][0]['last_name']);
         $this->assertSame('Lookup  Participant', $data['entry']['participants'][0]['full_name']);
+        $this->assertArrayHasKey('participant_type', $data['entry']['participants'][0]);
+        $this->assertSame(
+            'Lorem ipsum dolor sit amet',
+            $data['entry']['participants'][0]['participant_type']['participant_type'],
+        );
+        $this->assertArrayHasKey('section', $data['entry']['participants'][0]);
+        $this->assertSame(
+            'Lorem ipsum dolor sit amet',
+            $data['entry']['participants'][0]['section']['section_name'],
+        );
     }
 }

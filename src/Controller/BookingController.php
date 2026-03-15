@@ -132,11 +132,7 @@ class BookingController extends AppController
                 throw new RuntimeException('Saved entry is missing an id.');
             }
 
-            $entry = $this->Entries->get($entryId, contain: [
-                'Events' => ['Checkpoints', 'Questions'],
-                'CheckIns',
-                'Participants',
-            ]);
+            $entry = $this->Entries->getApiEntryById($entryId, false);
 
             $this->getMailer('Booking')->send('confirmation', [$entry]);
         } else {
@@ -212,7 +208,7 @@ class BookingController extends AppController
                 $success = true;
                 $message = 'Saved';
                 $errors = [];
-                $entry = $this->Entries->getPublicEntryById((string)$id);
+                $entry = $this->Entries->getApiEntryById((string)$id);
             } else {
                 $this->response = $this->response->withStatus(400, 'Validation failed');
                 $success = false;

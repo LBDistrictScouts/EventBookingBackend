@@ -155,6 +155,8 @@ class BookingControllerTest extends TestCase
         $this->assertEquals($expected['entry']['entry_name'], $resultData['entry']['entry_name']);
         $this->assertEquals($expected['entry']['entry_email'], $resultData['entry']['entry_email']);
         $this->assertEquals($expected['entry']['entry_mobile'], $resultData['entry']['entry_mobile']);
+        $this->assertArrayHasKey('participant_type', $resultData['entry']['participants'][0]);
+        $this->assertArrayHasKey('section', $resultData['entry']['participants'][0]);
     }
 
     /**
@@ -332,6 +334,16 @@ class BookingControllerTest extends TestCase
         $this->assertSame(0, $editData['entry']['checked_in_count']);
         $this->assertCount(1, $editData['entry']['participants']);
         $this->assertSame($participant->id, $editData['entry']['participants'][0]['id']);
+        $this->assertArrayHasKey('participant_type', $editData['entry']['participants'][0]);
+        $this->assertSame(
+            'Lorem ipsum dolor sit amet',
+            $editData['entry']['participants'][0]['participant_type']['participant_type'],
+        );
+        $this->assertArrayHasKey('section', $editData['entry']['participants'][0]);
+        $this->assertSame(
+            'Lorem ipsum dolor sit amet',
+            $editData['entry']['participants'][0]['section']['section_name'],
+        );
 
         $this->assertArrayNotHasKey('security_code', $editData['entry']);
         $this->assertArrayNotHasKey('entry_email', $editData['entry']);

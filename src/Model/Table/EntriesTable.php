@@ -5,8 +5,10 @@ namespace App\Model\Table;
 
 use App\Model\Entity\Entry;
 use ArrayObject;
+use Cake\Collection\CollectionInterface;
 use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
+use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -140,34 +142,66 @@ class EntriesTable extends Table
     }
 
     /**
+     * @param \Cake\ORM\Query\SelectQuery<\App\Model\Entity\Entry> $query
+     * @param bool $public
+     * @return \Cake\ORM\Query\SelectQuery<\App\Model\Entity\Entry>
+     */
+    public function findApiSignature(SelectQuery $query, bool $public = true): SelectQuery
+    {
+        $query->contain([
+            'Events' => ['Checkpoints', 'Questions'],
+            'CheckIns',
+            'Participants' => ['ParticipantTypes', 'Sections'],
+        ]);
+
+        if (!$public) {
+            return $query;
+        }
+
+        return $query->formatResults(
+            function (CollectionInterface $results): CollectionInterface {
+                return $results->map(
+                    fn(Entry $entry): Entry => $entry->hidePublicFields(),
+                );
+            },
+        );
+    }
+
+    /**
      * @param string $entryId
+     * @param bool $public
      * @return \App\Model\Entity\Entry
      */
-    public function getPublicEntryById(string $entryId): Entry
+    public function getApiEntryById(string $entryId, bool $public = true): Entry
     {
         /** @var \App\Model\Entity\Entry $entry */
-        $entry = $this->get($entryId, contain: ['Participants']);
+        $entry = $this->find('apiSignature', public: $public)
+            ->where([$this->aliasField('id') => $entryId])
+            ->firstOrFail();
 
-        return $entry->hidePublicFields();
+        return $entry;
     }
 
     /**
      * @param int $referenceNumber
      * @param string $securityCode
+     * @param bool $public
      * @return \App\Model\Entity\Entry
      */
-    public function getPublicEntryByLookup(int $referenceNumber, string $securityCode): Entry
-    {
+    public function getApiEntryByLookup(
+        int $referenceNumber,
+        string $securityCode,
+        bool $public = true,
+    ): Entry {
         /** @var \App\Model\Entity\Entry $entry */
-        $entry = $this->find()
+        $entry = $this->find('apiSignature', public: $public)
             ->where([
                 'reference_number' => $referenceNumber,
                 'security_code' => $securityCode,
             ])
-            ->contain(['Participants'])
             ->firstOrFail();
 
-        return $entry->hidePublicFields();
+        return $entry;
     }
 
     /**

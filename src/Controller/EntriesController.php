@@ -80,7 +80,7 @@ class EntriesController extends AppController
                 return;
             }
 
-            $entry = $this->Entries->getPublicEntryById((string)$entryId);
+            $entry = $this->Entries->getApiEntryById((string)$entryId);
             $this->setPublicEntryResponse($entry);
 
             return;
@@ -178,7 +178,7 @@ class EntriesController extends AppController
         }
 
         try {
-            $entry = $this->Entries->getPublicEntryByLookup(
+            $entry = $this->Entries->getApiEntryByLookup(
                 (int)$reference_number,
                 (string)$this->request->getData('security_code'),
             );
