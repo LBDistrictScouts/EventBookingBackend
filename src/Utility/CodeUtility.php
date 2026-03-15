@@ -16,7 +16,7 @@ class CodeUtility
      */
     public static function generateCode(int $length = 5): string
     {
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789';
         $maxIndex = strlen($characters) - 1;
         $code = '';
 

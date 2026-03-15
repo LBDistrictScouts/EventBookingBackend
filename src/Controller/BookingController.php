@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Model\Table\EntriesTable;
 use Cake\Event\EventInterface;
+use Cake\Http\Client\Request;
 use Cake\Http\Response;
 use Cake\Mailer\MailerAwareTrait;
 use Cake\View\JsonView;
@@ -49,7 +50,7 @@ class BookingController extends AppController
         parent::beforeFilter($event);
 
         // 🔹 Bypass authentication for these actions
-        $this->Authentication->allowUnauthenticated(['add']);
+        $this->Authentication->allowUnauthenticated(['add', 'edit']);
     }
 
     /**
@@ -80,6 +81,27 @@ class BookingController extends AppController
     }
 
     /**
+     * @param array $requestData
+     * @return array
+     */
+    private function prefilterData(array $requestData): array
+    {
+        // Filter out empty keys in incoming arrays.
+        $data = array_filter($requestData, fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+
+        // Ensure 'participants' exists and is an array before processing
+        if (!empty($data['participants']) && is_array($data['participants'])) {
+            foreach ($data['participants'] as &$participant) {
+                // Filter out empty keys in each participant
+                $participant = array_filter($participant, fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+            }
+            unset($participant); // Unset reference to prevent unexpected behavior
+        }
+
+        return $data;
+    }
+
+    /**
      * Add method
      *
      * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
@@ -96,17 +118,7 @@ class BookingController extends AppController
             return null;
         }
 
-        // Filter out empty keys in incoming arrays.
-        $data = array_filter($this->request->getData(), fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
-
-        // Ensure 'participants' exists and is an array before processing
-        if (!empty($data['participants']) && is_array($data['participants'])) {
-            foreach ($data['participants'] as &$participant) {
-                // Filter out empty keys in each participant
-                $participant = array_filter($participant, fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
-            }
-            unset($participant); // Unset reference to prevent unexpected behavior
-        }
+        $data = $this->prefilterData($this->request->getData());
 
         $entry = $this->Entries->newEntity($data);
         $entry->set('security_code', '');
@@ -149,39 +161,93 @@ class BookingController extends AppController
      */
     public function edit(?string $id = null): ?Response
     {
-        $entry = $this->Entries->get($id, contain: []);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $entry = $this->Entries->patchEntity($entry, $this->request->getData());
-            if ($this->Entries->save($entry)) {
-                $this->Flash->success(__('The entry has been saved.'));
+        $this->request->allowMethod(['patch', 'post', 'put', 'options']);
 
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The entry could not be saved. Please, try again.'));
+        if ($this->request->is(['options'])) {
+            $message = 'OPTIONS YES';
+            $this->set(compact('message'));
+            $this->viewBuilder()->setOption('serialize', ['message']);
+
+            return null;
         }
+
+        $entry = $this->Entries->get($id, contain: ['Participants']);
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $data = $this->prefilterData($this->request->getData());
+            $participantIdsToKeep = $this->extractParticipantIds($data['participants'] ?? []);
+            $participantsToDelete = [];
+
+            if (array_key_exists('participants', $data)) {
+                foreach ($entry->get('participants') as $participant) {
+                    $participantId = $participant->get('id');
+                    if (is_string($participantId) && !isset($participantIdsToKeep[$participantId])) {
+                        $participantsToDelete[] = $participant;
+                    }
+                }
+            }
+
+            $entry = $this->Entries->patchEntity($entry, $data);
+
+            $errors = [];
+            $saved = $this->Entries->getConnection()->transactional(
+                function () use ($entry, $participantsToDelete): bool {
+                    if (!$this->Entries->save($entry)) {
+                        return false;
+                    }
+
+                    foreach ($participantsToDelete as $participant) {
+                        if (!$this->Entries->Participants->delete($participant)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                },
+            );
+
+            if ($saved) {
+                $success = true;
+                $message = 'Saved';
+                $errors = [];
+                $entry = $this->Entries->getPublicEntryById((string)$id);
+            } else {
+                $this->response = $this->response->withStatus(400, 'Validation failed');
+                $success = false;
+                $message = 'Error';
+                $errors = $entry->getErrors();
+                $entry = $entry->hidePublicFields();
+            }
+            $this->set(compact('success', 'entry', 'message', 'errors'));
+            $this->viewBuilder()->setClassName(JsonView::class);
+            $this->viewBuilder()->setOption('serialize', ['success', 'entry', 'message', 'errors']);
+
+            return null;
+        }
+
         $events = $this->fetchTable('Events')->find('list', limit: 200)->all();
         $this->set(compact('entry', 'events'));
 
         return null;
     }
-
     /**
-     * Delete method
-     *
-     * @param string|null $id Entry id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     * @param array<int, mixed> $participants
+     * @return array<string, bool>
      */
-    public function delete(?string $id = null)
+    private function extractParticipantIds(array $participants): array
     {
-        $this->request->allowMethod(['post', 'delete']);
-        $entry = $this->Entries->get($id);
-        if ($this->Entries->delete($entry)) {
-            $this->Flash->success(__('The entry has been deleted.'));
-        } else {
-            $this->Flash->error(__('The entry could not be deleted. Please, try again.'));
+        $participantIds = [];
+
+        foreach ($participants as $participant) {
+            if (!is_array($participant)) {
+                continue;
+            }
+
+            $participantId = $participant['id'] ?? null;
+            if (is_string($participantId) && $participantId !== '') {
+                $participantIds[$participantId] = true;
+            }
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $participantIds;
     }
 }

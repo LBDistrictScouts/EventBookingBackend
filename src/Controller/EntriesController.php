@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Entity\Entry;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
@@ -32,7 +33,7 @@ class EntriesController extends AppController
         parent::beforeFilter($event);
 
         // 🔹 Bypass authentication for these actions
-        $this->Authentication->allowUnauthenticated(['lookup']);
+        $this->Authentication->allowUnauthenticated(['lookup', 'view']);
     }
 
     /**
@@ -68,6 +69,23 @@ class EntriesController extends AppController
      */
     public function view(?string $entryId = null): void
     {
+        if ($this->request->getParam('_ext') === 'json') {
+            $this->request->allowMethod(['get', 'options']);
+
+            if ($this->request->is('options')) {
+                $message = 'OPTIONS YES';
+                $this->set(compact('message'));
+                $this->viewBuilder()->setOption('serialize', ['message']);
+
+                return;
+            }
+
+            $entry = $this->Entries->getPublicEntryById((string)$entryId);
+            $this->setPublicEntryResponse($entry);
+
+            return;
+        }
+
         $entry = $this->Entries->get($entryId, contain: [
             'Events',
             'CheckIns' => [
@@ -160,28 +178,11 @@ class EntriesController extends AppController
         }
 
         try {
-            /** @var \App\Model\Entity\Entry $entry */
-            $entry = $this->Entries->find()
-                ->where([
-                    'reference_number' => $reference_number,
-                    'security_code' => $this->request->getData('security_code'),
-                ])
-                ->contain(['Participants'])
-                ->firstOrFail();
-
-            $entry = $entry->setHidden(
-                fields: [
-                    'security_code',
-                    'entry_email',
-                    'entry_mobile',
-                    'active',
-                    'deleted',
-                ],
-                merge: true,
+            $entry = $this->Entries->getPublicEntryByLookup(
+                (int)$reference_number,
+                (string)$this->request->getData('security_code'),
             );
-
-            $this->set(compact('entry'));
-            $this->viewBuilder()->setOption('serialize', ['entry']);
+            $this->setPublicEntryResponse($entry);
         } catch (RecordNotFoundException $e) {
             $message = 'Invalid Lookup';
             $this->set(compact('message'));
@@ -193,6 +194,16 @@ class EntriesController extends AppController
         }
 
         return null;
+    }
+
+    /**
+     * @param \App\Model\Entity\Entry $entry
+     * @return void
+     */
+    protected function setPublicEntryResponse(Entry $entry): void
+    {
+        $this->set(compact('entry'));
+        $this->viewBuilder()->setOption('serialize', ['entry']);
     }
 
     /**
