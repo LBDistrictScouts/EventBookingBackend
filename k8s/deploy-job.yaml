@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: event-booking-deploy
+  namespace: event-booking
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: event-booking-runtime
+      restartPolicy: Never
+      containers:
+        - name: deploy
+          image: ghcr.io/lbdistrictscouts/eventbookingbackend:latest
+          imagePullPolicy: Always
+          command:
+            - sh
+            - bin/deploy.sh
+          env:
+            - name: CREATE_TEST_SCHEMA
+              value: "false"
+          envFrom:
+            - configMapRef:
+                name: event-booking-config
+            - secretRef:
+                name: event-booking-secrets

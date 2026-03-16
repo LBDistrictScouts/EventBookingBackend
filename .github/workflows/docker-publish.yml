@@ -27,9 +27,35 @@ env:
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
+  docker-smoke-test:
+    name: Smoke Test Docker Image
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build smoke-test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: event-booking:smoke
+          cache-from: type=gha
+
+      - name: Verify runtime dependencies exist
+        run: |
+          docker run --rm event-booking:smoke test -f /var/www/html/vendor/autoload.php
+          docker run --rm event-booking:smoke php bin/cake.php queue_worker --help >/dev/null
+
   docker-build:
     name: Build Docker Image
     if: github.event_name == 'pull_request'
+    needs: docker-smoke-test
     runs-on: ubuntu-24.04
 
     steps:
@@ -68,6 +94,7 @@ jobs:
   docker-publish:
     name: Publish Docker Image
     if: github.event_name != 'pull_request'
+    needs: docker-smoke-test
     runs-on: ubuntu-24.04
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.release_environment || 'production' }}
 

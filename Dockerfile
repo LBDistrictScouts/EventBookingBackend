@@ -29,7 +29,7 @@ WORKDIR /var/www/html
 COPY composer.json .
 COPY composer.lock .
 
-RUN composer install --optimize-autoloader --no-scripts --no-interaction --profile --version
+RUN composer install --optimize-autoloader --no-scripts --no-interaction --profile --prefer-dist
 
 COPY . .
 

@@ -199,6 +199,109 @@ ghcr.io/<github-owner>/<repository>
 
 If your package visibility is private, consumers will need appropriate GitHub package permissions to pull it.
 
+## Kubernetes
+
+Kubernetes manifests for a local k3s deployment live in [`k8s/local-k3s.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/local-k3s.yaml), [`k8s/deploy-job.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/deploy-job.yaml), and [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml).
+
+The runtime image is the same one published by GitHub Actions:
+
+```text
+ghcr.io/lbdistrictscouts/eventbookingbackend:<tag>
+```
+
+Use `:latest` for the current `main` build, a Git tag such as `:v1.2.3` for releases, or a SHA tag published by the workflow when you want an immutable rollout target.
+
+The main manifest deploys:
+
+- a combined `event-booking` pod containing PHP-FPM and nginx
+- a `worker` deployment for `QueueWorker`
+- a `db` deployment backed by a persistent volume claim
+- config objects matching the existing runtime environment variable contract
+
+The nginx and PHP containers run in the same pod because the published GHCR image contains the application code, while nginx still needs access to the same files for `webroot` and PHP script resolution.
+
+Do not commit live Kubernetes secrets to the repository. When using the 1Password Kubernetes Operator, the repo only needs a `OnePasswordItem` custom resource that points at the 1Password item. The operator then creates and maintains the Kubernetes `Secret` for you.
+
+### 1Password Operator
+
+Store the Kubernetes secret values in a single 1Password item, with field labels that exactly match the environment variable names used by the application:
+
+- `SECURITY_SALT`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `DATABASE_URL`
+- `DATABASE_TEST_URL`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
+- `AWS_SQS_QUEUE_URL`
+- `AWS_SQS_QUEUE_NAME`
+- `COGNITO_DOMAIN`
+- `COGNITO_CLIENT_ID`
+- `COGNITO_CLIENT_SECRET`
+- `COGNITO_USER_POOL_ID`
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `SMTP_CLIENT`
+- `EMAIL_TRANSPORT_SMTP_URL`
+
+The operator flow in this repo assumes:
+
+- the `OnePasswordItem` resource is named `event-booking-secrets`
+- the operator creates a Kubernetes `Secret` with the same name
+- the application workloads consume that generated `Secret` via `secretRef`
+
+Update [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml) so `spec.itemPath` points to your real 1Password item:
+
+```text
+vaults/<vault-id-or-title>/items/<item-id-or-title>
+```
+
+The installed CRD in your cluster exposes exactly one required spec field, `itemPath`, which matches the current 1Password operator documentation and CRD schema.
+
+Basic local k3s flow:
+
+1. Update [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml) with the correct vault and item path.
+2. Create the GHCR image pull secret in the `event-booking` namespace. The manifests reference a secret named `ghcr-pull-secret` through the `event-booking-runtime` service account.
+
+```bash
+kubectl create namespace event-booking
+kubectl create secret docker-registry ghcr-pull-secret \
+  --namespace event-booking \
+  --docker-server=ghcr.io \
+  --docker-username="<github-username>" \
+  --docker-password="<github-classic-pat-or-fine-grained-token>" \
+  --docker-email="<email>"
+```
+
+The GitHub token must be able to read the private package. For GitHub Container Registry that typically means a token with package read access, such as a classic PAT with `read:packages`.
+
+3. Apply the namespace, config, operator item, and workloads:
+
+```bash
+kubectl apply -f k8s/local-k3s.yaml
+kubectl apply -f k8s/onepassword-item.yaml
+```
+
+4. Wait for the operator to create the `event-booking-secrets` Kubernetes `Secret`, then run the one-shot deploy job to create schemas, run post-install hooks, and execute migrations:
+
+```bash
+kubectl get secret -n event-booking event-booking-secrets
+kubectl apply -f k8s/deploy-job.yaml
+kubectl logs -n event-booking job/event-booking-deploy -f
+```
+
+If your operator is configured with auto-restart support, changes to the backing 1Password item will update the Kubernetes `Secret`, and the `OnePasswordItem` annotation enables automatic redeploy behavior for this secret.
+
+5. Get the service address from k3s:
+
+```bash
+kubectl get svc -n event-booking event-booking-web
+```
+
+The web service is defined as `LoadBalancer`, which works cleanly with the default k3s service load balancer for local access.
+
 ## GitHub Environment Secrets
 
 For deployments, create a GitHub Environment such as `production` and store runtime secrets there instead of in the repository.
