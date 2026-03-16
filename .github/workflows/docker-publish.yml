@@ -236,5 +236,5 @@ jobs:
             echo "- SMTP_PASSWORD"
             echo "- SMTP_CLIENT"
             echo "- EMAIL_TRANSPORT_SMTP_URL"
-            echo "- GH_PACKAGE_AUTH (if @lbd-scouts/district-styles requires registry auth)"
+            echo "- GH_PACKAGE_AUTH (if @lbdistrictscouts/district-styles requires registry auth)"
           } >> "$GITHUB_STEP_SUMMARY"

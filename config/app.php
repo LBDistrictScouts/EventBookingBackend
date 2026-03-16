@@ -100,7 +100,7 @@ return [
     ],
 
     'Theme' => [
-        'package' => '@lbd-scouts/district-styles',
+        'package' => '@lbdistrictscouts/district-styles',
         'packageVersion' => 'latest',
         'distDir' => 'dist',
         'sourcePath' => '../district-styles',

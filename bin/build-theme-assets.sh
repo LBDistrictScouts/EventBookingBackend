@@ -4,7 +4,7 @@ set -eu
 
 APP_ROOT="${APP_ROOT:-$(pwd)}"
 WEBROOT_DIR="${WEBROOT_DIR:-$APP_ROOT/webroot}"
-THEME_PACKAGE="${THEME_PACKAGE:-@lbd-scouts/district-styles}"
+THEME_PACKAGE="${THEME_PACKAGE:-@lbdistrictscouts/district-styles}"
 THEME_PACKAGE_VERSION="${THEME_PACKAGE_VERSION:-latest}"
 THEME_PACKAGE_DIST_DIR="${THEME_PACKAGE_DIST_DIR:-dist}"
 THEME_ASSET_PATH="${THEME_ASSET_PATH:-theme}"

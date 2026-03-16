@@ -100,7 +100,7 @@ If you need to publish your shared theme package assets into the checked-out `we
 docker compose --profile assets run --rm assets
 ```
 
-The theme settings are source-controlled in [`config/app.php`](/Users/jacob/Development/EventBookingBackend/config/app.php) and the build script defaults. The current source of truth is `@lbd-scouts/district-styles`, with local development compiling from `../district-styles` into `webroot/theme/theme.css`.
+The theme settings are source-controlled in [`config/app.php`](/Users/jacob/Development/EventBookingBackend/config/app.php) and the build script defaults. The current source of truth is `@lbdistrictscouts/district-styles`, with local development compiling from `../district-styles` into `webroot/theme/theme.css`.
 Docker image builds do not compile the theme themselves, because the sibling theme repo is outside the Docker build context. Run the assets build first so `webroot/theme/theme.css` exists before building the image.
 
 6. Start the local server:
