@@ -34,6 +34,27 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up npm auth for GitHub Packages
+        run: |
+          {
+            echo "@lbdistrictscouts:registry=https://npm.pkg.github.com"
+            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
+            echo "always-auth=true"
+          } > .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_AUTH }}
+
+      - name: Build theme assets
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_AUTH }}
+          THEME_SOURCE_PATH: ""
+        run: sh bin/build-theme-assets.sh
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -51,6 +72,7 @@ jobs:
         run: |
           docker run --rm event-booking:smoke test -f /var/www/html/vendor/autoload.php
           docker run --rm event-booking:smoke test -f /var/www/html/bin/cake.php
+          docker run --rm event-booking:smoke test -f /var/www/html/webroot/theme/theme.css
           docker run --rm event-booking:smoke php -r 'require "/var/www/html/vendor/autoload.php";'
 
   docker-build:
@@ -61,6 +83,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up npm auth for GitHub Packages
+        run: |
+          {
+            echo "@lbdistrictscouts:registry=https://npm.pkg.github.com"
+            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
+            echo "always-auth=true"
+          } > .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_AUTH }}
+
+      - name: Build theme assets
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_AUTH }}
+          THEME_SOURCE_PATH: ""
+        run: sh bin/build-theme-assets.sh
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -101,6 +144,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up npm auth for GitHub Packages
+        run: |
+          {
+            echo "@lbdistrictscouts:registry=https://npm.pkg.github.com"
+            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
+            echo "always-auth=true"
+          } > .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_AUTH }}
+
+      - name: Build theme assets
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_AUTH }}
+          THEME_SOURCE_PATH: ""
+        run: sh bin/build-theme-assets.sh
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -172,4 +236,5 @@ jobs:
             echo "- SMTP_PASSWORD"
             echo "- SMTP_CLIENT"
             echo "- EMAIL_TRANSPORT_SMTP_URL"
+            echo "- GH_PACKAGE_AUTH (if @lbd-scouts/district-styles requires registry auth)"
           } >> "$GITHUB_STEP_SUMMARY"

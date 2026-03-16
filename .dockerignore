@@ -3,3 +3,5 @@ logs/*
 
 supervisor.ini
 .env.compose
+
+bin/redeploy-k3s.sh

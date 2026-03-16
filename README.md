@@ -302,6 +302,18 @@ kubectl get svc -n event-booking event-booking-web
 
 The web service is defined as `LoadBalancer`, which works cleanly with the default k3s service load balancer for local access.
 
+To roll the cluster forward after a new GHCR image is published, use [`bin/redeploy-k3s.sh`](/Users/jacob/Development/EventBookingBackend/bin/redeploy-k3s.sh):
+
+```bash
+bin/redeploy-k3s.sh
+```
+
+That restarts the `event-booking` and `worker` deployments without recreating secrets, persistent storage, or the namespace. If you also want to rerun the deploy job for migrations:
+
+```bash
+bin/redeploy-k3s.sh --with-migrations
+```
+
 ## GitHub Environment Secrets
 
 For deployments, create a GitHub Environment such as `production` and store runtime secrets there instead of in the repository.
