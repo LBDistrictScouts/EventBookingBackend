@@ -50,7 +50,7 @@ if [ -n "$SOURCE_PATH_RESOLVED" ] && [ -d "$SOURCE_PATH_RESOLVED" ]; then
 
     if [ -f "$SOURCE_PACKAGE_DIR/package.json" ]; then
         SOURCE_PACKAGE_NAME="$(node -p "require('$SOURCE_PACKAGE_DIR/package.json').name")"
-        PACKAGE_DIR="$(node -p "require.resolve('$SOURCE_PACKAGE_NAME/package.json').replace(/\\/package\\.json$/, '')")"
+        PACKAGE_DIR="$BUILD_DIR/node_modules/$SOURCE_PACKAGE_NAME"
     else
         echo "Theme source package.json not found: $SOURCE_PACKAGE_DIR/package.json" >&2
         exit 1
@@ -68,7 +68,12 @@ else
 
     echo "Installing theme package: $PACKAGE_SPEC"
     npm install --no-package-lock --no-save "$PACKAGE_SPEC"
-    PACKAGE_DIR="$(node -p "require.resolve('$THEME_PACKAGE/package.json').replace(/\\/package\\.json$/, '')")"
+    PACKAGE_DIR="$BUILD_DIR/node_modules/$THEME_PACKAGE"
+fi
+
+if [ ! -d "$PACKAGE_DIR" ]; then
+    echo "Installed theme package directory not found: $PACKAGE_DIR" >&2
+    exit 1
 fi
 
 rm -rf "$TARGET_DIR"
