@@ -82,6 +82,15 @@ mkdir -p "$TARGET_DIR"
 DIST_DIR="$PACKAGE_DIR/$THEME_PACKAGE_DIST_DIR"
 if [ -d "$DIST_DIR" ]; then
     cp -R "$DIST_DIR"/. "$TARGET_DIR"/
+
+    if [ -f "$TARGET_DIR/css/district-styles.css" ]; then
+        cp "$TARGET_DIR/css/district-styles.css" "$TARGET_DIR/$THEME_OUTPUT_CSS"
+    fi
+
+    if [ -f "$TARGET_DIR/css/district-styles.min.css" ]; then
+        cp "$TARGET_DIR/css/district-styles.min.css" "$TARGET_DIR/${THEME_OUTPUT_CSS%.css}.min.css"
+    fi
+
     echo "Theme assets copied to $TARGET_DIR from dist output"
     exit 0
 fi
