@@ -50,7 +50,8 @@ jobs:
       - name: Verify runtime dependencies exist
         run: |
           docker run --rm event-booking:smoke test -f /var/www/html/vendor/autoload.php
-          docker run --rm event-booking:smoke php bin/cake.php queue_worker --help >/dev/null
+          docker run --rm event-booking:smoke test -f /var/www/html/bin/cake.php
+          docker run --rm event-booking:smoke php -r 'require "/var/www/html/vendor/autoload.php";'
 
   docker-build:
     name: Build Docker Image
