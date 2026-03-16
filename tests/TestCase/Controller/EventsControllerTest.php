@@ -103,6 +103,26 @@ class EventsControllerTest extends TestCase
     }
 
     /**
+     * @return void
+     * @uses \App\Controller\EventsController::current()
+     */
+    public function testCurrentRendersSetupDashboardWhenNoCurrentEventExists(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+        $event->set('finished', true);
+        $events->saveOrFail($event);
+
+        $this->get('/');
+        $this->assertResponseOk();
+        $this->assertResponseContains('No active event is configured yet');
+        $this->assertResponseContains('/events/add');
+        $this->assertResponseContains('/groups/add');
+        $this->assertResponseContains('/sections/add');
+        $this->assertResponseContains('/participant-types/add');
+    }
+
+    /**
      * Test view method
      *
      * @return void

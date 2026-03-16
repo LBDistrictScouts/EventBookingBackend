@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
 use Cake\View\JsonView;
 
@@ -52,11 +53,64 @@ class EventsController extends AppController
      */
     public function current(): void
     {
-        $this->viewBuilder()->setTemplate('view');
+        try {
+            $this->viewBuilder()->setTemplate('view');
 
-        $query = $this->Events->find()->where(['bookable' => true, 'finished' => false])->orderByAsc('start_time');
-        $latest = $query->firstOrFail();
-        $this->view($latest->id);
+            $query = $this->Events->find()->where(['bookable' => true, 'finished' => false])->orderByAsc('start_time');
+            $latest = $query->firstOrFail();
+            $this->view($latest->id);
+        } catch (RecordNotFoundException $exception) {
+            if (str_contains($this->request->getPath(), '.json')) {
+                throw $exception;
+            }
+
+            $setupSections = [
+                [
+                    'title' => 'Create an event',
+                    'description' => 'Start by creating the event that bookings and check-ins will belong to.',
+                    'links' => [
+                        ['label' => 'Add event', 'url' => ['action' => 'add']],
+                        ['label' => 'View events', 'url' => ['action' => 'index']],
+                    ],
+                ],
+                [
+                    'title' => 'Define sections and groups',
+                    'description' => 'Groups and sections provide the structure used when collecting bookings.',
+                    'links' => [
+                        ['label' => 'Add group', 'url' => ['controller' => 'Groups', 'action' => 'add']],
+                        ['label' => 'Add section', 'url' => ['controller' => 'Sections', 'action' => 'add']],
+                        ['label' => 'View groups', 'url' => ['controller' => 'Groups', 'action' => 'index']],
+                        ['label' => 'View sections', 'url' => ['controller' => 'Sections', 'action' => 'index']],
+                    ],
+                ],
+                [
+                    'title' => 'Add participant types',
+                    'description' =>
+                        'Participant types drive pricing and category choices for each section.',
+                    'links' => [
+                        [
+                            'label' => 'Add participant type',
+                            'url' => ['controller' => 'ParticipantTypes', 'action' => 'add'],
+                        ],
+                        [
+                            'label' => 'View participant types',
+                            'url' => ['controller' => 'ParticipantTypes', 'action' => 'index'],
+                        ],
+                    ],
+                ],
+                [
+                    'title' => 'Prepare checkpoints and questions',
+                    'description' => 'Optional checkpoints and booking questions can be added once the event exists.',
+                    'links' => [
+                        ['label' => 'Add checkpoint', 'url' => ['controller' => 'Checkpoints', 'action' => 'add']],
+                        ['label' => 'Add question', 'url' => ['controller' => 'Questions', 'action' => 'add']],
+                    ],
+                ],
+            ];
+
+            $this->viewBuilder()->setTemplate('setup_dashboard');
+            $this->set(compact('setupSections'));
+        }
     }
 
     /**
