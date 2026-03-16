@@ -1,9 +1,9 @@
-name: Docker Publish
+name: CI-CD
 
 on:
   push:
     branches:
-      - main
+      - 'main'
     tags:
       - 'v*'
   pull_request:
@@ -19,16 +19,154 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
+  testsuite:
+    name: PHPUnit Test Suite
+    runs-on: ubuntu-22.04
+    env:
+      SECURITY_SALT: ci-security-salt-for-tests-only-0123456789abcdef
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/event_booking?schema=data
+      DATABASE_TEST_URL: postgres://postgres:postgres@127.0.0.1:5432/event_booking?schema=test
+      AWS_REGION: eu-west-1
+      AWS_ACCESS_KEY_ID: testing
+      AWS_SECRET_ACCESS_KEY: testing
+      AWS_URL: https://sqs.eu-west-1.amazonaws.com/000000000000/greenway-queue
+      AWS_SQS_QUEUE_NAME: greenway-queue
+      COGNITO_DOMAIN: auth.example.test
+      COGNITO_CLIENT_ID: test-client-id
+      COGNITO_CLIENT_SECRET: test-client-secret
+      COGNITO_USER_POOL_ID: eu-west-1_testpool
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: event_booking
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d event_booking"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.4', '8.5']
+        dependencies: ['highest']
+        include:
+          - php-version: '8.5'
+            dependencies: 'lowest'
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, intl, pdo_pgsql, pgsql, sqlite3, pdo_sqlite
+        ini-values: zend.assertions=1
+        coverage: none
+
+    - name: Prepare AWS profile
+      run: |
+        mkdir -p "$HOME/.aws"
+        cat <<'EOF' > "$HOME/.aws/credentials"
+        [lbd]
+        aws_access_key_id = testing
+        aws_secret_access_key = testing
+        EOF
+        cat <<'EOF' > "$HOME/.aws/config"
+        [profile lbd]
+        region = eu-west-1
+        output = json
+        EOF
+
+    - name: Prepare database schemas
+      env:
+        PGPASSWORD: postgres
+      run: |
+        until pg_isready -h 127.0.0.1 -U postgres -d event_booking; do
+          sleep 1
+        done
+        psql -h 127.0.0.1 -U postgres -d event_booking -c 'CREATE SCHEMA IF NOT EXISTS data;'
+        psql -h 127.0.0.1 -U postgres -d event_booking -c 'CREATE SCHEMA IF NOT EXISTS test;'
+
+    - name: Composer install
+      uses: ramsey/composer-install@v3
+      with:
+        dependency-versions: ${{ matrix.dependencies }}
+
+    - name: Composer post install
+      run: composer run-script post-install-cmd --no-interaction
+
+    - name: Run PHPUnit
+      run: vendor/bin/phpunit tests
+
+  coding-standard:
+    name: Coding Standard & Static Analysis
+    runs-on: ubuntu-22.04
+    env:
+      SECURITY_SALT: ci-security-salt-for-analysis-only-0123456789abcdef
+      AWS_REGION: eu-west-1
+      AWS_ACCESS_KEY_ID: testing
+      AWS_SECRET_ACCESS_KEY: testing
+      AWS_URL: https://sqs.eu-west-1.amazonaws.com/000000000000/greenway-queue
+      AWS_SQS_QUEUE_NAME: greenway-queue
+      COGNITO_DOMAIN: auth.example.test
+      COGNITO_CLIENT_ID: test-client-id
+      COGNITO_CLIENT_SECRET: test-client-secret
+      COGNITO_USER_POOL_ID: eu-west-1_testpool
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.5'
+        extensions: mbstring, intl, dom, simplexml, tokenizer, xml, xmlwriter
+        coverage: none
+        tools: cs2pr, phpstan:2.1.22
+
+    - name: Composer install
+      uses: ramsey/composer-install@v3
+
+    - name: Prepare AWS profile
+      run: |
+        mkdir -p "$HOME/.aws"
+        cat <<'EOF' > "$HOME/.aws/credentials"
+        [lbd]
+        aws_access_key_id = testing
+        aws_secret_access_key = testing
+        EOF
+        cat <<'EOF' > "$HOME/.aws/config"
+        [profile lbd]
+        region = eu-west-1
+        output = json
+        EOF
+
+    - name: Run PHP CodeSniffer
+      run: vendor/bin/phpcs --report=checkstyle | cs2pr
+
+    - name: Run phpstan
+      if: always()
+      run: composer stan
+
   docker-smoke-test:
     name: Smoke Test Docker Image
+    needs:
+      - testsuite
+      - coding-standard
     runs-on: ubuntu-24.04
 
     steps:
@@ -141,6 +279,9 @@ jobs:
     needs: docker-smoke-test
     runs-on: ubuntu-24.04
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.release_environment || 'production' }}
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v5
