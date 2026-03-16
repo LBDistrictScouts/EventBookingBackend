@@ -12,6 +12,10 @@ THEME_SOURCE_PATH="${THEME_SOURCE_PATH:-../district-styles}"
 THEME_SOURCE_ENTRY="${THEME_SOURCE_ENTRY:-scss/style.scss}"
 THEME_OUTPUT_CSS="${THEME_OUTPUT_CSS:-theme.css}"
 
+if [ -z "${NPM_CONFIG_USERCONFIG:-}" ] && [ -f "$APP_ROOT/.npmrc" ]; then
+    export NPM_CONFIG_USERCONFIG="$APP_ROOT/.npmrc"
+fi
+
 if [ -z "$THEME_PACKAGE" ] && [ -z "$THEME_SOURCE_PATH" ]; then
     echo "Neither THEME_PACKAGE nor THEME_SOURCE_PATH is set; skipping theme asset build."
     exit 0
