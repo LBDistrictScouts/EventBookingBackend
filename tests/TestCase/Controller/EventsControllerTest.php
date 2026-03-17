@@ -123,6 +123,27 @@ class EventsControllerTest extends TestCase
     }
 
     /**
+     * @return void
+     * @uses \App\Controller\EventsController::current()
+     */
+    public function testCurrentRendersDashboardForActiveEvent(): void
+    {
+        $this->get('/');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Active Event');
+        $this->assertResponseContains('Entry Count');
+        $this->assertResponseContains('Participant Count');
+        $this->assertResponseContains('Checked In Count');
+        $this->assertResponseContains('Open Event View');
+        $this->assertResponseContains('#entries');
+        $this->assertResponseContains('#sections');
+        $this->assertResponseContains('#checkpoints');
+        $this->assertResponseContains('#questions');
+        $this->assertResponseContains('Entry Reference');
+    }
+
+    /**
      * Test view method
      *
      * @return void

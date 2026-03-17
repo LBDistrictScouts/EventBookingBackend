@@ -71,6 +71,71 @@ class EntriesControllerTest extends TestCase
         $this->get('/entries/view/' . self::FIXTURE_ENTRY_ID);
         $this->assertResponseOk();
         $this->assertResponseContains('Lorem ipsum dolor sit amet');
+        $this->assertResponseContains('Merge Entry');
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::merge()
+     */
+    public function testMergeGetRendersSelectionInterface(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->newEntity([
+            'event_name' => 'Merge Interface Event',
+            'event_description' => 'Event for merge UI',
+            'booking_code' => 'MRGUI',
+            'start_time' => '2027-01-01 10:00:00',
+            'bookable' => false,
+            'finished' => false,
+            'entry_count' => 0,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+        ]);
+        $this->assertNotFalse($events->save($event));
+
+        $survivor = $this->createSearchableEntry('MRGUI', 10, false, $event->id);
+        $victim = $this->createSearchableEntry('MRGUI', 11, false, $event->id);
+
+        $this->get('/entries/merge/' . $victim->id . '/' . $survivor->id);
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Consumed Entry');
+        $this->assertResponseContains('Surviving Entry');
+        $this->assertResponseContains('Review Merge');
+        $this->assertResponseContains('data-preview-base');
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::mergePreview()
+     */
+    public function testMergePreviewReturnsSelectedMergeInformation(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->newEntity([
+            'event_name' => 'Merge Preview Event',
+            'event_description' => 'Event for merge preview',
+            'booking_code' => 'MRGPV',
+            'start_time' => '2027-01-01 10:00:00',
+            'bookable' => false,
+            'finished' => false,
+            'entry_count' => 0,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+        ]);
+        $this->assertNotFalse($events->save($event));
+
+        $survivor = $this->createSearchableEntry('MRGPV', 21, false, $event->id);
+        $victim = $this->createSearchableEntry('MRGPV', 22, false, $event->id);
+
+        $this->get('/entries/merge-preview/' . $victim->id . '/' . $survivor->id . '.json');
+
+        $this->assertResponseOk();
+        $data = json_decode((string)$this->_response->getBody(), true);
+        $this->assertSame('MRGPV-21', $data['preview']['survivor']['reference']);
+        $this->assertSame('MRGPV-22', $data['preview']['consumed']['reference']);
+        $this->assertSame(0, $data['preview']['merged_participant_count']);
     }
 
     /**
@@ -137,6 +202,65 @@ class EntriesControllerTest extends TestCase
         $this->assertRedirectContains('/entries');
         $entries = $this->getTableLocator()->get('Entries');
         $deleted = $entries->find('withTrashed')->where(['id' => self::FIXTURE_ENTRY_ID])->firstOrFail();
+        $this->assertNotNull($deleted->deleted);
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::merge()
+     */
+    public function testMergeMovesParticipantsAndRedirectsToSurvivingEntry(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $entries = $this->getTableLocator()->get('Entries');
+        $participants = $this->getTableLocator()->get('Participants');
+
+        $event = $events->newEntity([
+            'event_name' => 'Merge Test Event',
+            'event_description' => 'Mergeable entries event',
+            'booking_code' => 'MERGE',
+            'start_time' => '2027-01-01 10:00:00',
+            'bookable' => false,
+            'finished' => false,
+            'entry_count' => 0,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+        ]);
+        $this->assertNotFalse($events->save($event));
+
+        $survivor = $this->createSearchableEntry('MERGE', 51, false, $event->id);
+        $victim = $this->createSearchableEntry('MERGE', 52, false, $event->id);
+
+        $participant = $participants->newEntity([
+            'first_name' => 'Merge',
+            'last_name' => 'Victim',
+            'entry_id' => $victim->id,
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+        $this->assertNotFalse($participants->save($participant));
+
+        $this->enableFormTokens();
+        $this->post('/entries/merge/' . $victim->id, [
+            'persisting_entry_id' => $survivor->id,
+        ]);
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Final confirmation required.');
+        $this->assertResponseContains('Confirm Merge');
+
+        $this->enableFormTokens();
+        $this->post('/entries/merge/' . $victim->id . '/' . $survivor->id, [
+            'persisting_entry_id' => $survivor->id,
+            'confirmed' => 1,
+        ]);
+
+        $this->assertRedirect(['controller' => 'Entries', 'action' => 'view', $survivor->id]);
+        $this->assertSame(1, $participants->find()->where(['entry_id' => $survivor->id])->count());
+        $deleted = $entries->find('withTrashed')->where(['id' => $victim->id])->firstOrFail();
         $this->assertNotNull($deleted->deleted);
     }
 
@@ -238,6 +362,59 @@ class EntriesControllerTest extends TestCase
         $this->assertPublicEntryResponse($data, $entry->id, (int)$entry->reference_number, $participant->id);
     }
 
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::findByReference()
+     */
+    public function testFindByReferenceRedirectsUsingFullReference(): void
+    {
+        $entry = $this->createSearchableEntry('SEARCH1', 42, true);
+
+        $this->get('/entries/find-by-reference?reference=SEARCH1-42');
+
+        $this->assertRedirect(['controller' => 'Entries', 'action' => 'view', $entry->id]);
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::findByReference()
+     */
+    public function testFindByReferenceRedirectsUsingNumericReferenceForActiveEvent(): void
+    {
+        $entry = $this->createSearchableEntry('SEARCH2', 77, true);
+
+        $this->get('/entries/find-by-reference?reference=77');
+
+        $this->assertRedirect(['controller' => 'Entries', 'action' => 'view', $entry->id]);
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::findByReference()
+     */
+    public function testFindByReferenceRejectsInvalidFormat(): void
+    {
+        $this->get('/entries/find-by-reference?reference=not-a-reference');
+
+        $this->assertRedirect(['controller' => 'Events', 'action' => 'current']);
+        $this->assertFlashMessage('Entry references must look like BOOKINGCODE-123 or just 123.');
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::findByReference()
+     */
+    public function testFindByReferenceRequiresFullReferenceWhenNumericMatchIsAmbiguous(): void
+    {
+        $this->createSearchableEntry('AMBIG1', 91, false);
+        $this->createSearchableEntry('AMBIG2', 91, false);
+
+        $this->get('/entries/find-by-reference?reference=91');
+
+        $this->assertRedirect(['controller' => 'Events', 'action' => 'current']);
+        $this->assertFlashMessage('Reference 91 matches multiple events. Use the full reference code.');
+    }
+
     public function testJsonViewIsPublicAndMatchesLookupSignature(): void
     {
         [$entry, $participant] = $this->createPublicEntryWithParticipant();
@@ -292,6 +469,60 @@ class EntriesControllerTest extends TestCase
         $this->assertNotFalse($participants->save($participant));
 
         return [$entry, $participant];
+    }
+
+    /**
+     * @param string $bookingCode
+     * @param int $referenceNumber
+     * @param bool $bookable
+     * @param string|null $eventId
+     * @return \App\Model\Entity\Entry
+     */
+    private function createSearchableEntry(
+        string $bookingCode,
+        int $referenceNumber,
+        bool $bookable,
+        ?string $eventId = null,
+    ): \App\Model\Entity\Entry
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $entries = $this->getTableLocator()->get('Entries');
+
+        if ($eventId === null) {
+            /** @var \App\Model\Entity\Event $event */
+            $event = $events->newEntity([
+                'event_name' => 'Search Event ' . $bookingCode,
+                'event_description' => 'Searchable event',
+                'booking_code' => $bookingCode,
+                'start_time' => '2027-01-01 10:00:00',
+                'bookable' => $bookable,
+                'finished' => false,
+                'entry_count' => 0,
+                'participant_count' => 0,
+                'checked_in_count' => 0,
+            ]);
+            $this->assertNotFalse($events->save($event));
+            $eventId = $event->id;
+        }
+
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->newEntity([
+            'event_id' => $eventId,
+            'entry_name' => 'Search Entry ' . $bookingCode . ' ' . $referenceNumber,
+            'active' => true,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'entry_email' => strtolower($bookingCode) . $referenceNumber . '@example.com',
+            'entry_mobile' => '07123456789',
+            'security_code' => 'ABCDE',
+        ]);
+        $this->assertNotFalse($entries->save($entry));
+
+        $entries->updateAll(['reference_number' => $referenceNumber], ['id' => $entry->id]);
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->get($entry->id);
+
+        return $entry;
     }
 
     /**

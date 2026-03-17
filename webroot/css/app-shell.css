@@ -1,0 +1,43 @@
+.app-topbar {
+    background-color: var(--bs-primary);
+    border-bottom: 1px solid rgba(var(--bs-white-rgb), 0.16);
+}
+
+.app-topbar .navbar-brand {
+    color: rgba(var(--bs-white-rgb), 1);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.app-topbar .navbar-brand:hover,
+.app-topbar .navbar-brand:focus {
+    color: rgba(var(--bs-white-rgb), 1);
+}
+
+.app-topbar .navbar-nav {
+    --bs-nav-link-color: rgba(var(--bs-white-rgb), 0.82);
+    --bs-nav-link-hover-color: rgba(var(--bs-white-rgb), 1);
+    --bs-navbar-active-color: rgba(var(--bs-white-rgb), 1);
+    gap: 0.25rem;
+}
+
+.app-topbar .nav-link {
+    border-radius: var(--bs-border-radius);
+    font-weight: 600;
+    padding-inline: 0.85rem;
+}
+
+.app-topbar .nav-link:hover,
+.app-topbar .nav-link:focus,
+.app-topbar .nav-link.active {
+    background-color: rgba(var(--bs-white-rgb), 0.14);
+}
+
+.app-topbar .navbar-toggler {
+    border-color: rgba(var(--bs-white-rgb), 0.35);
+}
+
+.app-sidebar {
+    background: var(--bs-tertiary-bg);
+    border-right: 1px solid var(--bs-border-color);
+}

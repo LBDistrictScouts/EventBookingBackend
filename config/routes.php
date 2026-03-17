@@ -73,6 +73,29 @@ return function (RouteBuilder $routes): void {
             ['controller' => 'Entries', 'action' => 'view'],
             ['pass' => ['id'], 'id' => '[0-9a-f\\-]+'],
         );
+        $builder->connect(
+            '/entries/merge/{consumedId}',
+            ['controller' => 'Entries', 'action' => 'merge'],
+            ['pass' => ['consumedId'], 'consumedId' => '[0-9a-f\\-]+'],
+        );
+        $builder->connect(
+            '/entries/merge/{consumedId}/{survivorId}',
+            ['controller' => 'Entries', 'action' => 'merge'],
+            [
+                'pass' => ['consumedId', 'survivorId'],
+                'consumedId' => '[0-9a-f\\-]+',
+                'survivorId' => '[0-9a-f\\-]+',
+            ],
+        );
+        $builder->connect(
+            '/entries/merge-preview/{consumedId}/{survivorId}',
+            ['controller' => 'Entries', 'action' => 'mergePreview'],
+            [
+                'pass' => ['consumedId', 'survivorId'],
+                'consumedId' => '[0-9a-f\\-]+',
+                'survivorId' => '[0-9a-f\\-]+',
+            ],
+        );
 
         $builder->connect('/check-in', ['controller' => 'CheckIns', 'action' => 'add', 'ext' => 'json']);
 
