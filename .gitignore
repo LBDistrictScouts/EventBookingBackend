@@ -50,6 +50,8 @@ nbproject/*
 .sass-cache/
 # node
 /node_modules/*
+/packages/*/node_modules/*
+/package-lock.json
 # yarn
 yarn-debug.log
 yarn-error.log
@@ -57,3 +59,4 @@ yarn-error.log
 /package.xml
 /tree.txt
 /boot
+/webroot/district_u_i/

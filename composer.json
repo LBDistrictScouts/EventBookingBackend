@@ -14,6 +14,7 @@
         "enqueue/simple-client": "^0.10.27",
         "enqueue/sqs": "^0.10.27",
         "firebase/php-jwt": "^7.0",
+        "lbdistrictscouts/district-ui": "^0.3.2",
         "friendsofcake/bootstrap-ui": "^5.1.3",
         "mobiledetect/mobiledetectlib": "^4.8",
         "muffin/trash": "^4.2",
@@ -63,13 +64,19 @@
         "stan": "phpstan analyse --memory-limit 1G",
         "test": "phpunit --colors=always",
         "migrate": "bin/cake migrations migrate",
-        "style-install": "bin/cake bootstrap install",
-        "theme-build": "sh bin/build-theme-assets.sh"
+        "style-install": "bin/cake bootstrap install"
     },
     "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/LBDistrictScouts/DistrictStyles.git"
+        }
+    ],
     "config": {
         "platform-check": true,
         "sort-packages": true,
+        "use-github-api": false,
         "allow-plugins": {
             "cakephp/plugin-installer": true,
             "dealerdirect/phpcodesniffer-composer-installer": true

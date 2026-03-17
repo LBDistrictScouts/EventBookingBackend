@@ -100,8 +100,15 @@ If you need to publish your shared theme package assets into the checked-out `we
 docker compose --profile assets run --rm assets
 ```
 
-The theme settings are source-controlled in [`config/app.php`](/Users/jacob/Development/EventBookingBackend/config/app.php) and the build script defaults. The current source of truth is `@lbdistrictscouts/district-styles`, with local development compiling from `../district-styles` into `webroot/theme/theme.css`.
-Docker image builds do not compile the theme themselves, because the sibling theme repo is outside the Docker build context. Run the assets build first so `webroot/theme/theme.css` exists before building the image.
+Frontend assets are installed through the `DistrictUI` CakePHP plugin command:
+
+```bash
+bin/cake district_ui install --overwrite
+```
+
+Docker image builds run that command inside the image build, so the published
+container includes the generated [`webroot/district_u_i`](/Users/jacob/Development/EventBookingBackend/webroot/district_u_i)
+assets without relying on a separate host-side theme build step.
 
 6. Start the local server:
 

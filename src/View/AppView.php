@@ -15,7 +15,7 @@ declare(strict_types=1);
  */
 namespace App\View;
 
-use BootstrapUI\View\UIView;
+use DistrictUI\View\UIView;
 
 /**
  * Application View

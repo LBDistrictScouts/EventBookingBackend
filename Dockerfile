@@ -11,7 +11,7 @@ ENV TAR_OPTIONS="--no-same-owner"
 WORKDIR /tmp
 
 RUN apk update
-RUN apk add bash zip unzip nodejs npm postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
+RUN apk add bash zip unzip nodejs npm yarn postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
 
 RUN docker-php-ext-configure intl || true
 RUN docker-php-ext-configure pgsql
@@ -37,3 +37,5 @@ USER root
 RUN chown -R $user:$group /var/www/html \
     && chmod -R 777 /var/www/html
 USER $user
+
+RUN php bin/cake district_ui install --overwrite
