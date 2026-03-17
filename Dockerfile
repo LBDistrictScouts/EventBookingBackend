@@ -10,12 +10,12 @@ ENV TAR_OPTIONS="--no-same-owner"
 
 WORKDIR /tmp
 
-RUN apk update
-RUN apk add bash zip unzip nodejs npm yarn postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
+RUN apk update && \
+    apk add --no-cache bash zip unzip nodejs npm yarn postgresql17-client icu-dev libpq-dev php85-pdo_pgsql php85-pgsql
 
-RUN docker-php-ext-configure intl || true
-RUN docker-php-ext-configure pgsql
-RUN docker-php-ext-install intl pgsql pdo pdo_pgsql
+RUN docker-php-ext-configure intl || true && \
+    docker-php-ext-configure pgsql && \
+    docker-php-ext-install intl pgsql pdo pdo_pgsql
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
