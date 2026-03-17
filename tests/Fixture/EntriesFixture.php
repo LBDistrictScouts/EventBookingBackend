@@ -28,6 +28,7 @@ class EntriesFixture extends TestFixture
                 'created' => 1739184246,
                 'modified' => 1739184246,
                 'deleted' => null,
+                'reminder_sent' => null,
                 'entry_email' => 'Lorem ipsum dolor sit amet',
                 'entry_mobile' => 'Lorem ipsum dolor ',
                 'security_code' => 'Lor',

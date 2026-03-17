@@ -22,7 +22,6 @@
         <?php
             echo $this->Form->control('group_name');
             echo $this->Form->control('visible');
-            echo $this->Form->control('deleted');
             echo $this->Form->control('sort_order');
         ?>
     </fieldset>

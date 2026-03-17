@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
+use Cake\TestSuite\EmailTrait;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use Cake\View\Exception\MissingTemplateException;
@@ -14,6 +15,7 @@ use Cake\View\Exception\MissingTemplateException;
  */
 class BookingControllerTest extends TestCase
 {
+    use EmailTrait;
     use IntegrationTestTrait;
     use AuthSessionTrait;
 
@@ -150,7 +152,7 @@ class BookingControllerTest extends TestCase
         $this->assertSame($expected['message'], $resultData['message']);
 
         $this->assertCount(3, $resultData['entry']['participants']);
-        $this->assertCount(16, $resultData['entry']);
+        $this->assertCount(17, $resultData['entry']);
 
         $this->assertEquals($expected['entry']['entry_name'], $resultData['entry']['entry_name']);
         $this->assertEquals($expected['entry']['entry_email'], $resultData['entry']['entry_email']);
@@ -221,6 +223,9 @@ class BookingControllerTest extends TestCase
 
         $entries = $this->getTableLocator()->get('Entries');
         $this->assertSame('Booking Edit', $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce')->entry_name);
+        $this->assertMailCount(1);
+        $this->assertMailSentTo('edited@example.com');
+        $this->assertMailSubjectContains('Booking Update');
     }
 
     /**

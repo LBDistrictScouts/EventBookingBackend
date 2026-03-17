@@ -145,11 +145,62 @@ class CheckInsControllerTest extends TestCase
 
     public function testAddPageLoadsForSpecificEntry(): void
     {
+        $entries = $this->getTableLocator()->get('Entries');
+        $entries->saveOrFail($entries->newEntity([
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'entry_name' => 'Sibling Event Entry',
+            'active' => true,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'entry_email' => 'sibling@example.com',
+            'entry_mobile' => '07123450000',
+            'security_code' => '',
+        ]));
+
+        $events = $this->getTableLocator()->get('Events');
+        $otherEvent = $events->newEntity([
+            'event_name' => 'Other Event',
+            'event_description' => 'Other Event',
+            'booking_code' => 'OTHER',
+            'start_time' => '2026-03-17 10:00:00',
+            'bookable' => true,
+            'finished' => false,
+            'entry_count' => 0,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+        ]);
+        $events->saveOrFail($otherEvent);
+
+        $checkpoints = $this->getTableLocator()->get('Checkpoints');
+        $otherCheckpoint = $checkpoints->newEntity([
+            'checkpoint_sequence' => 99,
+            'checkpoint_name' => 'Other Event Checkpoint',
+            'event_id' => $otherEvent->id,
+        ]);
+        $checkpoints->saveOrFail($otherCheckpoint);
+
+        $entries->saveOrFail($entries->newEntity([
+            'event_id' => $otherEvent->id,
+            'entry_name' => 'Other Event Entry',
+            'active' => true,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'entry_email' => 'other@example.com',
+            'entry_mobile' => '07123450001',
+            'security_code' => '',
+        ]));
+
         $this->get('/check-ins/add/2342ad37-13f0-4fd1-bd3f-2032273626ce');
 
         $this->assertResponseOk();
         $this->assertResponseContains('checkpoint-id');
         $this->assertResponseContains('participants');
+        $this->assertResponseContains('Lorem ipsum dolor');
+        $this->assertResponseContains('[1] Lorem ipsum dolor sit amet');
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
+        $this->assertResponseContains('Sibling Event Entry');
+        $this->assertResponseNotContains('Other Event Checkpoint');
+        $this->assertResponseNotContains('Other Event Entry');
     }
 
     public function testCheckpointPageLoads(): void

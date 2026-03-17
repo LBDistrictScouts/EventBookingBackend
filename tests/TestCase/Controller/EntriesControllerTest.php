@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Test\TestCase\Controller;
 
 use App\Model\Entity\Entry;
+use Cake\TestSuite\EmailTrait;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -14,6 +15,7 @@ use Cake\TestSuite\TestCase;
  */
 class EntriesControllerTest extends TestCase
 {
+    use EmailTrait;
     use IntegrationTestTrait;
     use AuthSessionTrait;
 
@@ -156,12 +158,51 @@ class EntriesControllerTest extends TestCase
             'checked_in_count' => 0,
             'entry_email' => 'controller@example.com',
             'entry_mobile' => '07123456789',
-            'security_code' => '',
         ]);
 
         $this->assertRedirectContains('/entries');
+        $this->assertMailCount(1);
         $entries = $this->getTableLocator()->get('Entries');
-        $this->assertSame(1, $entries->find()->where(['entry_name' => 'Controller Entry'])->count());
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->find()->where(['entry_name' => 'Controller Entry'])->firstOrFail();
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', (string)$entry->security_code);
+    }
+
+    public function testAddCreatesParticipantsFromInlineRows(): void
+    {
+        $this->enableFormTokens();
+        $this->post('/entries/add', [
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'entry_name' => 'Entry With Participants',
+            'active' => true,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'entry_email' => 'inline@example.com',
+            'entry_mobile' => '07123456789',
+            'security_code' => '',
+            'participants' => [
+                [
+                    'first_name' => 'Alice',
+                    'last_name' => 'Example',
+                    'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+                    'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+                ],
+                [
+                    'first_name' => 'Bob',
+                    'last_name' => 'Example',
+                    'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+                    'section_id' => '',
+                ],
+            ],
+        ]);
+
+        $this->assertRedirectContains('/entries');
+        $this->assertMailCount(1);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->find()->where(['entry_name' => 'Entry With Participants'])->firstOrFail();
+        $this->assertSame(2, $entries->Participants->find()->where(['entry_id' => $entry->id])->count());
     }
 
     /**
@@ -263,6 +304,9 @@ class EntriesControllerTest extends TestCase
         $this->assertSame(1, $participants->find()->where(['entry_id' => $survivor->id])->count());
         $deleted = $entries->find('withTrashed')->where(['id' => $victim->id])->firstOrFail();
         $this->assertNotNull($deleted->deleted);
+        $this->assertMailCount(1);
+        $this->assertMailSentTo('merge51@example.com');
+        $this->assertMailSubjectContains('Booking Update');
     }
 
     public function testLookupOptions(): void

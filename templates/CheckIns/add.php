@@ -5,8 +5,7 @@
  * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Checkpoint> $checkpoints
  * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Entry> $entries
  * @var \Cake\Collection\CollectionInterface|array<\App\Model\Entity\Participant> $participants
- * @var bool $entryFixed
- * @var string $entryId
+ * @var string|null $entryId
  */
 ?>
 <?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
@@ -27,20 +26,50 @@
     <fieldset>
         <legend><?= __('Add Check In') ?></legend>
         <?php
-            echo $this->Form->control('checkpoint_id', ['options' => $checkpoints]);
             echo $this->Form->control('entry_id', [
                 'options' => $entries,
-                'disabled' => $entryFixed,
+                'empty' => __('Choose an entry'),
+                'value' => $entryId,
+                'data-redirect-on-change' => $this->Url->build(['action' => 'add']),
+            ]);
+            echo $this->Form->control('checkpoint_id', [
+                'options' => $checkpoints,
+                'empty' => $entryId ? __('Choose a checkpoint') : __('Choose an entry first'),
+                'disabled' => $entryId === null || $entryId === '',
             ]);
             echo $this->Form->control('check_in_time');
-            echo $entryFixed ?
-                $this->Form->multiCheckbox('participants._ids', $participants) :
-                $this->Form->control('participants._ids', ['options' => $participants]);
-            ?>
-        <?php if ($entryFixed) : ?>
-            <?= $this->Form->hidden('entry_id', ['value' => $entryId]) ?>
+        ?>
+        <?php if ($entryId !== null && $entryId !== '') : ?>
+            <?= $this->Form->multiCheckbox('participants._ids', $participants) ?>
+        <?php else : ?>
+            <div class="text-secondary small mt-3">
+                <?= __('Choose an entry to load the participant checklist for that booking.') ?>
+            </div>
         <?php endif; ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>
     <?= $this->Form->end() ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const entrySelect = document.querySelector('[data-redirect-on-change]');
+    if (!(entrySelect instanceof HTMLSelectElement)) {
+        return;
+    }
+
+    entrySelect.addEventListener('change', function () {
+        const baseUrl = entrySelect.dataset.redirectOnChange;
+        if (!baseUrl) {
+            return;
+        }
+
+        if (entrySelect.value) {
+            window.location.assign(baseUrl.replace(/\/$/, '') + '/' + encodeURIComponent(entrySelect.value));
+            return;
+        }
+
+        window.location.assign(baseUrl);
+    });
+});
+</script>

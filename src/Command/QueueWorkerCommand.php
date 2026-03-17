@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Queue\Processor\CheckInProcessor;
+use App\Queue\Processor\QueueMessageProcessor;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
@@ -86,7 +86,7 @@ class QueueWorkerCommand extends Command
             new ReplyExtension(),
         ]));
 
-        $queueConsumer->bind($queueName, new CheckInProcessor());
+        $queueConsumer->bind($queueName, new QueueMessageProcessor());
 
         $queueConsumer->consume();
 

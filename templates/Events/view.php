@@ -49,10 +49,10 @@ $checkedInCount = $event->checked_in_count ?? 0;
                             <div class="card-body">
                                 <h3 class="h5 mb-3"><?= __('Jump To') ?></h3>
                                 <div class="d-grid gap-2">
-                                    <?= $this->Html->link(__('Entries'), ['#' => 'entries'], ['class' => 'btn btn-outline-primary text-start']) ?>
-                                    <?= $this->Html->link(__('Sections'), ['#' => 'sections'], ['class' => 'btn btn-outline-primary text-start']) ?>
-                                    <?= $this->Html->link(__('Checkpoints'), ['#' => 'checkpoints'], ['class' => 'btn btn-outline-primary text-start']) ?>
-                                    <?= $this->Html->link(__('Questions'), ['#' => 'questions'], ['class' => 'btn btn-outline-primary text-start']) ?>
+                                    <?= $this->Html->link(__('Entries'), ['action' => 'view', $event->id, '#' => 'entries'], ['class' => 'btn btn-outline-primary text-start']) ?>
+                                    <?= $this->Html->link(__('Sections'), ['action' => 'view', $event->id, '#' => 'sections'], ['class' => 'btn btn-outline-primary text-start']) ?>
+                                    <?= $this->Html->link(__('Checkpoints'), ['action' => 'view', $event->id, '#' => 'checkpoints'], ['class' => 'btn btn-outline-primary text-start']) ?>
+                                    <?= $this->Html->link(__('Questions'), ['action' => 'view', $event->id, '#' => 'questions'], ['class' => 'btn btn-outline-primary text-start']) ?>
                                 </div>
                             </div>
                         </div>

@@ -13,15 +13,38 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  * @var \Cake\View\View $this
  * @var \App\Model\Entity\Entry $entry
+ * @var string|null $notificationType
+ * @var \App\Model\Entity\Entry|null $mergedEntry
  */
 
 ?>
+<?php
+$notificationType = $notificationType ?? 'created';
+$mergedEntry = $mergedEntry ?? null;
 
-<?= $entry->event->event_name ?> - Registration Confirmed
+$heading = match ($notificationType) {
+    'updated' => 'Registration Updated',
+    'merged' => 'Booking Updated After Merge',
+    'reminder' => 'Event Reminder',
+    default => 'Registration Confirmed',
+};
+?>
+
+<?= $entry->event->event_name ?> - <?= $heading ?>
 Event Date: <?= $this->Time->i18nFormat($entry->event->start_time, 'dd-MMM-yy') ?>
 
 
 ===========================================================
+
+<?php if ($notificationType === 'updated') : ?>
+Your booking details have been updated.
+<?php elseif ($notificationType === 'merged') : ?>
+Your booking was updated after a merge<?php if ($mergedEntry !== null) : ?> from "<?= $mergedEntry->entry_name ?>"<?php endif; ?>.
+<?php elseif ($notificationType === 'reminder') : ?>
+This is your reminder that the event starts in around 12 hours.
+<?php else : ?>
+Your booking has been received and confirmed.
+<?php endif; ?>
 
 Walking Group Name: "<?= $entry->entry_name ?>"
 Contact Email: "<?= $entry->entry_email ?>"
@@ -33,6 +56,24 @@ Booking Reference: <?= $entry->event->booking_code ?>-<?= $entry->reference_numb
 
 Security Code: <?= $entry->security_code ?>
 
+<?php if ($notificationType === 'reminder') : ?>
+Event Start Time: <?= $this->Time->i18nFormat($entry->event->start_time, 'HH:mm', 'Europe/London') ?> on <?= $this->Time->i18nFormat($entry->event->start_time, 'dd-MMM-yy', 'Europe/London') ?>
+<?php endif; ?>
+
+<?php if (!empty($entry->participants)) : ?>
+
+Participants
+<?php foreach ($entry->participants as $participant) : ?>
+<?php $participantName = preg_replace('/\s+/', ' ', trim($participant->full_name)); ?>
+- <?= $participantName ?? trim($participant->full_name) ?>
+  Type: <?= $participant->has('participant_type') ? $participant->participant_type->participant_type : 'N/A' ?>
+  Section: <?=
+    $participant->has('section') && $participant->section !== null
+        ? $participant->section->section_name
+        : 'N/A'
+?>
+<?php endforeach; ?>
+<?php endif; ?>
 
 -------------------------------------------
 

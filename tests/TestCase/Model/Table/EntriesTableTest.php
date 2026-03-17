@@ -102,6 +102,22 @@ class EntriesTableTest extends TestCase
         $this->assertArrayHasKey('security_code', $invalid->getErrors());
     }
 
+    public function testNewEntityGeneratesSecurityCodeWhenFieldIsMissing(): void
+    {
+        $entry = $this->Entries->newEntity([
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'entry_name' => 'Generated Security Code',
+            'active' => true,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'entry_email' => 'generated@example.com',
+            'entry_mobile' => '07123456789',
+        ]);
+
+        $this->assertEmpty($entry->getErrors());
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', (string)$entry->security_code);
+    }
+
     /**
      * Test buildRules method
      *

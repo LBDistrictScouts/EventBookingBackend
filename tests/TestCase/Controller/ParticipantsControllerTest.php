@@ -147,6 +147,8 @@ class ParticipantsControllerTest extends TestCase
 
         $this->assertResponseOk();
         $this->assertResponseContains('participant-type-id');
+        $this->assertResponseContains('Lorem ipsum dolor');
+        $this->assertResponseContains('[1] Lorem ipsum dolor sit amet');
     }
 
     public function testAddPageLoadsForSpecificEntry(): void

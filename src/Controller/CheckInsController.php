@@ -145,26 +145,34 @@ class CheckInsController extends AppController
         }
         $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
 
-        $checkpoints = $this->CheckIns->Checkpoints->find()
-            ->orderByAsc('checkpoint_sequence')
-            ->limit(100)
-            ->all();
-        /** @var iterable<\App\Model\Entity\Checkpoint> $checkpoints */
-        $checkpointOptions = [];
-        foreach ($checkpoints as $checkpoint) {
-            $checkpointOptions[$checkpoint->id] = sprintf(
-                '[%s] %s',
-                $checkpoint->checkpoint_sequence,
-                $checkpoint->checkpoint_name,
-            );
-        }
-        $checkpoints = $checkpointOptions;
+        if ($entryId) {
+            $checkpointsQuery = $this->CheckIns->Checkpoints->find()
+                ->orderByAsc('checkpoint_sequence')
+                ->limit(100);
+            /** @var \App\Model\Entity\Entry $entry */
+            $entry = $this->CheckIns->Entries->get($entryId);
+            $eventId = $entry->event_id;
 
-        $entryFixed = false;
+            /** @var \App\Model\Entity\Entry $entry */
+            $checkpointsQuery->where([
+                'Checkpoints.event_id' => $eventId,
+            ]);
+            $checkpoints = $checkpointsQuery->all();
+            /** @var iterable<\App\Model\Entity\Checkpoint> $checkpoints */
+            $checkpointOptions = [];
+            foreach ($checkpoints as $checkpoint) {
+                $checkpointOptions[$checkpoint->id] = sprintf(
+                    '[%s] %s',
+                    $checkpoint->checkpoint_sequence,
+                    $checkpoint->checkpoint_name,
+                );
+            }
+            $checkpoints = $checkpointOptions;
+        } else {
+            $checkpoints = [];
+        }
 
         if ($entryId) {
-            $entries = $this->CheckIns->Entries->find('list', conditions: ['id' => $entryId], limit: 200)->all();
-            $entryFixed = true;
             $participants = $this->CheckIns->Participants->find(
                 'list',
                 valueField: 'full_name',
@@ -175,22 +183,14 @@ class CheckInsController extends AppController
                 ],
                 limit: 200,
             )->all();
+            $entries = $this->buildEntryOptions($this->CheckIns->Entries, $eventId);
         } else {
-            $entries = $this->CheckIns->Entries->find('list', limit: 200)->all();
-            $participants = $this->CheckIns->Participants->find(
-                'list',
-                valueField: 'full_name',
-                keyField: 'id',
-                groupField: 'entry.entry_name',
-                conditions: [
-                    'checked_out' => false,
-                ],
-                contain: 'Entries',
-            )->all();
+            $participants = [];
+            $entries = $this->buildEntryOptions($this->CheckIns->Entries);
         }
 
         $this->set(
-            compact('checkIn', 'checkpoints', 'entries', 'participants', 'entryFixed', 'entryId'),
+            compact('checkIn', 'checkpoints', 'entries', 'participants', 'entryId'),
         );
 
         return null;
@@ -281,7 +281,7 @@ class CheckInsController extends AppController
 
         $checkpointFixed = false;
 
-        $entries = $this->CheckIns->Entries->find('list', limit: 200)->all();
+        $entries = $this->buildEntryOptions($this->CheckIns->Entries);
         $participants = $this->CheckIns->Participants->find(
             'list',
             valueField: 'full_name',
@@ -327,7 +327,7 @@ class CheckInsController extends AppController
             $this->Flash->error(__('The check in could not be saved. Please, try again.'));
         }
         $checkpoints = $this->CheckIns->Checkpoints->find('list', limit: 200)->all();
-        $entries = $this->CheckIns->Entries->find('list', limit: 200)->all();
+        $entries = $this->buildEntryOptions($this->CheckIns->Entries);
         $participants = $this->CheckIns->Participants->find('list', limit: 200)->all();
         $this->set(compact('checkIn', 'checkpoints', 'entries', 'participants'));
     }

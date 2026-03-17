@@ -20,6 +20,7 @@ use Random\RandomException;
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
+ * @property \Cake\I18n\DateTime|null $reminder_sent
  * @property string $entry_email
  * @property string|null $entry_mobile
  * @property string|null $security_code
@@ -60,6 +61,7 @@ class Entry extends Entity
         'entry_email' => true,
         'entry_mobile' => true,
         'security_code' => true,
+        'reminder_sent' => true,
         'reference_number' => false,
         'event' => true,
         'check_ins' => true,

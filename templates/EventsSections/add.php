@@ -22,7 +22,6 @@
     <fieldset>
         <legend><?= __('Add Events Section') ?></legend>
         <?php
-            echo $this->Form->control('deleted');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

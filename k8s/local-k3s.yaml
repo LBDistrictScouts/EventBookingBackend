@@ -196,6 +196,36 @@ spec:
             - secretRef:
                 name: event-booking-secrets
 ---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: send-event-reminders
+  namespace: event-booking
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: event-booking-runtime
+          restartPolicy: Never
+          containers:
+            - name: send-event-reminders
+              image: ghcr.io/lbdistrictscouts/eventbookingbackend:latest
+              imagePullPolicy: Always
+              command:
+                - php
+                - bin/cake.php
+                - send_event_reminders
+              envFrom:
+                - configMapRef:
+                    name: event-booking-config
+                - secretRef:
+                    name: event-booking-secrets
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

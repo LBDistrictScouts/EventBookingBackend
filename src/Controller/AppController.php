@@ -18,6 +18,8 @@ namespace App\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\EventInterface;
+use Cake\ORM\Association;
+use Cake\ORM\Table;
 use Exception;
 
 /**
@@ -84,5 +86,47 @@ class AppController extends Controller
                 $authentication->allowUnauthenticated([$action]);
             }
         }
+    }
+
+    /**
+     * Build consistent entry selector labels: BOOKINGCODE-REF [count] Name.
+     *
+     * @param \Cake\ORM\Table|\Cake\ORM\Association $entriesTable Entries table or association.
+     * @param string|null $eventId Optional event filter.
+     * @param int $limit Result limit.
+     * @return array<int|string, string>
+     */
+    protected function buildEntryOptions(
+        Table|Association $entriesTable,
+        ?string $eventId = null,
+        int $limit = 200,
+    ): array {
+        $table = $entriesTable instanceof Association ? $entriesTable->getTarget() : $entriesTable;
+
+        $query = $table->find(
+            'list',
+            keyField: 'id',
+            valueField: function ($entry): string {
+                return sprintf(
+                    '%s-%d [%d] %s',
+                    $entry->event->booking_code,
+                    $entry->reference_number,
+                    $entry->participant_count,
+                    $entry->entry_name,
+                );
+            },
+        )
+            ->contain(['Events'])
+            ->orderByAsc('Entries.reference_number')
+            ->limit($limit);
+
+        if ($eventId !== null && $eventId !== '') {
+            $query->where(['Entries.event_id' => $eventId]);
+        }
+
+        /** @var array<int|string, string> $entryOptions */
+        $entryOptions = $query->toArray();
+
+        return $entryOptions;
     }
 }

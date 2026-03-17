@@ -9,7 +9,9 @@ use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
+use Cake\Mailer\MailerAwareTrait;
 use Cake\View\JsonView;
+use RuntimeException;
 
 /**
  * Entries Controller
@@ -18,6 +20,8 @@ use Cake\View\JsonView;
  */
 class EntriesController extends AppController
 {
+    use MailerAwareTrait;
+
     /**
      * @return array<class-string>
      */
@@ -195,21 +199,7 @@ class EntriesController extends AppController
         /** @var list<\App\Model\Entity\CheckIn> $checkIns */
         $checkIns = $entry->check_ins;
         usort($checkIns, function (CheckIn $left, CheckIn $right): int {
-            $leftSequence = (int)$left->checkpoint->checkpoint_sequence;
-            $rightSequence = (int)$right->checkpoint->checkpoint_sequence;
-
-            $leftIsNegative = $leftSequence < 0;
-            $rightIsNegative = $rightSequence < 0;
-
-            if ($leftIsNegative !== $rightIsNegative) {
-                return $leftIsNegative ? 1 : -1;
-            }
-
-            if ($leftIsNegative) {
-                return $leftSequence <=> $rightSequence;
-            }
-
-            return $leftSequence <=> $rightSequence;
+            return $left->check_in_time <=> $right->check_in_time;
         });
         $entry->set('check_ins', $checkIns);
 
@@ -298,6 +288,9 @@ class EntriesController extends AppController
                     return $this->redirect(['action' => 'merge', $consumedEntry->id, $survivorEntry->id]);
                 }
 
+                $notificationEntry = $this->Entries->getApiEntryById($survivorEntry->id, false);
+                $this->getMailer('Booking')->send('confirmation', [$notificationEntry, 'merged', $consumedEntry]);
+
                 $this->Flash->success(__(
                     'Merged {0} into {1}. The surviving entry now has {2} participant(s).',
                     $consumedEntry->entry_name,
@@ -359,17 +352,73 @@ class EntriesController extends AppController
     public function add(): ?Response
     {
         $entry = $this->Entries->newEmptyEntity();
+        $participantRows = [$this->emptyParticipantRow()];
+        $participantErrors = [];
+
         if ($this->request->is('post')) {
-            $entry = $this->Entries->patchEntity($entry, $this->request->getData());
-            if ($this->Entries->save($entry)) {
+            /** @var array<string, mixed> $requestData */
+            $requestData = $this->request->getData();
+            $participantRows = $this->normalizeParticipantRows($requestData['participants'] ?? []);
+            if ($participantRows === []) {
+                $participantRows = [$this->emptyParticipantRow()];
+                unset($requestData['participants']);
+            } else {
+                $requestData['participants'] = array_map(
+                    fn(array $participantRow): array => [
+                        'first_name' => $participantRow['first_name'],
+                        'last_name' => $participantRow['last_name'],
+                        'participant_type_id' => $participantRow['participant_type_id'],
+                        'section_id' => $participantRow['section_id'] !== '' ? $participantRow['section_id'] : null,
+                        'checked_in' => false,
+                        'checked_out' => false,
+                        'highest_check_in_sequence' => 0,
+                    ],
+                    $participantRows,
+                );
+            }
+
+            $entry = $this->Entries->patchEntity($entry, $requestData, [
+                'associated' => ['Participants'],
+            ]);
+            if (!$entry instanceof Entry) {
+                throw new RuntimeException('Patched entry has unexpected type.');
+            }
+
+            if ($this->Entries->save($entry, ['associated' => ['Participants']])) {
+                $mailEntry = $this->Entries->getApiEntryById((string)$entry->id, false);
+                $this->getMailer('Booking')->send('confirmation', [$mailEntry]);
                 $this->Flash->success(__('The entry has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
             }
+
+            /** @var list<\App\Model\Entity\Participant> $participants */
+            $participants = (array)$entry->participants;
+            foreach ($participants as $index => $participant) {
+                $participantErrors[$index] = $participant->getErrors();
+            }
             $this->Flash->error(__('The entry could not be saved. Please, try again.'));
         }
         $events = $this->Entries->Events->find('list', limit: 200)->all();
-        $this->set(compact('entry', 'events'));
+        $participantTypes = $this->Entries->Participants->ParticipantTypes->find(
+            'list',
+            keyField: 'id',
+            valueField: 'participant_type',
+            orderBy: ['ParticipantTypes.sort_order' => 'ASC'],
+        )->all();
+        $sections = $this->Entries->Participants->Sections->find(
+            'list',
+            keyField: 'id',
+            valueField: 'section_name',
+            groupField: 'group.group_name',
+            contain: ['Groups', 'ParticipantTypes'],
+            orderBy: [
+                'Groups.sort_order' => 'ASC',
+                'ParticipantTypes.sort_order' => 'ASC',
+                'Sections.section_name' => 'ASC',
+            ],
+        )->all();
+        $this->set(compact('entry', 'events', 'participantTypes', 'sections', 'participantRows', 'participantErrors'));
 
         return null;
     }
@@ -454,6 +503,57 @@ class EntriesController extends AppController
     {
         $this->set(compact('entry'));
         $this->viewBuilder()->setOption('serialize', ['entry']);
+    }
+
+    /**
+     * @param mixed $participantData
+     * @return list<array{first_name: string, last_name: string, participant_type_id: string, section_id: string}>
+     */
+    protected function normalizeParticipantRows(mixed $participantData): array
+    {
+        if (!is_array($participantData)) {
+            return [];
+        }
+
+        $participantRows = [];
+        foreach ($participantData as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $participantRow = [
+                'first_name' => trim((string)($row['first_name'] ?? '')),
+                'last_name' => trim((string)($row['last_name'] ?? '')),
+                'participant_type_id' => trim((string)($row['participant_type_id'] ?? '')),
+                'section_id' => trim((string)($row['section_id'] ?? '')),
+            ];
+
+            if (
+                $participantRow['first_name'] === '' &&
+                $participantRow['last_name'] === '' &&
+                $participantRow['participant_type_id'] === '' &&
+                $participantRow['section_id'] === ''
+            ) {
+                continue;
+            }
+
+            $participantRows[] = $participantRow;
+        }
+
+        return $participantRows;
+    }
+
+    /**
+     * @return array{first_name: string, last_name: string, participant_type_id: string, section_id: string}
+     */
+    protected function emptyParticipantRow(): array
+    {
+        return [
+            'first_name' => '',
+            'last_name' => '',
+            'participant_type_id' => '',
+            'section_id' => '',
+        ];
     }
 
     /**

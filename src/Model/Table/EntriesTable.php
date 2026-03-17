@@ -55,6 +55,21 @@ class EntriesTable extends Table
     }
 
     /**
+     * Ensure the entity setter gets a chance to generate a code when the field is omitted.
+     *
+     * @param \Cake\Event\EventInterface<static> $event Event instance.
+     * @param \ArrayObject<string, mixed> $data Submitted data.
+     * @param \ArrayObject<string, mixed> $options Marshal options.
+     * @return void
+     */
+    public function beforeMarshal(EventInterface $event, ArrayObject $data, ArrayObject $options): void
+    {
+        if (!$data->offsetExists('security_code') || $data['security_code'] === null) {
+            $data['security_code'] = '';
+        }
+    }
+
+    /**
      * @param \Cake\Event\EventInterface<static> $event
      * @param \App\Model\Entity\Entry $entity
      * @param \ArrayObject<string, mixed> $options
@@ -123,6 +138,10 @@ class EntriesTable extends Table
             ->maxLength('security_code', 5)
             ->allowEmptyString('security_code');
 
+        $validator
+            ->dateTime('reminder_sent')
+            ->allowEmptyDateTime('reminder_sent');
+
         return $validator;
     }
 
@@ -151,7 +170,16 @@ class EntriesTable extends Table
         $query->contain([
             'Events' => ['Checkpoints', 'Questions'],
             'CheckIns',
-            'Participants' => ['ParticipantTypes', 'Sections'],
+            'Participants' => function (SelectQuery $query): SelectQuery {
+                return $query
+                    ->contain(['ParticipantTypes', 'Sections'])
+                    ->leftJoinWith('ParticipantTypes')
+                    ->orderBy([
+                        'ParticipantTypes.sort_order' => 'ASC',
+                        'Participants.last_name' => 'ASC',
+                        'Participants.first_name' => 'ASC',
+                    ]);
+            },
         ]);
 
         if (!$public) {

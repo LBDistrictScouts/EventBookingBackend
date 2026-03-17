@@ -32,7 +32,6 @@
             echo $this->Form->control('participant_type_id', ['options' => $participantTypes]);
             echo $this->Form->control('group_id', ['options' => $groups]);
             echo $this->Form->control('osm_section_id');
-            echo $this->Form->control('deleted');
             echo $this->Form->control('events._ids', ['options' => $events]);
                 ?>
     </fieldset>

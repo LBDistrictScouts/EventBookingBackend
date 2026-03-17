@@ -79,7 +79,7 @@ class ParticipantsController extends AppController
             }
             $this->Flash->error(__('The participant could not be saved. Please, try again.'));
         }
-        $entries = $this->Participants->Entries->find('list', limit: 200)->all();
+        $entries = $this->buildEntryOptions($this->Participants->Entries);
         $participantTypes = $this->Participants->ParticipantTypes->find('list', limit: 200)->all();
         $sections = $this->Participants->Sections->find(
             'list',
@@ -113,7 +113,7 @@ class ParticipantsController extends AppController
             }
             $this->Flash->error(__('The participant could not be saved. Please, try again.'));
         }
-        $entries = $this->Participants->Entries->find('list', limit: 200)->all();
+        $entries = $this->buildEntryOptions($this->Participants->Entries);
         $participantTypes = $this->Participants->ParticipantTypes->find('list', limit: 200)->all();
         $sections = $this->Participants->Sections->find(
             'list',

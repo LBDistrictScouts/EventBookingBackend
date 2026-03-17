@@ -26,7 +26,6 @@
             echo $this->Form->control('adult');
             echo $this->Form->control('uniformed');
             echo $this->Form->control('out_of_district');
-            echo $this->Form->control('deleted');
             echo $this->Form->control('category');
             echo $this->Form->control('sort_order');
         ?>

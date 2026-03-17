@@ -13,11 +13,27 @@ use Exception;
 class BookingMailer extends Mailer
 {
     /**
+     * @var array<string, string>
+     */
+    private const SUBJECT_PREFIXES = [
+        'created' => 'Booking Confirmation',
+        'updated' => 'Booking Update',
+        'merged' => 'Booking Update',
+        'reminder' => 'Event Reminder',
+    ];
+
+    /**
      * @param \App\Model\Entity\Entry $entry
+     * @param string $notificationType
+     * @param \App\Model\Entity\Entry|null $mergedEntry
      * @return \Cake\Mailer\Mailer
      */
-    public function confirmation(Entry $entry): Mailer
+    public function confirmation(Entry $entry, string $notificationType = 'created', ?Entry $mergedEntry = null): Mailer
     {
+        if (!isset(self::SUBJECT_PREFIXES[$notificationType])) {
+            $notificationType = 'created';
+        }
+
         // Grab the configured transport (e.g., 'smtp')
         $transport = TransportFactory::get('smtp');
 
@@ -32,11 +48,12 @@ class BookingMailer extends Mailer
             }
         }
 
+        $subjectPrefix = self::SUBJECT_PREFIXES[$notificationType];
         $mailer = $this->setTo($entry->entry_email)
             ->setFrom(['greenway@lbdscouts.org.uk' => 'LBD Scouts - Greenway Team'])
-            ->setSubject("Booking Confirmation for {$entry->event->event_name}")
+            ->setSubject("{$subjectPrefix} for {$entry->event->event_name}")
             ->setEmailFormat('both')
-            ->setViewVars(compact('entry'));
+            ->setViewVars(compact('entry', 'notificationType', 'mergedEntry'));
 
         $mailer->viewBuilder()
             ->addHelpers(['Html', 'Text', 'Time'])

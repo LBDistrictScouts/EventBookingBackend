@@ -22,7 +22,6 @@
             echo $this->Form->control('event_id', ['options' => $events]);
             echo $this->Form->control('question_text');
             echo $this->Form->control('answer_text');
-            echo $this->Form->control('deleted');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

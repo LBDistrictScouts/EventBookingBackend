@@ -23,7 +23,6 @@
         <legend><?= __('Add Participants Check In') ?></legend>
         <?php
             echo $this->Form->control('id');
-            echo $this->Form->control('deleted');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

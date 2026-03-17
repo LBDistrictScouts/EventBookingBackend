@@ -208,7 +208,9 @@ class BookingController extends AppController
                 $success = true;
                 $message = 'Saved';
                 $errors = [];
-                $entry = $this->Entries->getApiEntryById((string)$id);
+                $mailEntry = $this->Entries->getApiEntryById((string)$id, false);
+                $this->getMailer('Booking')->send('confirmation', [$mailEntry, 'updated']);
+                $entry = $mailEntry->hidePublicFields();
             } else {
                 $this->response = $this->response->withStatus(400, 'Validation failed');
                 $success = false;
