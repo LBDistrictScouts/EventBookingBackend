@@ -20,17 +20,17 @@
     font-weight: 700;
 }
 
-.entry-view .entry-badge {
-    border: 1px solid transparent;
-    font-size: 0.92rem;
-    font-weight: 700;
-    padding: 0.55rem 0.8rem;
+.entry-view .entry-meta-line {
+    color: #5f6f7d;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.98rem;
+    font-weight: 600;
+    gap: 0.5rem;
 }
 
-.entry-view .entry-badge-code {
-    background: var(--entry-ink);
-    border-color: var(--entry-ink);
-    color: #fff;
+.entry-view .entry-meta-separator {
+    color: #9aabb8;
 }
 
 .entry-view .entry-panel {

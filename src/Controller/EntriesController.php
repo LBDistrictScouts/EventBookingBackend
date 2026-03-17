@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Entity\CheckIn;
 use App\Model\Entity\Entry;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
@@ -72,11 +73,12 @@ class EntriesController extends AppController
      */
     public function findByReference(): Response
     {
+        $fallback = ['controller' => 'Events', 'action' => 'current'];
         $rawReference = strtoupper(trim((string)$this->request->getQuery('reference')));
         if ($rawReference === '') {
             $this->Flash->error(__('Enter an entry reference.'));
 
-            return $this->redirect($this->referer(['controller' => 'Events', 'action' => 'current'], true));
+            return $this->redirect($fallback) ?? $this->response;
         }
 
         $query = $this->Entries->find()
@@ -89,18 +91,18 @@ class EntriesController extends AppController
 
             $entry = $query->first();
             if ($entry !== null) {
-                return $this->redirect(['action' => 'view', $entry->id]);
+                return $this->redirectResponse(['action' => 'view', $entry->id]);
             }
 
             $this->Flash->error(__('No entry was found for reference {0}.', $rawReference));
 
-            return $this->redirect($this->referer(['controller' => 'Events', 'action' => 'current'], true));
+            return $this->redirect($fallback) ?? $this->response;
         }
 
         if (!ctype_digit($rawReference)) {
             $this->Flash->error(__('Entry references must look like BOOKINGCODE-123 or just 123.'));
 
-            return $this->redirect($this->referer(['controller' => 'Events', 'action' => 'current'], true));
+            return $this->redirect($fallback) ?? $this->response;
         }
 
         $referenceNumber = (int)$rawReference;
@@ -119,7 +121,7 @@ class EntriesController extends AppController
                 ->first();
 
             if ($activeEntry !== null) {
-                return $this->redirect(['action' => 'view', $activeEntry->id]);
+                return $this->redirectResponse(['action' => 'view', $activeEntry->id]);
             }
         }
 
@@ -134,10 +136,10 @@ class EntriesController extends AppController
             if ($entry === null) {
                 $this->Flash->error(__('No entry was found for reference {0}.', $rawReference));
 
-                return $this->redirect($this->referer(['controller' => 'Events', 'action' => 'current'], true));
+                return $this->redirect($fallback) ?? $this->response;
             }
 
-            return $this->redirect(['action' => 'view', $entry->id]);
+            return $this->redirectResponse(['action' => 'view', $entry->id]);
         }
 
         $message = $matches->count() > 1
@@ -145,7 +147,7 @@ class EntriesController extends AppController
             : __('No entry was found for reference {0}.', $rawReference);
         $this->Flash->error($message);
 
-        return $this->redirect($this->referer(['controller' => 'Events', 'action' => 'current'], true));
+        return $this->redirect($fallback) ?? $this->response;
     }
 
     /**
@@ -173,6 +175,7 @@ class EntriesController extends AppController
             return;
         }
 
+        /** @var \App\Model\Entity\Entry $entry */
         $entry = $this->Entries->get($entryId, contain: [
             'Events',
             'CheckIns' => [
@@ -189,7 +192,9 @@ class EntriesController extends AppController
             ],
         ]);
 
-        usort($entry->check_ins, function ($left, $right): int {
+        /** @var list<\App\Model\Entity\CheckIn> $checkIns */
+        $checkIns = $entry->check_ins;
+        usort($checkIns, function (CheckIn $left, CheckIn $right): int {
             $leftSequence = (int)$left->checkpoint->checkpoint_sequence;
             $rightSequence = (int)$right->checkpoint->checkpoint_sequence;
 
@@ -206,6 +211,7 @@ class EntriesController extends AppController
 
             return $leftSequence <=> $rightSequence;
         });
+        $entry->set('check_ins', $checkIns);
 
         $this->set(compact('entry'));
     }
@@ -224,8 +230,10 @@ class EntriesController extends AppController
         $this->request->allowMethod(['get', 'post']);
 
         $baseEntryId = $consumedId ?: $survivorId;
+        /** @var \App\Model\Entity\Entry $baseEntry */
         $baseEntry = $this->Entries->get((string)$baseEntryId, contain: ['Events']);
 
+        /** @var \Cake\Collection\CollectionInterface<int, \App\Model\Entity\Entry> $allMergeEntries */
         $allMergeEntries = $this->Entries->find()
             ->contain(['Events', 'Participants'])
             ->where([
@@ -243,6 +251,7 @@ class EntriesController extends AppController
 
         $consumedEntry = null;
         if ($selectedConsumedId !== null && $selectedConsumedId !== '') {
+            /** @var \App\Model\Entity\Entry|null $consumedEntry */
             $consumedEntry = $this->Entries->find()
                 ->contain(['Events', 'Participants'])
                 ->where([
@@ -254,6 +263,7 @@ class EntriesController extends AppController
 
         $survivorEntry = null;
         if ($selectedSurvivorId !== null && $selectedSurvivorId !== '') {
+            /** @var \App\Model\Entity\Entry|null $survivorEntry */
             $survivorEntry = $this->Entries->find()
                 ->contain(['Events', 'Participants'])
                 ->where([
@@ -264,6 +274,7 @@ class EntriesController extends AppController
         }
 
         if ($consumedEntry === null) {
+            /** @var \App\Model\Entity\Entry $consumedEntry */
             $consumedEntry = $this->Entries->get((string)$baseEntryId, contain: ['Events', 'Participants']);
         }
 
@@ -314,7 +325,9 @@ class EntriesController extends AppController
     {
         $this->request->allowMethod(['get']);
 
+        /** @var \App\Model\Entity\Entry $consumedEntry */
         $consumedEntry = $this->Entries->get((string)$consumedId, contain: ['Events', 'Participants']);
+        /** @var \App\Model\Entity\Entry|null $survivorEntry */
         $survivorEntry = $this->Entries->find()
             ->contain(['Events', 'Participants'])
             ->where([
@@ -445,7 +458,7 @@ class EntriesController extends AppController
 
     /**
      * @param \App\Model\Entity\Entry $entry
-     * @return array<string, scalar>
+     * @return array<string, mixed>
      */
     protected function buildMergeEntrySummary(Entry $entry): array
     {
@@ -467,6 +480,15 @@ class EntriesController extends AppController
                 $entry->participants,
             ),
         ];
+    }
+
+    /**
+     * @param array<string|int, mixed>|string $url
+     * @return \Cake\Http\Response
+     */
+    protected function redirectResponse(array|string $url): Response
+    {
+        return $this->redirect($url) ?? $this->response;
     }
 
     /**

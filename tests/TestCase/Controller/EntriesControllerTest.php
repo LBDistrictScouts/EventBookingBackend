@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
+use App\Model\Entity\Entry;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -483,8 +484,7 @@ class EntriesControllerTest extends TestCase
         int $referenceNumber,
         bool $bookable,
         ?string $eventId = null,
-    ): \App\Model\Entity\Entry
-    {
+    ): Entry {
         $events = $this->getTableLocator()->get('Events');
         $entries = $this->getTableLocator()->get('Entries');
 

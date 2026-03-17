@@ -20,7 +20,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\DateTime $modified
  * @property \Cake\I18n\DateTime|null $deleted
  * @property int $highest_check_in_sequence
- *
+ * @property-read string $full_name
  * @property \App\Model\Entity\Entry $entry
  * @property \App\Model\Entity\ParticipantType $participant_type
  * @property \App\Model\Entity\Section $section
