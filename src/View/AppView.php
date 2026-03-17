@@ -41,6 +41,7 @@ class AppView extends UIView
         parent::initialize();
 
         $this->addHelper('Actions');
+        $this->addHelper('BooleanIcon');
         $this->addHelper('Paginator');
 
         $this->Paginator->setTemplates([

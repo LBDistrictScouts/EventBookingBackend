@@ -18,6 +18,9 @@
 
 <div class="groups view large-9 medium-8 columns content">
     <h3><?= h($group->group_name) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($group) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>
@@ -65,25 +68,7 @@
                                 <td><?= $section->has('participant_type') ? h($section->participant_type->participant_type) : '' ?></td>
                                 <td><?= h($section->osm_section_id) ?></td>
                                 <td class="actions">
-                                    <?= $this->Html->link(
-                                        title: $this->Html->icon('eye'),
-                                        url: ['controller' => 'Sections', 'action' => 'view', $section->id],
-                                        options: ['escape' => false, 'class' => 'btn btn-sm btn-success'],
-                                    ) ?>
-                                    <?= $this->Html->link(
-                                        title: $this->Html->icon('pencil-square'),
-                                        url: ['controller' => 'Sections', 'action' => 'edit', $section->id],
-                                        options: ['escape' => false, 'class' => 'btn btn-sm btn-warning'],
-                                    ) ?>
-                                    <?= $this->Form->postLink(
-                                        title: $this->Html->icon('trash3'),
-                                        url: ['controller' => 'Sections', 'action' => 'delete', $section->id],
-                                        options: [
-                                            'confirm' => __('Are you sure you want to delete # {0}?', $section->id),
-                                            'escape' => false,
-                                            'class' => 'btn btn-sm btn-danger',
-                                        ],
-                                    ) ?>
+                                    <?= $this->Actions->buttons($section, ['outline' => true]) ?>
                                 </td>
                             </tr>
                         </table>
@@ -108,29 +93,7 @@
                                                 ]) ?></td>
                                             <td><?= h($participant->entry->participant_count) ?></td>
                                             <td class="actions">
-                                                <?= $this->Html->link(
-                                                    title: $this->Html->icon('eye'),
-                                                    url: ['controller' => 'Participants', 'action' => 'view', $participant->id],
-                                                    options: ['escape' => false, 'class' => 'btn btn-sm btn-outline-success'],
-                                                ) ?>
-                                                <?= $this->Html->link(
-                                                    title: $this->Html->icon('pencil-square'),
-                                                    url: ['controller' => 'Participants', 'action' => 'edit', $participant->id],
-                                                    options: ['escape' => false, 'class' => 'btn btn-sm btn-outline-warning'],
-                                                ) ?>
-                                                <?= $this->Form->postLink(
-                                                    title: $this->Html->icon('trash3'),
-                                                    url: ['controller' => 'Participants', 'action' => 'delete', $participant->id],
-                                                    options: [
-                                                        'confirm' => __(
-                                                            'Are you sure you want to delete # {0} {1}?',
-                                                            $participant->first_name,
-                                                            $participant->last_name,
-                                                        ),
-                                                        'escape' => false,
-                                                        'class' => 'btn btn-sm btn-outline-danger',
-                                                    ],
-                                                ) ?>
+                                                <?= $this->Actions->buttons($participant, ['outline' => true]) ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

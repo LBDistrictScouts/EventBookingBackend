@@ -11,7 +11,8 @@ usage() {
 Usage: bin/redeploy-k3s.sh [--with-migrations]
 
 Restarts the Kubernetes workloads for the local k3s deployment so they pull the
-latest GHCR image without recreating secrets, PVCs, or the namespace.
+latest GHCR image and rerun the app Deployment init container that copies code
+into the shared webroot, without recreating secrets, PVCs, or the namespace.
 
 Environment overrides:
   NAMESPACE=<namespace>       Kubernetes namespace to use. Default: event-booking
@@ -38,7 +39,17 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-echo "Restarting app deployment in namespace '$NAMESPACE'..."
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+    echo "Recreating deploy job..."
+    kubectl delete job event-booking-deploy -n "$NAMESPACE" --ignore-not-found
+    kubectl apply -f k8s/deploy-job.yaml
+    echo "Streaming deploy job logs..."
+    kubectl logs -n "$NAMESPACE" job/event-booking-deploy -f
+    echo "Waiting for deploy job completion..."
+    kubectl wait --for=condition=complete job/event-booking-deploy -n "$NAMESPACE" --timeout="$WAIT_TIMEOUT"
+fi
+
+echo "Restarting app deployment in namespace '$NAMESPACE' to trigger copy-app-code..."
 kubectl rollout restart deployment/event-booking -n "$NAMESPACE"
 
 echo "Restarting worker deployment in namespace '$NAMESPACE'..."
@@ -49,14 +60,6 @@ kubectl rollout status deployment/event-booking -n "$NAMESPACE" --timeout="$WAIT
 
 echo "Waiting for worker rollout..."
 kubectl rollout status deployment/worker -n "$NAMESPACE" --timeout="$WAIT_TIMEOUT"
-
-if [ "$RUN_MIGRATIONS" = "true" ]; then
-    echo "Recreating deploy job..."
-    kubectl delete job event-booking-deploy -n "$NAMESPACE" --ignore-not-found
-    kubectl apply -f k8s/deploy-job.yaml
-    echo "Streaming deploy job logs..."
-    kubectl logs -n "$NAMESPACE" job/event-booking-deploy -f
-fi
 
 echo "Current pod status:"
 kubectl get pods -n "$NAMESPACE"

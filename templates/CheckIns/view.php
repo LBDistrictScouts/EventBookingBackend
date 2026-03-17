@@ -22,6 +22,9 @@
 
 <div class="checkIns view large-9 medium-8 columns content">
     <h3><?= h($checkIn->id) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($checkIn) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>

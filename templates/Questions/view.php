@@ -18,6 +18,9 @@
 
 <div class="questions view large-9 medium-8 columns content">
     <h3><?= h($question->id) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($question) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>

@@ -20,15 +20,18 @@
 
 <div class="participantTypes view large-9 medium-8 columns content">
     <h3><?= h($participantType->participant_type) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($participantType) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>
-                <th scope="row"><?= __('Id') ?></th>
-                <td><?= h($participantType->id) ?></td>
-            </tr>
-            <tr>
                 <th scope="row"><?= __('Participant Type') ?></th>
                 <td><?= h($participantType->participant_type) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Category') ?></th>
+                <td><?= h($participantType->category?->label()) ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Sort Order') ?></th>
@@ -43,20 +46,20 @@
                 <td><?= h($participantType->modified) ?></td>
             </tr>
             <tr>
-                <th scope="row"><?= __('Deleted') ?></th>
-                <td><?= h($participantType->deleted) ?></td>
-            </tr>
-            <tr>
                 <th scope="row"><?= __('Adult') ?></th>
-                <td><?= $participantType->adult ? __('Yes') : __('No'); ?></td>
+                <td><?= $this->BooleanIcon->render($participantType->adult) ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Uniformed') ?></th>
-                <td><?= $participantType->uniformed ? __('Yes') : __('No'); ?></td>
+                <td><?= $this->BooleanIcon->render($participantType->uniformed) ?></td>
             </tr>
             <tr>
                 <th scope="row"><?= __('Out Of District') ?></th>
-                <td><?= $participantType->out_of_district ? __('Yes') : __('No'); ?></td>
+                <td><?= $this->BooleanIcon->render($participantType->out_of_district) ?></td>
+            </tr>
+            <tr>
+                <th scope="row"><?= __('Deleted') ?></th>
+                <td><?= $participantType->deleted ? h($participantType->deleted) : '' ?></td>
             </tr>
         </table>
     </div>
@@ -67,37 +70,25 @@
             <table class="table table-striped">
                 <tr>
                     <th scope="col"><?= __('Id') ?></th>
-                    <th scope="col"><?= __('First Name') ?></th>
-                    <th scope="col"><?= __('Last Name') ?></th>
+                    <th scope="col"><?= __('Name') ?></th>
                     <th scope="col"><?= __('Entry Id') ?></th>
-                    <th scope="col"><?= __('Participant Type Id') ?></th>
                     <th scope="col"><?= __('Section Id') ?></th>
                     <th scope="col"><?= __('Checked In') ?></th>
                     <th scope="col"><?= __('Checked Out') ?></th>
-                    <th scope="col"><?= __('Created') ?></th>
-                    <th scope="col"><?= __('Modified') ?></th>
-                    <th scope="col"><?= __('Deleted') ?></th>
                     <th scope="col"><?= __('Highest Check In Sequence') ?></th>
                     <th scope="col" class="actions"><?= __('Actions') ?></th>
                 </tr>
                 <?php foreach ($participantType->participants as $participants): ?>
                 <tr>
                     <td><?= h($participants->id) ?></td>
-                    <td><?= h($participants->first_name) ?></td>
-                    <td><?= h($participants->last_name) ?></td>
+                    <td><?= h(trim($participants->full_name)) ?></td>
                     <td><?= h($participants->entry_id) ?></td>
-                    <td><?= h($participants->participant_type_id) ?></td>
                     <td><?= h($participants->section_id) ?></td>
-                    <td><?= h($participants->checked_in) ?></td>
-                    <td><?= h($participants->checked_out) ?></td>
-                    <td><?= h($participants->created) ?></td>
-                    <td><?= h($participants->modified) ?></td>
-                    <td><?= h($participants->deleted) ?></td>
+                    <td><?= $this->BooleanIcon->render($participants->checked_in) ?></td>
+                    <td><?= $this->BooleanIcon->render($participants->checked_out) ?></td>
                     <td><?= h($participants->highest_check_in_sequence) ?></td>
                     <td class="actions">
-                        <?= $this->Html->link(__('View'), ['controller' => 'Participants', 'action' => 'view', $participants->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Html->link(__('Edit'), ['controller' => 'Participants', 'action' => 'edit', $participants->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Form->postLink( __('Delete'), ['controller' => 'Participants', 'action' => 'delete', $participants->id], ['confirm' => __('Are you sure you want to delete # {0}?', $participants->id), 'class' => 'btn btn-danger']) ?>
+                        <?= $this->Actions->buttons($participants) ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -113,28 +104,18 @@
                 <tr>
                     <th scope="col"><?= __('Id') ?></th>
                     <th scope="col"><?= __('Section Name') ?></th>
-                    <th scope="col"><?= __('Participant Type Id') ?></th>
                     <th scope="col"><?= __('Group Id') ?></th>
                     <th scope="col"><?= __('Osm Section Id') ?></th>
-                    <th scope="col"><?= __('Created') ?></th>
-                    <th scope="col"><?= __('Modified') ?></th>
-                    <th scope="col"><?= __('Deleted') ?></th>
                     <th scope="col" class="actions"><?= __('Actions') ?></th>
                 </tr>
                 <?php foreach ($participantType->sections as $sections): ?>
                 <tr>
                     <td><?= h($sections->id) ?></td>
                     <td><?= h($sections->section_name) ?></td>
-                    <td><?= h($sections->participant_type_id) ?></td>
                     <td><?= h($sections->group_id) ?></td>
-                    <td><?= h($sections->osm_section_id) ?></td>
-                    <td><?= h($sections->created) ?></td>
-                    <td><?= h($sections->modified) ?></td>
-                    <td><?= h($sections->deleted) ?></td>
+                    <td><?= $sections->osm_section_id === null ? '' : h($sections->osm_section_id) ?></td>
                     <td class="actions">
-                        <?= $this->Html->link(__('View'), ['controller' => 'Sections', 'action' => 'view', $sections->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Html->link(__('Edit'), ['controller' => 'Sections', 'action' => 'edit', $sections->id], ['class' => 'btn btn-secondary']) ?>
-                        <?= $this->Form->postLink( __('Delete'), ['controller' => 'Sections', 'action' => 'delete', $sections->id], ['confirm' => __('Are you sure you want to delete # {0}?', $sections->id), 'class' => 'btn btn-danger']) ?>
+                        <?= $this->Actions->buttons($sections) ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

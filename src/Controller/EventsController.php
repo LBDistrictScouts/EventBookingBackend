@@ -54,7 +54,7 @@ class EventsController extends AppController
     public function current(): void
     {
         try {
-            $this->viewBuilder()->setTemplate('view');
+            $this->viewBuilder()->setTemplate('current_dashboard');
 
             $query = $this->Events->find()->where(['bookable' => true, 'finished' => false])->orderByAsc('start_time');
             $latest = $query->firstOrFail();

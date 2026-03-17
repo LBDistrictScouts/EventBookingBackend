@@ -13,6 +13,9 @@
 
 <div class="checkpoints view large-9 medium-8 columns content">
     <h3><?= h($checkpoint->checkpoint_name) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($checkpoint) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>

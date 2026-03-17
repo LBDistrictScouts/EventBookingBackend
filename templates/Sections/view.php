@@ -24,6 +24,9 @@
 
 <div class="sections view large-9 medium-8 columns content">
     <h3><?= h($section->section_name) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($section) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>

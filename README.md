@@ -315,7 +315,7 @@ To roll the cluster forward after a new GHCR image is published, use [`bin/redep
 bin/redeploy-k3s.sh
 ```
 
-That restarts the `event-booking` and `worker` deployments without recreating secrets, persistent storage, or the namespace. If you also want to rerun the deploy job for migrations:
+That restarts the `event-booking` and `worker` deployments without recreating secrets, persistent storage, or the namespace. Restarting `event-booking` also reruns the `copy-app-code` init container so NGINX picks up the latest static files from the new image. If you also want to rerun the deploy job for migrations before restarting workloads:
 
 ```bash
 bin/redeploy-k3s.sh --with-migrations

@@ -24,6 +24,9 @@
 
 <div class="events view large-9 medium-8 columns content">
     <h3><?= h($event->event_name) ?></h3>
+    <div class="mb-3">
+        <?= $this->Actions->buttons($event) ?>
+    </div>
     <div class="table-responsive">
         <table class="table table-striped">
             <tr>
@@ -77,7 +80,7 @@
         </table>
     </div>
     <div class="accordion" id="accordionRelated">
-        <div class="accordion-item">
+        <div class="accordion-item" id="sections">
             <h4 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseSections" aria-expanded="false" aria-controls="collapseSections">
@@ -112,7 +115,7 @@
             <?php endif; ?>
             </div>
         </div>
-        <div class="accordion-item">
+        <div class="accordion-item" id="checkpoints">
             <h4 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseCheckpoints" aria-expanded="false" aria-controls="collapseCheckpoints">
@@ -144,7 +147,7 @@
             <?php endif; ?>
             </div>
         </div>
-        <div class="accordion-item">
+        <div class="accordion-item" id="entries">
             <h4 class="accordion-header">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseEntries" aria-expanded="true" aria-controls="collapseEntries">
@@ -187,7 +190,7 @@
             <?php endif; ?>
             </div>
         </div>
-        <div class="accordion-item">
+        <div class="accordion-item" id="questions">
             <h4 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseQuestions" aria-expanded="false" aria-controls="collapseQuestions">
@@ -225,3 +228,33 @@
         </div>
     </div>
 </div>
+
+<?php $this->append('script'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const hash = window.location.hash.replace('#', '');
+    const map = {
+        sections: 'collapseSections',
+        checkpoints: 'collapseCheckpoints',
+        entries: 'collapseEntries',
+        questions: 'collapseQuestions',
+    };
+
+    if (!hash || !map[hash]) {
+        return;
+    }
+
+    const collapseId = map[hash];
+    const collapseElement = document.getElementById(collapseId);
+    if (!collapseElement) {
+        return;
+    }
+
+    if (window.bootstrap && window.bootstrap.Collapse) {
+        window.bootstrap.Collapse.getOrCreateInstance(collapseElement).show();
+    }
+
+    document.getElementById(hash)?.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+</script>
+<?php $this->end(); ?>
