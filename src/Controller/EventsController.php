@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
+use Cake\ORM\Query\SelectQuery;
 use Cake\View\JsonView;
 
 /**
@@ -169,21 +170,143 @@ class EventsController extends AppController
         $event = $this->Events->get(
             $id,
             contain: [
-                'Sections' => [
-                    'Groups',
-                    'ParticipantTypes',
-                    'sort' => ['Groups.sort_order' => 'ASC', 'ParticipantTypes.sort_order' => 'ASC'],
-                ],
                 'Questions',
                 'Checkpoints' => ['sort' => 'checkpoint_sequence'],
-                'Entries' => [
-                    'Participants',
-                    'CheckIns.Checkpoints',
-                    'sort' => ['reference_number' => 'ASC'],
-                ],
             ],
         );
-        $this->set(compact('event'));
+
+        /** @var \Cake\ORM\Query\SelectQuery<array<string, mixed>|\Cake\Datasource\EntityInterface> $entriesQuery */
+        $entriesQuery = $this->Events->Entries->find()
+            ->where(['Entries.event_id' => $id])
+            ->contain(['CheckIns'])
+            ->orderBy(['Entries.reference_number' => 'ASC']);
+
+        $entriesSearch = trim((string)$this->request->getQuery('entries_search', ''));
+        if ($entriesSearch !== '') {
+            $entriesSearchNeedle = '%' . $entriesSearch . '%';
+            $entriesQuery->where([
+                'OR' => [
+                    'Entries.entry_name ILIKE' => $entriesSearchNeedle,
+                    'Entries.entry_email ILIKE' => $entriesSearchNeedle,
+                    'Entries.entry_mobile ILIKE' => $entriesSearchNeedle,
+                ],
+            ]);
+        }
+
+        /** @var \Cake\ORM\Query\SelectQuery<array<string, mixed>|\Cake\Datasource\EntityInterface> $sectionsQuery */
+        $sectionsQuery = $this->Events->Sections->find()
+            ->matching('Events', fn(SelectQuery $query): SelectQuery => $query->where(['Events.id' => $id]))
+            ->contain(['Groups', 'ParticipantTypes'])
+            ->orderBy(['Groups.sort_order' => 'ASC', 'Sections.section_name' => 'ASC']);
+
+        [$entries, $entriesPagination] = $this->paginateRelatedQuery(
+            $entriesQuery,
+            [
+                'pageParam' => 'entries_page',
+                'sortParam' => 'entries_sort',
+                'directionParam' => 'entries_direction',
+                'defaultSort' => 'reference_number',
+                'sortableFields' => [
+                    'reference_number' => 'Entries.reference_number',
+                    'entry_name' => 'Entries.entry_name',
+                    'participant_count' => 'Entries.participant_count',
+                    'checked_in_count' => 'Entries.checked_in_count',
+                    'created' => 'Entries.created',
+                ],
+                'limit' => 10,
+                'anchor' => 'entries',
+                'tieBreakers' => ['Entries.reference_number' => 'ASC'],
+            ],
+        );
+
+        [$sections, $sectionsPagination] = $this->paginateRelatedQuery(
+            $sectionsQuery,
+            [
+                'pageParam' => 'sections_page',
+                'sortParam' => 'sections_sort',
+                'directionParam' => 'sections_direction',
+                'defaultSort' => 'section_name',
+                'sortableFields' => [
+                    'section_name' => 'Sections.section_name',
+                    'group_name' => 'Groups.group_name',
+                ],
+                'limit' => 10,
+                'anchor' => 'sections',
+                'tieBreakers' => ['Groups.sort_order' => 'ASC', 'Sections.section_name' => 'ASC'],
+            ],
+        );
+
+        $this->set(compact(
+            'event',
+            'entries',
+            'entriesPagination',
+            'sections',
+            'sectionsPagination',
+            'entriesSearch',
+        ));
+    }
+
+    /**
+     * @param \Cake\ORM\Query\SelectQuery<array<string, mixed>|\Cake\Datasource\EntityInterface> $query
+     * @param array<string, mixed> $options
+     * @return array{0: \Cake\Datasource\ResultSetInterface<int, array<string, mixed>|\Cake\Datasource\EntityInterface>, 1: array<string, int|string>}
+     * @phpstan-param \Cake\ORM\Query\SelectQuery<array<string, mixed>|\Cake\Datasource\EntityInterface> $query
+     * @phpstan-param array<string, mixed> $options
+     * @phpstan-return array{0: \Cake\Datasource\ResultSetInterface<int, array<string, mixed>|\Cake\Datasource\EntityInterface>, 1: array<string, int|string>}
+     */
+    private function paginateRelatedQuery(SelectQuery $query, array $options): array
+    {
+        $limit = (int)($options['limit'] ?? 10);
+        $pageParam = (string)$options['pageParam'];
+        $sortParam = (string)$options['sortParam'];
+        $directionParam = (string)$options['directionParam'];
+        /** @var array<string, string> $sortableFields */
+        $sortableFields = $options['sortableFields'];
+        $defaultSort = (string)$options['defaultSort'];
+        /** @var array<string, string> $tieBreakers */
+        $tieBreakers = $options['tieBreakers'] ?? [];
+
+        $sort = (string)$this->request->getQuery($sortParam, $defaultSort);
+        if (!array_key_exists($sort, $sortableFields)) {
+            $sort = $defaultSort;
+        }
+
+        $direction = strtolower((string)$this->request->getQuery($directionParam, 'asc')) === 'desc' ? 'DESC' : 'ASC';
+        $page = max(1, (int)$this->request->getQuery($pageParam, 1));
+
+        $total = $query->count();
+        $pageCount = max(1, (int)ceil($total / $limit));
+        $page = min($page, $pageCount);
+
+        $orderBy = [$sortableFields[$sort] => $direction];
+        foreach ($tieBreakers as $field => $tieDirection) {
+            if ($field === $sortableFields[$sort]) {
+                continue;
+            }
+            $orderBy[$field] = $tieDirection;
+        }
+
+        $results = $query
+            ->orderBy($orderBy)
+            ->limit($limit)
+            ->offset(($page - 1) * $limit)
+            ->all();
+
+        return [
+            $results,
+            [
+                'page' => $page,
+                'page_count' => $pageCount,
+                'limit' => $limit,
+                'total' => $total,
+                'sort' => $sort,
+                'direction' => strtolower($direction),
+                'page_param' => $pageParam,
+                'sort_param' => $sortParam,
+                'direction_param' => $directionParam,
+                'anchor' => (string)$options['anchor'],
+            ],
+        ];
     }
 
     /**

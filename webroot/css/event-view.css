@@ -1,0 +1,118 @@
+.event-view {
+    --event-view-ink: #14213d;
+    --event-view-accent: #fca311;
+    --event-view-soft: #eef4fb;
+}
+
+.event-view-shell {
+    max-width: 1440px;
+}
+
+.event-hero {
+    background:
+        radial-gradient(circle at top right, rgba(252, 163, 17, 0.18), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #f3f7fc 100%);
+}
+
+.event-kicker,
+.event-stat-label,
+.event-detail-label {
+    color: #5c6b80;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.event-panel {
+    background: rgba(20, 33, 61, 0.04);
+}
+
+.event-meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.65rem;
+    color: #4f5f75;
+    font-weight: 600;
+}
+
+.event-meta-separator {
+    color: #9aa8ba;
+}
+
+.event-stat {
+    background: linear-gradient(135deg, #f8fafc 0%, var(--event-view-soft) 100%);
+    border-left: 0.45rem solid var(--event-view-ink);
+}
+
+.event-stat-accent {
+    border-left-color: var(--event-view-accent);
+}
+
+.event-stat-value {
+    color: var(--event-view-ink);
+    font-size: clamp(2.6rem, 5vw, 4.8rem);
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.5rem 0 0.75rem;
+}
+
+.event-stat-note {
+    color: #5c6b80;
+    font-size: 0.95rem;
+}
+
+.event-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem 1.25rem;
+}
+
+.event-detail-value {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.event-view .table td,
+.event-view .table th {
+    vertical-align: middle;
+}
+
+.event-view .list-group-item:last-child {
+    border-bottom: 0;
+}
+
+.event-table-search {
+    min-width: min(100%, 28rem);
+}
+
+.event-table-search-group {
+    flex-wrap: nowrap;
+}
+
+.ajax-table-card {
+    transition: opacity 0.15s ease;
+}
+
+.ajax-table-card.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.table-sort-link.active {
+    font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+    .event-hero .display-6 {
+        font-size: 2.1rem;
+    }
+
+    .event-table-search {
+        min-width: 100%;
+    }
+
+    .event-table-search-group {
+        flex-wrap: wrap;
+    }
+}

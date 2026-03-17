@@ -163,6 +163,40 @@ class EventsControllerTest extends TestCase
     }
 
     /**
+     * @return void
+     * @uses \App\Controller\EventsController::view()
+     */
+    public function testViewFiltersEntriesByPartialSearchAcrossContactFields(): void
+    {
+        $entries = $this->getTableLocator()->get('Entries');
+        $existingEntry = $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce');
+        $existingEntry->entry_mobile = '07999999999';
+        $entries->saveOrFail($existingEntry);
+
+        $newEntry = $entries->newEntity([
+            'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+            'entry_name' => 'Alpha Patrol',
+            'active' => true,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'entry_email' => 'alpha@example.com',
+            'entry_mobile' => '07000111222',
+            'security_code' => 'ABC12',
+        ]);
+        $entries->saveOrFail($newEntry);
+
+        $this->get('/events/view/3a6d9419-b621-45cf-a13e-4db9647bf5bc?entries_search=alpha');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Alpha Patrol');
+        $this->assertResponseNotContains('07999999999');
+
+        $this->get('/events/view/3a6d9419-b621-45cf-a13e-4db9647bf5bc?entries_search=111222');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Alpha Patrol');
+        $this->assertResponseNotContains('07999999999');
+    }
+
+    /**
      * Test add method
      *
      * @return void
