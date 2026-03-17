@@ -38,4 +38,4 @@ RUN chown -R $user:$group /var/www/html \
     && chmod -R 777 /var/www/html
 USER $user
 
-RUN php bin/cake district_ui install --overwrite
+RUN ./bin/cake district_ui install --overwrite
