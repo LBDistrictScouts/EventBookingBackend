@@ -102,7 +102,7 @@ jobs:
         psql -h 127.0.0.1 -U postgres -d event_booking -c 'CREATE SCHEMA IF NOT EXISTS test;'
 
     - name: Composer install
-      uses: ramsey/composer-install@v3
+      uses: ramsey/composer-install@v4
       with:
         dependency-versions: ${{ matrix.dependencies }}
 
@@ -139,7 +139,7 @@ jobs:
         tools: cs2pr, phpstan:2.1.22
 
     - name: Composer install
-      uses: ramsey/composer-install@v3
+      uses: ramsey/composer-install@v4
 
     - name: Prepare AWS profile
       run: |
