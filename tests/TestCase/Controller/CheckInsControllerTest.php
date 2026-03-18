@@ -109,7 +109,9 @@ class CheckInsControllerTest extends TestCase
 
         $this->assertRedirectContains('/check-ins');
         $checkIns = $this->getTableLocator()->get('CheckIns');
-        $this->assertSame('2025-01-16 13:00:00', $checkIns->get('2172aa66-e48c-4026-aa73-e6674a3d9926')->check_in_time->format('Y-m-d H:i:s'));
+        /** @var \App\Model\Entity\CheckIn $checkIn */
+        $checkIn = $checkIns->get('2172aa66-e48c-4026-aa73-e6674a3d9926');
+        $this->assertSame('2025-01-16 13:00:00', $checkIn->check_in_time->format('Y-m-d H:i:s'));
     }
 
     /**
@@ -158,6 +160,7 @@ class CheckInsControllerTest extends TestCase
         ]));
 
         $events = $this->getTableLocator()->get('Events');
+        /** @var \App\Model\Entity\Event $otherEvent */
         $otherEvent = $events->newEntity([
             'event_name' => 'Other Event',
             'event_description' => 'Other Event',
@@ -215,12 +218,76 @@ class CheckInsControllerTest extends TestCase
         $this->enableFormTokens();
         $this->post('/check-ins/checkpoint/8454694e-a2f3-4775-b75d-1fd3e57cc4b7', [
             'checkpoint_id' => '8454694e-a2f3-4775-b75d-1fd3e57cc4b7',
-            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'entry_reference' => '1',
             'participants' => ['5045fd83-55db-4d36-8a8a-63222e50e3fd'],
         ]);
 
-        $this->assertRedirectContains('/entries/view/2342ad37-13f0-4fd1-bd3f-2032273626ce');
+        $this->assertRedirectContains('/checkpoints/view/8454694e-a2f3-4775-b75d-1fd3e57cc4b7');
         $checkIns = $this->getTableLocator()->get('CheckIns');
         $this->assertGreaterThan(1, $checkIns->find()->count());
+    }
+
+    public function testCheckpointPanelFragmentLoadsForNumericReference(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participants->saveOrFail($participants->newEntity([
+            'first_name' => 'Available',
+            'last_name' => 'Walker',
+            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => true,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]));
+
+        $this->configRequest([
+            'headers' => [
+                'X-Requested-With' => 'XMLHttpRequest',
+            ],
+        ]);
+
+        $this->get('/check-ins/checkpoint/8454694e-a2f3-4775-b75d-1fd3e57cc4b7?fragment=panel&entry_reference=1');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('checkpoint-checkin-panel');
+        $this->assertResponseContains('Save Check In');
+        $this->assertResponseContains('value="1"');
+        $this->assertResponseContains('Available');
+        $this->assertResponseNotContains('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+    }
+
+    public function testCheckpointPanelFragmentLoadsForFullReference(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        /** @var \App\Model\Entity\Event $event */
+        $event = $events->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+        $event->booking_code = 'GW26';
+        $events->saveOrFail($event);
+
+        $participants = $this->getTableLocator()->get('Participants');
+        $participants->saveOrFail($participants->newEntity([
+            'first_name' => 'Full',
+            'last_name' => 'Reference',
+            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => true,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]));
+
+        $this->configRequest([
+            'headers' => [
+                'X-Requested-With' => 'XMLHttpRequest',
+            ],
+        ]);
+
+        $this->get('/check-ins/checkpoint/8454694e-a2f3-4775-b75d-1fd3e57cc4b7?fragment=panel&entry_reference=GW26-1');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('value="GW26-1"');
+        $this->assertResponseContains('GW26-1');
+        $this->assertResponseContains('Full');
     }
 }

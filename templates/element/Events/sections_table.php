@@ -71,7 +71,7 @@ $sortLink = function (string $field, string $label) use (
                         <tr>
                             <th><?= $sortLink('section_name', __('Section')) ?></th>
                             <th><?= $sortLink('group_name', __('Group')) ?></th>
-                            <th><?= __('Participant Types') ?></th>
+                            <th><?= $sortLink('participant_type', __('Participant Type')) ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
                     </thead>
@@ -80,17 +80,9 @@ $sortLink = function (string $field, string $label) use (
                             <tr>
                                 <td class="fw-semibold"><?= h($section->section_name) ?></td>
                                 <td><?= $section->has('group') ? h($section->group->group_name) : '' ?></td>
-                                <td>
-                                    <?php if (!empty($section->participant_types)) : ?>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <?php foreach ($section->participant_types as $participantType) : ?>
-                                                <span class="badge text-bg-secondary"><?= h($participantType->participant_type) ?></span>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php else : ?>
-                                        <span class="text-secondary"><?= __('None assigned') ?></span>
-                                    <?php endif; ?>
-                                </td>
+                                <td><?= $section->has('participant_type') ?
+                                        h($section->participant_type->participant_type)
+                                        : '' ?></td>
                                 <td class="actions"><?= $this->Actions->buttons($section, ['outline' => true]) ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -101,7 +93,8 @@ $sortLink = function (string $field, string $label) use (
                 <div class="card-footer bg-body-tertiary border-0">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                         <div class="small text-secondary">
-                            <?= __('Page {0} of {1}', $this->Number->format($page), $this->Number->format($pageCount)) ?>
+                            <?= __('Page {0} of {1}', $this->Number->format($page), $this->Number->format($pageCount))
+                            ?>
                         </div>
                         <div class="btn-group btn-group-sm" role="group" aria-label="<?= __('Sections pagination') ?>">
                             <?=

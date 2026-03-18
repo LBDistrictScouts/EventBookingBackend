@@ -2,6 +2,8 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Entry[]|\Cake\Collection\CollectionInterface $entries
+ * @var \App\Model\Entity\Event|null $currentEvent
+ * @var bool $showAll
  */
 ?>
 <?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
@@ -16,6 +18,27 @@
 <li><?= $this->Html->link(__('New Participant'), ['controller' => 'Participants', 'action' => 'add'], ['class' => 'nav-link']) ?></li>
 <?php $this->end(); ?>
 <?php $this->assign('tb_sidebar', '<ul class="nav flex-column">' . $this->fetch('tb_actions') . '</ul>'); ?>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <?php if ($showAll) : ?>
+            <div class="text-secondary"><?= __('Showing entries from all events.') ?></div>
+        <?php elseif ($currentEvent !== null) : ?>
+            <div class="text-secondary">
+                <?= __('Showing entries for the current event: {0}', h($currentEvent->event_name)) ?>
+            </div>
+        <?php else : ?>
+            <div class="text-secondary"><?= __('No current active event was found. Showing all entries.') ?></div>
+        <?php endif; ?>
+    </div>
+    <div>
+        <?php if ($showAll) : ?>
+            <?= $this->Html->link(__('Show Current Event Only'), ['action' => 'index'], ['class' => 'btn btn-outline-secondary']) ?>
+        <?php else : ?>
+            <?= $this->Html->link(__('Show All Entries'), ['action' => 'index', '?' => ['all' => 1]], ['class' => 'btn btn-outline-secondary']) ?>
+        <?php endif; ?>
+    </div>
+</div>
 
 <table class="table table-striped">
     <thead>

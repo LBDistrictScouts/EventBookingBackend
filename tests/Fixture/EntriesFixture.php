@@ -22,6 +22,7 @@ class EntriesFixture extends TestFixture
                 'id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
                 'event_id' => '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
                 'entry_name' => 'Lorem ipsum dolor sit amet',
+                'reference_number' => 1,
                 'active' => 1,
                 'participant_count' => 1,
                 'checked_in_count' => 1,

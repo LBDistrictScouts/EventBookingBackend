@@ -32,7 +32,7 @@ $this->start('tb_body_start');
         ['label' => 'Home', 'url' => '/', 'controller' => 'Events', 'action' => 'current'],
         ['label' => 'Events', 'url' => ['controller' => 'Events', 'action' => 'index'], 'controller' => 'Events'],
         ['label' => 'Entries', 'url' => ['controller' => 'Entries', 'action' => 'index'], 'controller' => 'Entries'],
-        ['label' => 'Groups', 'url' => ['controller' => 'Groups', 'action' => 'index'], 'controller' => 'Groups'],
+        ['label' => 'Checkpoints', 'url' => ['controller' => 'Checkpoints', 'action' => 'index'], 'controller' => 'Checkpoints'],
     ];
     ?>
     <header class="navbar navbar-expand-md navbar-dark sticky-top app-topbar shadow-sm">
@@ -101,8 +101,8 @@ $this->start('tb_body_start');
                     <ul class="navbar-nav px-3 w-100">
                         <li class="nav-item text-nowrap">
                             <?= $this->Html->link(
-                                'Groups',
-                                ['controller' => 'Groups', 'action' => 'index'],
+                                'Checkpoints',
+                                ['controller' => 'Checkpoints', 'action' => 'index'],
                                 ['class' => 'nav-link'],
                             ) ?>
                         </li>

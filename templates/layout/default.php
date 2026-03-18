@@ -37,7 +37,7 @@ $this->start('tb_body_start');
         ['label' => 'Home', 'url' => '/', 'controller' => 'Events', 'action' => 'current'],
         ['label' => 'Events', 'url' => ['controller' => 'Events', 'action' => 'index'], 'controller' => 'Events'],
         ['label' => 'Entries', 'url' => ['controller' => 'Entries', 'action' => 'index'], 'controller' => 'Entries'],
-        ['label' => 'Groups', 'url' => ['controller' => 'Groups', 'action' => 'index'], 'controller' => 'Groups'],
+        ['label' => 'Checkpoints', 'url' => ['controller' => 'Checkpoints', 'action' => 'index'], 'controller' => 'Checkpoints'],
     ];
     ?>
     <header class="navbar navbar-expand-md navbar-dark sticky-top app-topbar shadow-sm">
@@ -114,7 +114,7 @@ $this->start('tb_body_start');
                             <?= $this->Html->link('Entries', ['controller' => 'Entries', 'action' => 'index'], ['class' => 'nav-link']) ?>
                         </li>
                         <li class="nav-item text-nowrap">
-                            <?= $this->Html->link('Groups', ['controller' => 'Groups', 'action' => 'index'], ['class' => 'nav-link']) ?>
+                            <?= $this->Html->link('Checkpoints', ['controller' => 'Checkpoints', 'action' => 'index'], ['class' => 'nav-link']) ?>
                         </li>
                     </ul>
                     <hr class="d-md-none"/>

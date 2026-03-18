@@ -62,9 +62,25 @@ class EntriesController extends AppController
     {
         $query = $this->Entries->find()
             ->contain(['Events']);
+        $showAll = $this->request->getQuery('all') === '1';
+        $currentEvent = null;
+
+        if (!$showAll) {
+            try {
+                $currentEvent = $this->Entries->Events->find()
+                    ->where(['bookable' => true, 'finished' => false])
+                    ->orderByAsc('start_time')
+                    ->firstOrFail();
+
+                $query->where(['Entries.event_id' => $currentEvent->id]);
+            } catch (RecordNotFoundException) {
+                $currentEvent = null;
+            }
+        }
+
         $entries = $this->paginate($query);
 
-        $this->set(compact('entries'));
+        $this->set(compact('entries', 'showAll', 'currentEvent'));
     }
 
     /**

@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Entity\Entry;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
+use Cake\ORM\Query\SelectQuery;
 use Cake\View\JsonView;
 use RuntimeException;
 
@@ -15,6 +17,50 @@ use RuntimeException;
  */
 class CheckInsController extends AppController
 {
+    /**
+     * Resolve an entry reference within a specific event.
+     *
+     * Accepts either BOOKINGCODE-123 or just 123.
+     *
+     * @param string $eventId Event id.
+     * @param string $rawReference User-entered reference.
+     * @return \App\Model\Entity\Entry|null
+     */
+    protected function resolveCheckpointEntryReference(string $eventId, string $rawReference): ?Entry
+    {
+        $reference = strtoupper(trim($rawReference));
+        if ($reference === '') {
+            return null;
+        }
+
+        $query = $this->CheckIns->Entries->find()
+            ->contain(['Events'])
+            ->where(['Entries.event_id' => $eventId]);
+
+        if (preg_match('/^([A-Z0-9]+)\s*-\s*(\d+)$/', $reference, $matches) === 1) {
+            /** @var \App\Model\Entity\Entry|null $entry */
+            $entry = $query
+                ->matching('Events', function (SelectQuery $query) use ($matches): SelectQuery {
+                    return $query->where(['Events.booking_code' => $matches[1]]);
+                })
+                ->where(['Entries.reference_number' => (int)$matches[2]])
+                ->first();
+
+            return $entry;
+        }
+
+        if (!ctype_digit($reference)) {
+            return null;
+        }
+
+        /** @var \App\Model\Entity\Entry|null $entry */
+        $entry = $query
+            ->where(['Entries.reference_number' => (int)$reference])
+            ->first();
+
+        return $entry;
+    }
+
     /**
      * @return array<class-string>
      */
@@ -203,14 +249,59 @@ class CheckInsController extends AppController
      */
     public function checkpoint(?string $checkpointId = null): ?Response
     {
+        /** @var \App\Model\Entity\Checkpoint $checkpoint */
+        $checkpoint = $this->CheckIns->Checkpoints->get($checkpointId, contain: ['Events']);
         $checkIn = $this->CheckIns->newEmptyEntity();
         if ($checkpointId) {
             $checkIn->set('checkpoint_id', $checkpointId);
         }
 
+        $selectedEntryReference = $this->request->is('post')
+            ? trim((string)$this->request->getData('entry_reference'))
+            : trim((string)$this->request->getQuery('entry_reference'));
+        $selectedEntryId = (string)$this->request->getData('entry_id');
+        $selectedEntryLabel = '';
+        $selectedEntry = null;
+
+        if ($selectedEntryReference !== '') {
+            $selectedEntry = $this->resolveCheckpointEntryReference($checkpoint->event_id, $selectedEntryReference);
+            if ($selectedEntry !== null) {
+                $selectedEntryId = $selectedEntry->id;
+            }
+        } elseif ($selectedEntryId !== '') {
+            /** @var \App\Model\Entity\Entry|null $selectedEntry */
+            $selectedEntry = $this->CheckIns->Entries->find()
+                ->contain(['Events'])
+                ->where([
+                    'Entries.id' => $selectedEntryId,
+                    'Entries.event_id' => $checkpoint->event_id,
+                ])
+                ->first();
+            if ($selectedEntry !== null) {
+                $selectedEntryReference = sprintf(
+                    '%s-%d',
+                    $selectedEntry->event->booking_code,
+                    $selectedEntry->reference_number,
+                );
+            }
+        }
+
+        if ($selectedEntry !== null) {
+            $selectedEntryLabel = sprintf(
+                '%s-%d [%d] %s',
+                $selectedEntry->event->booking_code,
+                $selectedEntry->reference_number,
+                $selectedEntry->participant_count,
+                $selectedEntry->entry_name,
+            );
+        }
+
         if ($this->request->is('post')) {
             /** @var array<string, mixed> $data */
             $data = $this->request->getData();
+            if ($selectedEntryId !== '') {
+                $data['entry_id'] = $selectedEntryId;
+            }
 
             if (array_key_exists('participants', $data)) {
                 $participants = $data['participants'];
@@ -245,9 +336,9 @@ class CheckInsController extends AppController
                     }
 
                     return $this->redirect([
-                        'controller' => 'Entries',
+                        'controller' => 'Checkpoints',
                         'action' => 'view',
-                        $savedEntryId,
+                        $checkpointId,
                     ]);
                 }
             }
@@ -264,43 +355,47 @@ class CheckInsController extends AppController
         }
         $checkIn->set('check_in_time', date('Y-m-d H:i:s'));
 
-        $checkpoints = $this->CheckIns->Checkpoints->find()
-            ->orderByAsc('checkpoint_sequence')
-            ->limit(100)
-            ->all();
-        /** @var iterable<\App\Model\Entity\Checkpoint> $checkpoints */
-        $checkpointOptions = [];
-        foreach ($checkpoints as $checkpoint) {
-            $checkpointOptions[$checkpoint->id] = sprintf(
-                '[%s] %s',
-                $checkpoint->checkpoint_sequence,
-                $checkpoint->checkpoint_name,
-            );
+        $participants = [];
+        if ($selectedEntryId !== '') {
+            if ($selectedEntry !== null) {
+                $checkIn->set('entry_id', $selectedEntryId);
+                $participants = $this->CheckIns->Participants->find(
+                    'list',
+                    valueField: 'full_name',
+                    keyField: 'id',
+                    limit: 200,
+                )->find(
+                    'beforeSequence',
+                    sequence: $checkpoint->checkpoint_sequence,
+                    eventId: $checkpoint->event_id,
+                    entryId: $selectedEntryId,
+                    excludeCheckpointId: $checkpointId,
+                )->all();
+            }
         }
-        $checkpoints = $checkpointOptions;
 
-        $checkpointFixed = false;
+        if ($this->request->is('ajax') && $this->request->getQuery('fragment') === 'panel') {
+            $this->viewBuilder()->disableAutoLayout();
+            $this->set(compact(
+                'checkIn',
+                'checkpoint',
+                'participants',
+                'selectedEntryId',
+                'selectedEntryReference',
+                'selectedEntryLabel',
+            ));
 
-        $entries = $this->buildEntryOptions($this->CheckIns->Entries);
-        $participants = $this->CheckIns->Participants->find(
-            'list',
-            valueField: 'full_name',
-            keyField: 'id',
-            groupField: 'entry.entry_name',
-            conditions: [
-                'checked_out' => false,
-            ],
-            contain: 'Entries',
-        )->all();
+            return $this->render('/element/Checkpoints/checkin_panel');
+        }
 
         $this->set(
             compact(
                 'checkIn',
-                'checkpoints',
-                'entries',
+                'checkpoint',
                 'participants',
-                'checkpointFixed',
-                'checkpointId',
+                'selectedEntryId',
+                'selectedEntryReference',
+                'selectedEntryLabel',
             ),
         );
 

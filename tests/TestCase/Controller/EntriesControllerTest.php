@@ -63,6 +63,47 @@ class EntriesControllerTest extends TestCase
         $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 
+    public function testIndexDefaultsToCurrentEventButCanShowAll(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $otherEvent = $events->newEntity([
+            'event_name' => 'Other Event',
+            'event_description' => 'Other Event',
+            'booking_code' => 'OTHER',
+            'start_time' => '2026-03-18 10:00:00',
+            'bookable' => false,
+            'finished' => false,
+            'entry_count' => 0,
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+        ]);
+        $events->saveOrFail($otherEvent);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        $otherEntry = $entries->newEntity([
+            'event_id' => $otherEvent->id,
+            'entry_name' => 'Other Event Entry',
+            'entry_email' => 'other@example.com',
+            'entry_mobile' => '07123456780',
+            'participant_count' => 0,
+            'checked_in_count' => 0,
+            'active' => true,
+            'security_code' => '',
+        ]);
+        $entries->saveOrFail($otherEntry);
+
+        $this->get('/entries');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Show All Entries');
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
+        $this->assertResponseNotContains('Other Event Entry');
+
+        $this->get('/entries?all=1');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Show Current Event Only');
+        $this->assertResponseContains('Other Event Entry');
+    }
+
     /**
      * Test view method
      *
