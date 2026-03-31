@@ -99,6 +99,12 @@ return [
         'QueueName' => env('AWS_SQS_QUEUE_NAME'),
     ],
 
+    'CoreDataSeeder' => [
+        'url' => env('DISTRICT_CORE_DATA_URL'),
+        'username' => env('DISTRICT_CORE_DATA_USERNAME'),
+        'password' => env('DISTRICT_CORE_DATA_PASSWORD'),
+    ],
+
     /*
      * Apply timestamps with the last modified time to static assets (js, css, images).
      * Will append a querystring parameter containing the time the file was modified.

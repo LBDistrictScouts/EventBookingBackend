@@ -48,6 +48,18 @@ class SectionsControllerTest extends TestCase
         $this->assertCount(1, $data['sections']);
     }
 
+    public function testPublicIndexJsonDoesNotRequireAuthentication(): void
+    {
+        $this->session([]);
+
+        $this->get('/sections.json');
+
+        $this->assertResponseOk();
+        $data = json_decode((string)$this->_response->getBody(), true);
+        $this->assertArrayHasKey('sections', $data);
+        $this->assertCount(1, $data['sections']);
+    }
+
     /**
      * Test view method
      *

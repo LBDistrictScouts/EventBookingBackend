@@ -10,6 +10,7 @@ use Cake\ORM\Entity;
  *
  * @property string $id
  * @property string $participant_type
+ * @property string|null $osm_type_code
  * @property bool $adult
  * @property bool $uniformed
  * @property bool $out_of_district
@@ -35,6 +36,7 @@ class ParticipantType extends Entity
      */
     protected array $_accessible = [
         'participant_type' => true,
+        'osm_type_code' => true,
         'adult' => true,
         'uniformed' => true,
         'out_of_district' => true,

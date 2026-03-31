@@ -210,6 +210,8 @@ If your package visibility is private, consumers will need appropriate GitHub pa
 
 Kubernetes manifests for a local k3s deployment live in [`k8s/local-k3s.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/local-k3s.yaml), [`k8s/deploy-job.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/deploy-job.yaml), and [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml).
 
+For direct HTTPS on the Event Booking `LoadBalancer` origin, see [`k8s/README.md`](/Users/jacob/Development/EventBookingBackend/k8s/README.md). On a fresh cluster, run [`k8s/bootstrap-origin-tls.sh`](/Users/jacob/Development/EventBookingBackend/k8s/bootstrap-origin-tls.sh) once to seed the temporary TLS secret before applying the steady-state manifest.
+
 The runtime image is the same one published by GitHub Actions:
 
 ```text

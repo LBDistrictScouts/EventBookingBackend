@@ -38,7 +38,8 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "src/",
+            "LBDistrictScouts\\CoreDataSeeder\\": "plugins/LBDistrictScouts/CoreDataSeeder/src/"
         }
     },
     "autoload-dev": {
@@ -57,7 +58,12 @@
         ],
         "prepare": [
             "@post-install-cmd",
-            "@migrate"
+            "@migrate",
+            "@seed"
+        ],
+        "seed": [
+            "bin/cake seeds run",
+            "bin/cake seeds run -p LBDistrictScouts/CoreDataSeeder CoreDataSeeder"
         ],
         "cs-check": "phpcs --colors -p",
         "cs-fix": "phpcbf --colors -p",

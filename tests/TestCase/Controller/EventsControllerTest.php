@@ -102,6 +102,18 @@ class EventsControllerTest extends TestCase
         $this->assertResponseError();
     }
 
+    public function testCurrentJsonDoesNotRequireAuthentication(): void
+    {
+        $this->session([]);
+
+        $this->get('/events/current.json');
+
+        $this->assertResponseOk();
+        $resultData = json_decode((string)$this->_response->getBody(), true);
+        $this->assertArrayHasKey('event', $resultData);
+        $this->assertCount(10, $resultData['event']);
+    }
+
     /**
      * @return void
      * @uses \App\Controller\EventsController::current()

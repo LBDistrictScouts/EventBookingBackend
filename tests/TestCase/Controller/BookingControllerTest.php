@@ -87,6 +87,41 @@ class BookingControllerTest extends TestCase
         $this->assertResponseOk();
     }
 
+    public function testBookJsonDoesNotRequireAuthentication(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+
+        $participantTypes = $this->getTableLocator()->get('ParticipantTypes');
+        $participantType = $participantTypes->find('all')->firstOrFail();
+
+        $sections = $this->getTableLocator()->get('Sections');
+        $section = $sections->find('all')->firstOrFail();
+
+        $this->session([]);
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Public Booking',
+            'entry_email' => 'public-booking@example.com',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => 'ab3437be-53f2-49f8-af5f-c8f1daebcb91',
+                    'first_name' => 'Public',
+                    'last_name' => 'Booker',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $section->id,
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+        $resultData = json_decode((string)$this->_response->getBody(), true);
+        $this->assertSame(true, $resultData['success']);
+        $this->assertSame('Saved', $resultData['message']);
+    }
+
     /**
      * Test index method
      *

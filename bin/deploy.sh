@@ -27,3 +27,4 @@ echo "Running database migrations..."
 composer run-script migrate
 
 echo "Running database seeding"
+composer run-script seed
