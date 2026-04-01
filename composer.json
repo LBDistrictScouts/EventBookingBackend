@@ -62,7 +62,7 @@
             "@seed"
         ],
         "seed": [
-            "bin/cake seeds run",
+            "bin/cake seeds run -q",
             "bin/cake seeds run -p LBDistrictScouts/CoreDataSeeder CoreDataSeeder"
         ],
         "cs-check": "phpcs --colors -p",

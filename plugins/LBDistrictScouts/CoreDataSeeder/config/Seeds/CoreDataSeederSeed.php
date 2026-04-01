@@ -52,7 +52,7 @@ class CoreDataSeederSeed extends BaseSeed
      */
     private const array SECTION_TYPE_MAP = [
         'earlyyears' => [
-            'participant_type' => 'Squirrels',
+            'participant_type' => 'Squirrel',
             'adult' => false,
             'uniformed' => false,
             'out_of_district' => false,
@@ -60,7 +60,7 @@ class CoreDataSeederSeed extends BaseSeed
             'sort_order' => 0,
         ],
         'beavers' => [
-            'participant_type' => 'Beavers',
+            'participant_type' => 'Beaver',
             'adult' => false,
             'uniformed' => true,
             'out_of_district' => false,
@@ -68,7 +68,7 @@ class CoreDataSeederSeed extends BaseSeed
             'sort_order' => 1,
         ],
         'cubs' => [
-            'participant_type' => 'Cubs',
+            'participant_type' => 'Cub',
             'adult' => false,
             'uniformed' => true,
             'out_of_district' => false,
@@ -76,7 +76,7 @@ class CoreDataSeederSeed extends BaseSeed
             'sort_order' => 2,
         ],
         'scouts' => [
-            'participant_type' => 'Scouts',
+            'participant_type' => 'Scout',
             'adult' => false,
             'uniformed' => true,
             'out_of_district' => false,
@@ -84,7 +84,7 @@ class CoreDataSeederSeed extends BaseSeed
             'sort_order' => 3,
         ],
         'explorers' => [
-            'participant_type' => 'Explorers',
+            'participant_type' => 'Explorer',
             'adult' => false,
             'uniformed' => true,
             'out_of_district' => false,
