@@ -14,6 +14,15 @@ spec:
         app: db
     spec:
       serviceAccountName: event-booking-runtime
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: storage.homelab/db-ssd
+                    operator: In
+                    values:
+                      - "true"
       containers:
         - name: db
           image: postgres:17-alpine

@@ -7,6 +7,7 @@ resources:
   - config/app-configmap.yaml
   - config/nginx-configmap.yaml
   - db/persistentvolumeclaim.yaml
+  - secrets/onepassword-item.yaml
   - app/deployment.yaml
   - app/service.yaml
   - worker/deployment.yaml
