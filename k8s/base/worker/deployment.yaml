@@ -27,3 +27,14 @@ spec:
                 name: event-booking-config
             - secretRef:
                 name: event-booking-secrets
+          env:
+            - name: DISTRICT_CORE_DATA_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: event-booking-district-core-data-secrets
+                  key: BASIC_AUTH_USER
+            - name: DISTRICT_CORE_DATA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: event-booking-district-core-data-secrets
+                  key: BASIC_AUTH_PASSWORD
