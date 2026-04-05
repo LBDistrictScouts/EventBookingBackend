@@ -2,6 +2,9 @@ name: Update Dependabot Branches
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - copilot/update-dependabot-branches
 
 jobs:
   update-branches:
