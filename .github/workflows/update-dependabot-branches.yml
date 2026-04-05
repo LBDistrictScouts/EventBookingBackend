@@ -1,0 +1,32 @@
+name: Update Dependabot Branches
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-branches:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        branch:
+          - dependabot/github_actions/actions/download-artifact-8
+          - dependabot/github_actions/actions/upload-artifact-7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into ${{ matrix.branch }}
+        run: |
+          git fetch origin main
+          git merge origin/main --no-edit
+          git push origin ${{ matrix.branch }}
