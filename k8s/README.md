@@ -1,6 +1,6 @@
 # Event Booking K3s Notes
 
-`local-k3s.yaml` is the desired steady-state manifest for the Event Booking stack on K3s.
+`kustomization.yaml` is the entrypoint for the steady-state Event Booking manifest on K3s. It currently renders the grouped resources under `base/`.
 
 ## HTTPS Bootstrap
 
@@ -14,7 +14,7 @@ On a brand new cluster, nginx cannot start its `443` listener until that secret 
 
 That script:
 - creates a short-lived self-signed TLS secret for `event-backend.jacobagtyler.com`
-- applies `local-k3s.yaml`
+- applies `kubectl apply -k k8s`
 - leaves the cert-manager `Certificate` in place so Let's Encrypt can replace the temporary certificate
 
 ## DNS

@@ -21,7 +21,7 @@ kubectl -n "$NAMESPACE" create secret tls "$SECRET_NAME" \
   --key="$tmpdir/tls.key" \
   --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl apply -f "$MANIFEST_DIR/local-k3s.yaml"
+kubectl apply -k "$MANIFEST_DIR"
 
 echo
 echo "Bootstrap complete. Nginx can now serve HTTPS while cert-manager replaces the temporary certificate."

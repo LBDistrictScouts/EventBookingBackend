@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - core/namespace.yaml
+  - core/serviceaccount.yaml
+  - config/app-configmap.yaml
+  - config/nginx-configmap.yaml
+  - db/persistentvolumeclaim.yaml
+  - app/deployment.yaml
+  - app/service.yaml
+  - worker/deployment.yaml
+  - jobs/send-event-reminders-cronjob.yaml
+  - db/deployment.yaml
+  - db/service.yaml
+  - tls/certificate.yaml
