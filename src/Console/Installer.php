@@ -61,6 +61,7 @@ class Installer
 
         static::createAppLocalConfig($rootDir, $io);
         static::createWritableDirectories($rootDir, $io);
+        static::createBootstrapUiSymlink($rootDir, $io);
 
         static::setFolderPermissions($rootDir, $io);
         static::setSecuritySalt($rootDir, $io);
@@ -103,6 +104,46 @@ class Installer
                 $io->write('Created `' . $path . '` directory');
             }
         }
+    }
+
+    /**
+     * Create a relative symlink for Bootstrap UI web assets.
+     *
+     * @param string $dir The application's root directory.
+     * @param \Composer\IO\IOInterface $io IO interface to write to console.
+     * @return void
+     */
+    public static function createBootstrapUiSymlink(string $dir, IOInterface $io): void
+    {
+        $target = '../vendor/friendsofcake/bootstrap-ui/webroot';
+        $sourcePath = $dir . '/vendor/friendsofcake/bootstrap-ui/webroot';
+        $linkPath = $dir . '/webroot/bootstrap_u_i';
+
+        if (!is_dir($sourcePath)) {
+            $io->write('Bootstrap UI webroot not found, skipping asset symlink.');
+
+            return;
+        }
+
+        if (is_link($linkPath)) {
+            if (readlink($linkPath) === $target) {
+                return;
+            }
+
+            unlink($linkPath);
+        } elseif (file_exists($linkPath)) {
+            $io->write('webroot/bootstrap_u_i exists and is not a symlink, skipping asset symlink.');
+
+            return;
+        }
+
+        if (symlink($target, $linkPath)) {
+            $io->write('Created `webroot/bootstrap_u_i` symlink');
+
+            return;
+        }
+
+        $io->write('Unable to create `webroot/bootstrap_u_i` symlink.');
     }
 
     /**

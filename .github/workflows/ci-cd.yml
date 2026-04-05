@@ -183,6 +183,7 @@ jobs:
         run: |
           docker run --rm event-booking:smoke test -f /var/www/html/vendor/autoload.php
           docker run --rm event-booking:smoke test -f /var/www/html/bin/cake.php
+          docker run --rm event-booking:smoke test -f /var/www/html/webroot/bootstrap_u_i/css/bootstrap.min.css
           docker run --rm event-booking:smoke test -f /var/www/html/webroot/district_u_i/css/district-ui.css
           docker run --rm event-booking:smoke test -f /var/www/html/webroot/district_u_i/js/bootstrap.bundle.min.js
           docker run --rm event-booking:smoke test -f /var/www/html/webroot/district_u_i/assets/topography.svg

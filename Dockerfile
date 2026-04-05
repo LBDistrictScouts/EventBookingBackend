@@ -38,4 +38,5 @@ RUN chown -R $user:$group /var/www/html \
     && chmod -R 777 /var/www/html
 USER $user
 
-RUN APP_NAME=docker-build SECURITY_SALT=docker-build-security-salt-for-district-ui-assets ./bin/cake district_ui install --overwrite
+RUN ln -sfn ../vendor/friendsofcake/bootstrap-ui/webroot /var/www/html/webroot/bootstrap_u_i \
+    && APP_NAME=docker-build SECURITY_SALT=docker-build-security-salt-for-district-ui-assets ./bin/cake district_ui install --overwrite
