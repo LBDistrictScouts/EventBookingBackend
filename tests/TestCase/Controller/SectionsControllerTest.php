@@ -25,6 +25,8 @@ class SectionsControllerTest extends TestCase
         'app.Groups',
         'app.ParticipantTypes',
         'app.Sections',
+        'app.Events',
+        'app.EventsSections',
     ];
 
     /**
@@ -46,6 +48,7 @@ class SectionsControllerTest extends TestCase
         $data = json_decode((string)$this->_response->getBody(), true);
         $this->assertArrayHasKey('sections', $data);
         $this->assertCount(1, $data['sections']);
+        $this->assertArrayNotHasKey('notification_email', $data['sections'][0]);
     }
 
     public function testPublicIndexJsonDoesNotRequireAuthentication(): void
@@ -58,6 +61,7 @@ class SectionsControllerTest extends TestCase
         $data = json_decode((string)$this->_response->getBody(), true);
         $this->assertArrayHasKey('sections', $data);
         $this->assertCount(1, $data['sections']);
+        $this->assertArrayNotHasKey('notification_email', $data['sections'][0]);
     }
 
     /**
@@ -84,14 +88,39 @@ class SectionsControllerTest extends TestCase
         $this->enableFormTokens();
         $this->post('/sections/add', [
             'section_name' => 'Explorers',
+            'notification_email' => 'explorers@example.com',
             'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
             'group_id' => '873b0f71-5389-46f9-baae-7d4855406b64',
-            'osm_section_id' => 2,
+            'osm_section_id' => '',
+            'events' => [
+                '_ids' => [
+                    '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+                ],
+            ],
         ]);
 
         $this->assertRedirectContains('/sections');
         $sections = $this->getTableLocator()->get('Sections');
-        $this->assertSame(1, $sections->find()->where(['section_name' => 'Explorers'])->count());
+        $section = $sections->get(
+            $sections->find()->select(['id'])->where(['section_name' => 'Explorers'])->firstOrFail()->id,
+            contain: ['Events'],
+        );
+        $this->assertSame('explorers@example.com', $section->notification_email);
+        $this->assertNull($section->osm_section_id);
+        $this->assertCount(1, $section->events);
+        $this->assertSame('3a6d9419-b621-45cf-a13e-4db9647bf5bc', $section->events[0]->id);
+    }
+
+    public function testAddFormRendersNotificationEmailAndOsmSectionIdInputs(): void
+    {
+        $this->get('/sections/add');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('name="notification_email"');
+        $this->assertResponseContains('type="email"');
+        $this->assertResponseContains('name="osm_section_id"');
+        $this->assertResponseContains('type="number"');
+        $this->assertResponseNotContains('<select name="osm_section_id"');
     }
 
     /**
@@ -105,14 +134,37 @@ class SectionsControllerTest extends TestCase
         $this->enableFormTokens();
         $this->post('/sections/edit/95116a77-0675-4e1a-9d0c-74e3d40d92c1', [
             'section_name' => 'Renamed Section',
+            'notification_email' => 'renamed@example.com',
             'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
             'group_id' => '873b0f71-5389-46f9-baae-7d4855406b64',
-            'osm_section_id' => 1,
+            'osm_section_id' => '',
+            'events' => [
+                '_ids' => [
+                    '3a6d9419-b621-45cf-a13e-4db9647bf5bc',
+                ],
+            ],
         ]);
 
         $this->assertRedirectContains('/sections');
         $sections = $this->getTableLocator()->get('Sections');
-        $this->assertSame('Renamed Section', $sections->get('95116a77-0675-4e1a-9d0c-74e3d40d92c1')->section_name);
+        $section = $sections->get('95116a77-0675-4e1a-9d0c-74e3d40d92c1', contain: ['Events']);
+        $this->assertSame('Renamed Section', $section->section_name);
+        $this->assertSame('renamed@example.com', $section->notification_email);
+        $this->assertNull($section->osm_section_id);
+        $this->assertCount(1, $section->events);
+        $this->assertSame('3a6d9419-b621-45cf-a13e-4db9647bf5bc', $section->events[0]->id);
+    }
+
+    public function testEditFormRendersCurrentNotificationEmailAndOsmSectionIdInputs(): void
+    {
+        $this->get('/sections/edit/95116a77-0675-4e1a-9d0c-74e3d40d92c1');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('name="notification_email"');
+        $this->assertResponseContains('value="section@example.com"');
+        $this->assertResponseContains('name="osm_section_id"');
+        $this->assertResponseContains('type="number"');
+        $this->assertResponseNotContains('<select name="osm_section_id"');
     }
 
     /**

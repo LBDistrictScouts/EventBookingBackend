@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Event\BookingListener;
 use App\Model\Entity\Entry;
 use App\Model\Table\EntriesTable;
 use Cake\Event\EventInterface;
@@ -135,6 +136,7 @@ class BookingController extends AppController
             $entry = $this->Entries->getApiEntryById($entryId, false);
 
             $this->getMailer('Booking')->send('confirmation', [$entry]);
+            $this->dispatchEvent(BookingListener::EVENT_CREATED, ['entry' => $entry]);
         } else {
             $this->response = $this->response->withStatus(400, 'Validation failed');
 

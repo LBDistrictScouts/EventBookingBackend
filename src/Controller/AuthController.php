@@ -18,6 +18,8 @@ use RuntimeException;
 
 class AuthController extends AppController
 {
+    private const DEFAULT_REDIRECT = '/events/current';
+
     /**
      * @param \Cake\Event\EventInterface<static> $event
      * @return void
@@ -35,8 +37,13 @@ class AuthController extends AppController
      */
     public function login(): ?Response
     {
+        $redirectTarget = $this->readRequestedRedirectTarget();
+        if ($redirectTarget !== null) {
+            $this->request->getSession()->write('Auth.redirect_target', $redirectTarget);
+        }
+
         if ($this->request->getSession()->check('Auth.User')) {
-            return $this->redirect('/events/current'); // ✅ Prevents looping
+            return $this->redirect($redirectTarget ?? self::DEFAULT_REDIRECT);
         }
 
         $cognitoDomain = Configure::readOrFail('AWS.Cognito.Domain');
@@ -94,7 +101,12 @@ class AuthController extends AppController
         }
 
         // 🚀 Redirect to the dashboard instead of looping back to login
-        return $this->redirect('/events/current');
+        $redirectTarget = $this->request->getSession()->consume('Auth.redirect_target');
+        if (!is_string($redirectTarget) || !$this->isSafeRedirectTarget($redirectTarget)) {
+            $redirectTarget = self::DEFAULT_REDIRECT;
+        }
+
+        return $this->redirect($redirectTarget);
     }
 
     /**
@@ -194,5 +206,29 @@ class AuthController extends AppController
                 'client_id' => Configure::read('AWS.Cognito.ClientId'),
                 'logout_uri' => Router::url('/', true),
             ]));
+    }
+
+    /**
+     * @return string|null
+     */
+    private function readRequestedRedirectTarget(): ?string
+    {
+        $redirectTarget = $this->request->getQuery('redirect');
+        if (!is_string($redirectTarget) || !$this->isSafeRedirectTarget($redirectTarget)) {
+            return null;
+        }
+
+        return $redirectTarget;
+    }
+
+    /**
+     * @param string $redirectTarget
+     * @return bool
+     */
+    private function isSafeRedirectTarget(string $redirectTarget): bool
+    {
+        return $redirectTarget !== '' &&
+            str_starts_with($redirectTarget, '/') &&
+            !str_starts_with($redirectTarget, '//');
     }
 }

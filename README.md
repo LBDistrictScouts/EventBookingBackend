@@ -56,6 +56,8 @@ Minimum environment/config values you need:
 
 Optional runtime values:
 
+- `APP_FULL_BASE_URL` for generating absolute links in emails and CLI-triggered notifications
+- `APP_FRONTEND_BASE_URL` for frontend confirmation email links such as `/edit/{id}`; falls back to `APP_FULL_BASE_URL` when unset
 - `AWS_SESSION_TOKEN`
 - `AWS_PROFILE` for non-container local CLI development when you want to use a named AWS profile instead of explicit credentials
 - `SMTP_HOST`

@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 namespace App;
 
+use App\Event\BookingListener;
 use App\Middleware\CorsMiddleware;
 use App\Utility\JwksUtility;
 use Authentication\AuthenticationService;
@@ -26,6 +27,7 @@ use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
+use Cake\Event\EventManager;
 use Cake\Http\BaseApplication;
 use Cake\Http\Middleware\BodyParserMiddleware;
 use Cake\Http\Middleware\CsrfProtectionMiddleware;
@@ -80,6 +82,8 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         $this->addPlugin('BootstrapUI');
         $this->addPlugin('DistrictUI');
         $this->addPlugin('LBDistrictScouts/CoreDataSeeder', ['bootstrap' => true]);
+
+        EventManager::instance()->on(new BookingListener());
     }
 
     /**

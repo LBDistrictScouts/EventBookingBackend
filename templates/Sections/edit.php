@@ -30,9 +30,10 @@
         <legend><?= __('Edit Section') ?></legend>
         <?php
             echo $this->Form->control('section_name');
+            echo $this->Form->control('notification_email', ['type' => 'email']);
             echo $this->Form->control('participant_type_id', ['options' => $participantTypes]);
             echo $this->Form->control('group_id', ['options' => $groups]);
-            echo $this->Form->control('osm_section_id');
+            echo $this->Form->control('osm_section_id', ['type' => 'number', 'step' => 1]);
             echo $this->Form->control('events._ids', ['options' => $events]);
                 ?>
     </fieldset>

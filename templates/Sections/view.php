@@ -38,6 +38,10 @@
                 <td><?= h($section->section_name) ?></td>
             </tr>
             <tr>
+                <th scope="row"><?= __('Notification Email') ?></th>
+                <td><?= h($section->notification_email) ?></td>
+            </tr>
+            <tr>
                 <th scope="row"><?= __('Participant Type') ?></th>
                 <td><?= $section->hasValue('participant_type') ? $this->Html->link(
                     title: $section->participant_type->participant_type,
