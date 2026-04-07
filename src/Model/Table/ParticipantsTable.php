@@ -123,6 +123,37 @@ class ParticipantsTable extends Table
     }
 
     /**
+     * Recalculate participant-related counter caches for an entry and its event.
+     *
+     * @param string $entryId
+     * @return void
+     */
+    public function refreshCounterCaches(string $entryId): void
+    {
+        $entriesTable = $this->getTableLocator()->get('Entries');
+
+        $participantCount = $this->find()
+            ->where(['Participants.entry_id' => $entryId])
+            ->count();
+        $checkedInCount = $this->find()
+            ->where([
+                'Participants.entry_id' => $entryId,
+                'Participants.checked_in' => true,
+            ])
+            ->count();
+
+        $entriesTable->updateAll(
+            [
+                'participant_count' => $participantCount,
+                'checked_in_count' => $checkedInCount,
+            ],
+            ['id' => $entryId],
+        );
+
+        $this->updateEventParticipantCount($entryId);
+    }
+
+    /**
      * Default validation rules.
      *
      * @param \Cake\Validation\Validator $validator Validator instance.

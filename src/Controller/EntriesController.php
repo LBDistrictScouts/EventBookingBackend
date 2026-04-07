@@ -9,9 +9,12 @@ use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
+use Cake\Log\Log;
 use Cake\Mailer\MailerAwareTrait;
+use Cake\Validation\Validation;
 use Cake\View\JsonView;
 use RuntimeException;
+use Throwable;
 
 /**
  * Entries Controller
@@ -461,6 +464,40 @@ class EntriesController extends AppController
         $this->set(compact('entry', 'events'));
 
         return null;
+    }
+
+    /**
+     * @param string|null $entryId
+     * @return \Cake\Http\Response|null
+     */
+    public function sendConfirmation(?string $entryId = null): ?Response
+    {
+        $this->request->allowMethod(['post']);
+
+        $redirect = (string)$this->request->getData('redirect');
+        if ($redirect === '' || str_starts_with($redirect, 'http://') || str_starts_with($redirect, 'https://')) {
+            $redirect = $this->request->getAttribute('webroot') . 'entries/view/' . $entryId;
+        }
+        $entry = $this->Entries->getApiEntryById((string)$entryId, false);
+        if (!Validation::email((string)$entry->entry_email)) {
+            $this->Flash->error(__('The entry email address is invalid, so no confirmation was sent.'));
+
+            return $this->redirect($redirect);
+        }
+
+        try {
+            $this->getMailer('Booking')->send('confirmation', [$entry]);
+            $this->Flash->success(__('The confirmation email has been sent.'));
+        } catch (Throwable $exception) {
+            Log::error(sprintf(
+                'Manual confirmation email failed for entry %s: %s',
+                (string)$entry->id,
+                $exception->getMessage(),
+            ));
+            $this->Flash->error(__('The confirmation email could not be sent. Please try again.'));
+        }
+
+        return $this->redirect($redirect);
     }
 
     /**

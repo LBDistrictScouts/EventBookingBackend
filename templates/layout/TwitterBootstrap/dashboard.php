@@ -13,6 +13,7 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  * @var \App\View\AppView $this
  */
+
 use Cake\Core\Configure;
 
 $this->Html->css('BootstrapUI.dashboard', ['block' => true]);
@@ -20,19 +21,26 @@ $this->Html->css('app-shell', ['block' => true]);
 $this->prepend(
     name: 'tb_body_attrs',
     value: ' class="' .
-        implode(' ', [h($this->request->getParam('controller')), h($this->request->getParam('action'))]) .
-        '" ',
+    implode(' ', [h($this->request->getParam('controller')), h($this->request->getParam('action'))]) .
+    '" ',
 );
 $this->start('tb_body_start');
 ?>
-<body <?= $this->fetch('tb_body_attrs') ?>>
+    <body <?= $this->fetch('tb_body_attrs') ?>>
     <?php
     $currentController = (string)$this->request->getParam('controller');
     $topLinks = [
-        ['label' => 'Home', 'url' => '/', 'controller' => 'Events', 'action' => 'current'],
+        ['label' => 'Home', 'url' => '/'],
         ['label' => 'Events', 'url' => ['controller' => 'Events', 'action' => 'index'], 'controller' => 'Events'],
         ['label' => 'Entries', 'url' => ['controller' => 'Entries', 'action' => 'index'], 'controller' => 'Entries'],
-        ['label' => 'Checkpoints', 'url' => ['controller' => 'Checkpoints', 'action' => 'index'], 'controller' => 'Checkpoints'],
+        [
+            'label' => 'Checkpoints',
+            'url' => [
+                'controller' => 'Checkpoints',
+                'action' => 'index',
+            ],
+            'controller' => 'Checkpoints',
+        ],
     ];
     ?>
     <header class="navbar navbar-expand-md navbar-dark sticky-top app-topbar shadow-sm">
@@ -53,7 +61,7 @@ $this->start('tb_body_start');
                                     'class' => 'nav-link' .
                                         ($currentController === ($link['controller'] ?? '') &&
                                         (($link['action'] ?? null) === null ||
-                                         (string)$this->request->getParam('action') === $link['action'])
+                                            (string)$this->request->getParam('action') === $link['action'])
                                             ? ' active'
                                             : ''),
                                 ],
@@ -62,13 +70,13 @@ $this->start('tb_body_start');
                     <?php endforeach; ?>
                 </ul>
             </div>
-        <button
-            class="navbar-toggler d-md-none collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
-            aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <button
+                class="navbar-toggler d-md-none collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
+                aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
     </header>
 
@@ -115,26 +123,21 @@ $this->start('tb_body_start');
                             pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2 page-header"><?= h($this->request->getParam('controller')) ?></h1>
                 </div>
-<?php
-/**
- * Default `flash` block.
- */
-if (!$this->fetch('tb_flash')) {
-    $this->start('tb_flash');
-    if (isset($this->Flash)) {
-        echo $this->Flash->render();
-    }
-    $this->end();
-}
-$this->end();
+                <div class="app-flash-block">
+                    <?= $this->Flash->render() ?>
+                </div>
+                <div class="app-content">
+                    <?= $this->fetch('content'); ?>
+                </div>
+                <div class="app-footer">
 
-$this->start('tb_body_end');
-?>
+                </div>
             </main>
         </div>
     </div>
-</body>
 <?php
 $this->end();
 
-echo $this->fetch('content');
+$this->start('tb_body_end');
+echo '</body>';
+$this->end();

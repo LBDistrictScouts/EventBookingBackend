@@ -272,6 +272,42 @@ class EntriesControllerTest extends TestCase
     }
 
     /**
+     * @return void
+     * @uses \App\Controller\EntriesController::sendConfirmation()
+     */
+    public function testSendConfirmation(): void
+    {
+        $entries = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->get(self::FIXTURE_ENTRY_ID);
+        $entry->entry_email = 'manual-confirmation@example.com';
+        $entries->saveOrFail($entry);
+
+        $this->enableFormTokens();
+        $this->post('/entries/send-confirmation/' . self::FIXTURE_ENTRY_ID);
+
+        $this->assertRedirect(['controller' => 'Entries', 'action' => 'view', self::FIXTURE_ENTRY_ID]);
+        $this->assertMailCount(1);
+        $this->assertMailSentTo('manual-confirmation@example.com');
+        $this->assertMailSubjectContains('Booking Confirmation');
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EntriesController::sendConfirmation()
+     */
+    public function testSendConfirmationWithInvalidEntryEmailRedirectsBackWithNoMail(): void
+    {
+        $this->enableFormTokens();
+        $this->post('/entries/send-confirmation/' . self::FIXTURE_ENTRY_ID, [
+            'redirect' => '/entries/view/' . self::FIXTURE_ENTRY_ID,
+        ]);
+
+        $this->assertRedirect(['controller' => 'Entries', 'action' => 'view', self::FIXTURE_ENTRY_ID]);
+        $this->assertMailCount(0);
+    }
+
+    /**
      * Test delete method
      *
      * @return void

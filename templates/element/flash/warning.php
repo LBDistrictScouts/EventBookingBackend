@@ -4,8 +4,15 @@
  * @var array $params
  * @var string $message
  */
+$class = 'alert alert-warning alert-dismissible fade show';
+if (!empty($params['class'])) {
+    $class .= ' ' . $params['class'];
+}
 if (!isset($params['escape']) || $params['escape'] !== false) {
     $message = h($message);
 }
 ?>
-<div class="message warning" onclick="this.classList.add('hidden');"><?= $message ?></div>
+<div class="<?= h($class) ?>" role="alert">
+    <?= $message ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?= __('Close') ?>"></button>
+</div>

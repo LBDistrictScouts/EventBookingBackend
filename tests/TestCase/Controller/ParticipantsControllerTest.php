@@ -274,8 +274,14 @@ class ParticipantsControllerTest extends TestCase
     public function testRestore(): void
     {
         $participants = $this->getTableLocator()->get('Participants');
+        $entries = $this->getTableLocator()->get('Entries');
+        $events = $this->getTableLocator()->get('Events');
         $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
         $participants->deleteOrFail($participant);
+
+        $this->assertSame(0, $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce')->participant_count);
+        $this->assertSame(0, $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce')->checked_in_count);
+        $this->assertSame(0, $events->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc')->participant_count);
 
         $this->enableFormTokens();
         $this->post('/participants/restore/5045fd83-55db-4d36-8a8a-63222e50e3fd');
@@ -285,6 +291,9 @@ class ParticipantsControllerTest extends TestCase
             ->where(['id' => '5045fd83-55db-4d36-8a8a-63222e50e3fd'])
             ->firstOrFail();
         $this->assertNull($restored->deleted);
+        $this->assertSame(1, $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce')->participant_count);
+        $this->assertSame(1, $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce')->checked_in_count);
+        $this->assertSame(1, $events->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc')->participant_count);
     }
 
     public function testIndexCanFilterCheckedInParticipants(): void

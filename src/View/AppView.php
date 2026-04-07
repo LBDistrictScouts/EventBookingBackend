@@ -42,6 +42,7 @@ class AppView extends UIView
 
         $this->addHelper('Actions');
         $this->addHelper('BooleanIcon');
+        $this->addHelper('Flash');
         $this->addHelper('Paginator');
 
         $this->Paginator->setTemplates([

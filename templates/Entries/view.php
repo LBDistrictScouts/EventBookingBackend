@@ -129,6 +129,17 @@ $checkInCount = count($entry->check_ins);
                         <div class="card-header"><?= __('Quick Actions') ?></div>
                         <div class="card-body d-grid gap-2">
                             <?= $this->Html->link(__('Edit Entry'), ['action' => 'edit', $entry->id], ['class' => 'btn btn-outline-secondary text-start']) ?>
+                            <?= $this->Form->create(null, [
+                                'url' => ['action' => 'sendConfirmation', $entry->id],
+                                'class' => 'd-grid',
+                            ]) ?>
+                            <?= $this->Form->hidden('redirect', ['value' => $this->Url->build(['action' => 'view', $entry->id])]) ?>
+                            <?= $this->Form->button(__('Send Confirmation Email'), [
+                                'type' => 'submit',
+                                'confirm' => __('Send a confirmation email to {0}?', $entry->entry_email),
+                                'class' => 'btn btn-outline-success text-start w-100',
+                            ]) ?>
+                            <?= $this->Form->end() ?>
                             <?= $this->Html->link(__('Add Participant'), ['controller' => 'Participants', 'action' => 'add', $entry->id], ['class' => 'btn btn-outline-primary text-start']) ?>
                             <?= $this->Html->link(__('Add Check In'), ['controller' => 'CheckIns', 'action' => 'add', $entry->id], ['class' => 'btn btn-outline-primary text-start']) ?>
                             <?= $this->Html->link(__('Open Merge Tool'), ['action' => 'merge', $entry->id], ['class' => 'btn btn-outline-danger text-start']) ?>

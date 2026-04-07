@@ -226,6 +226,10 @@ class ParticipantsController extends AppController
             ->firstOrFail();
 
         if ($this->Participants->updateAll(['deleted' => null], ['id' => $participant->id]) > 0) {
+            $entryId = $participant->get('entry_id');
+            if (is_string($entryId) && $entryId !== '') {
+                $this->Participants->refreshCounterCaches($entryId);
+            }
             $this->Flash->success(__('The participant has been restored.'));
         } else {
             $this->Flash->error(__('The participant could not be restored. Please, try again.'));
