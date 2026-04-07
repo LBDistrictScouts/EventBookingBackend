@@ -1,0 +1,141 @@
+{
+    "$id": "https://greenway.lbdscouts.org.uk/booking-response-schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+        "success": {
+            "type": "boolean"
+        },
+        "message": {
+            "type": "string"
+        },
+        "errors": {
+            "type": [
+                "array",
+                "object",
+                "null"
+            ]
+        },
+        "entry": {
+        }
+    },
+    "required": [
+        "success",
+        "message",
+        "errors"
+    ],
+    "definitions": {
+        "uuid": {
+            "type": "string",
+            "minLength": 36,
+            "pattern": "^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$"
+        },
+        "group": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "group_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "participant_type": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "participant_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "section": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "section_name": {
+                    "type": "string"
+                },
+                "participant_type": {
+                    "$ref": "#/definitions/participant_type"
+                },
+                "group": {
+                    "$ref": "#/definitions/group"
+                }
+            }
+        },
+        "participant": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "entry_id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "participant_type_id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "section_id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "checked_in": {
+                    "type": "boolean"
+                },
+                "checked_out": {
+                    "type": "boolean"
+                },
+                "highest_check_in_sequence": {
+                    "type": "integer"
+                },
+                "participant_type": {
+                    "$ref": "#/definitions/participant_type"
+                },
+                "section": {
+                    "$ref": "#/definitions/section"
+                }
+            },
+            "required": [
+                "id",
+                "first_name",
+                "last_name",
+                "entry_id",
+                "participant_type_id",
+                "section_id",
+                "checked_in",
+                "checked_out",
+                "highest_check_in_sequence",
+                "participant_type",
+                "section"
+            ]
+        }
+    }
+}

@@ -7,6 +7,7 @@ use Cake\TestSuite\EmailTrait;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use Cake\View\Exception\MissingTemplateException;
+use Opis\JsonSchema\Validator;
 
 /**
  * App\Controller\EventsController Test Case
@@ -117,9 +118,138 @@ class BookingControllerTest extends TestCase
         ]);
 
         $this->assertResponseOk();
-        $resultData = json_decode((string)$this->_response->getBody(), true);
-        $this->assertSame(true, $resultData['success']);
-        $this->assertSame('Saved', $resultData['message']);
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 1);
+    }
+
+    public function testBookResolvesParentVolunteerAliasToParticipantTypeId(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+        $participantTypes = $this->getTableLocator()->get('ParticipantTypes');
+
+        $parentVolunteerType = $participantTypes->newEntity([
+            'id' => '7474361d-03ff-44fc-9a02-388e6c0d688c',
+            'participant_type' => 'Parent / Non Uniformed Volunteer',
+            'adult' => true,
+            'uniformed' => false,
+            'out_of_district' => false,
+            'category' => 1,
+            'sort_order' => 12,
+            'osm_type_code' => null,
+        ]);
+        $parentVolunteerType = $participantTypes->saveOrFail($parentVolunteerType);
+
+        $this->session([]);
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Parent Alias Booking',
+            'entry_email' => 'parent-alias@example.com',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => '4ed9cd92-72c8-4157-aa91-6c0f37577b69',
+                    'first_name' => 'Taylor',
+                    'last_name' => 'Helper',
+                    'participant_type_id' => 'Parents / non-uniformed volunteers',
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 1);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        $entry = $entries->find()
+            ->where(['entry_email' => 'parent-alias@example.com'])
+            ->contain(['Participants'])
+            ->firstOrFail();
+
+        $this->assertCount(1, $entry->participants);
+        $this->assertSame(
+            $parentVolunteerType->id,
+            $entry->participants[0]->participant_type_id,
+        );
+        $this->assertNull($entry->participants[0]->section_id);
+    }
+
+    public function testBookReturnsAllParticipantsInSerializedResponse(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+
+        $participantTypes = $this->getTableLocator()->get('ParticipantTypes');
+        $participantType = $participantTypes->find('all')->firstOrFail();
+
+        $sections = $this->getTableLocator()->get('Sections');
+        $section = $sections->find('all')->firstOrFail();
+
+        $this->session([]);
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Two Participant Booking',
+            'entry_email' => 'two-participant@example.com',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => '26644a91-1fe0-495a-9b1b-4719b79df5ba',
+                    'first_name' => 'Joseph',
+                    'last_name' => 'Walker',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $section->id,
+                ],
+                [
+                    'access_key' => '6f882fd2-3ff4-446b-a4fc-444b9881ad44',
+                    'first_name' => 'Gemma',
+                    'last_name' => 'Walker',
+                    'participant_type_id' => $participantType->id,
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 2);
+        $this->assertSame(['Gemma', 'Joseph'], array_column($resultData['entry']['participants'], 'first_name'));
+        $this->assertArrayHasKey('participant_type', $resultData['entry']['participants'][0]);
+        $this->assertArrayHasKey('section', $resultData['entry']['participants'][0]);
+        $this->assertNull($resultData['entry']['participants'][0]['section']);
+        $this->assertArrayHasKey('section', $resultData['entry']['participants'][1]);
+        $this->assertSame($section->id, $resultData['entry']['participants'][1]['section']['id']);
+    }
+
+    public function testBookValidationFailureReturnsStructuredErrors(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+
+        $this->session([]);
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Broken Booking',
+            'entry_email' => 'not-an-email',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => '6d5faab8-c6df-47fd-ac07-ddefa1dd4950',
+                    'first_name' => 'Taylor',
+                    'last_name' => 'Helper',
+                    'participant_type_id' => '',
+                ],
+            ],
+        ]);
+
+        $this->assertResponseCode(400);
+        $resultData = $this->decodeJsonResponse();
+        $this->assertFailedBookingResponse($resultData);
+        $this->assertArrayHasKey('entry_email', $resultData['errors']);
+        $this->assertArrayHasKey('participants', $resultData['errors']);
+        $this->assertNotEmpty($resultData['errors']['entry_email']);
+        $this->assertNotEmpty($resultData['errors']['participants'][0]['participant_type_id']);
     }
 
     public function testBookSendsSectionNotificationEmailsWithFullTeamRoster(): void
@@ -292,7 +422,8 @@ class BookingControllerTest extends TestCase
         $this->post('/book.json', $requestData);
         $this->assertResponseOk();
 
-        $resultData = json_decode($this->_response->getBody()->__toString(), true);
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 3);
 
         $expected = [
             'success' => true,
@@ -300,7 +431,6 @@ class BookingControllerTest extends TestCase
             'message' => 'Saved',
         ];
 
-        $this->assertEmpty($resultData['errors']);
         $this->assertSame($expected['success'], $resultData['success']);
         $this->assertSame($expected['message'], $resultData['message']);
 
@@ -362,10 +492,8 @@ class BookingControllerTest extends TestCase
 
         $this->assertResponseOk();
 
-        $resultData = json_decode((string)$this->_response->getBody(), true);
-        $this->assertSame(true, $resultData['success']);
-        $this->assertSame('Saved', $resultData['message']);
-        $this->assertSame([], $resultData['errors']);
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 1);
         $this->assertSame('2342ad37-13f0-4fd1-bd3f-2032273626ce', $resultData['entry']['id']);
         $this->assertSame('Booking Edit', $resultData['entry']['entry_name']);
         $this->assertArrayNotHasKey('security_code', $resultData['entry']);
@@ -401,10 +529,8 @@ class BookingControllerTest extends TestCase
 
         $this->assertResponseOk();
 
-        $resultData = json_decode((string)$this->_response->getBody(), true);
-        $this->assertSame(true, $resultData['success']);
-        $this->assertSame('Saved', $resultData['message']);
-        $this->assertSame([], $resultData['errors']);
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 0);
         $this->assertCount(0, $resultData['entry']['participants']);
 
         $participants = $this->getTableLocator()->get('Participants');
@@ -433,10 +559,8 @@ class BookingControllerTest extends TestCase
 
         $this->assertResponseOk();
 
-        $resultData = json_decode((string)$this->_response->getBody(), true);
-        $this->assertSame(true, $resultData['success']);
-        $this->assertSame('Saved', $resultData['message']);
-        $this->assertSame([], $resultData['errors']);
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 1);
         $this->assertSame('Booking Edit Json', $resultData['entry']['entry_name']);
         $this->assertArrayNotHasKey('security_code', $resultData['entry']);
         $this->assertArrayNotHasKey('entry_email', $resultData['entry']);
@@ -545,5 +669,75 @@ class BookingControllerTest extends TestCase
         $this->assertNotFalse($participants->save($participant));
 
         return [$entry, $participant];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodeJsonResponse(): array
+    {
+        /** @var array<string, mixed> $data */
+        $data = json_decode((string)$this->_response->getBody(), true);
+
+        return $data;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param int $expectedParticipantCount
+     * @return void
+     */
+    private function assertSuccessfulBookingResponse(array $data, int $expectedParticipantCount): void
+    {
+        $this->assertBookingResponseMatchesSchema(
+            $data,
+            'https://greenway.lbdscouts.org.uk/booking-response-schema.json',
+            'config/schema/booking-response-schema.json',
+        );
+        $this->assertSame(true, $data['success']);
+        $this->assertSame('Saved', $data['message']);
+        $this->assertSame([], $data['errors']);
+        $this->assertArrayHasKey('entry', $data);
+        $this->assertIsArray($data['entry']);
+        $this->assertSame($expectedParticipantCount, $data['entry']['participant_count']);
+        $this->assertCount($expectedParticipantCount, $data['entry']['participants']);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return void
+     */
+    private function assertFailedBookingResponse(array $data): void
+    {
+        $this->assertBookingResponseMatchesSchema(
+            $data,
+            'https://greenway.lbdscouts.org.uk/booking-response-schema.json',
+            'config/schema/booking-response-schema.json',
+        );
+        $this->assertSame(false, $data['success']);
+        $this->assertSame('Error', $data['message']);
+        $this->assertIsArray($data['errors']);
+        $this->assertNotEmpty($data['errors']);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param string $schemaId
+     * @param string $schemaFile
+     * @return void
+     */
+    private function assertBookingResponseMatchesSchema(array $data, string $schemaId, string $schemaFile): void
+    {
+        $validator = new Validator();
+        $validator->resolver()->registerFile(
+            $schemaId,
+            dirname(__DIR__, 3) . '/' . ltrim($schemaFile, '/'),
+        );
+
+        $result = $validator->validate(
+            json_decode((string)json_encode($data, JSON_THROW_ON_ERROR)),
+            $schemaId,
+        );
+        $this->assertTrue($result->isValid(), (string)json_encode($result->error(), JSON_THROW_ON_ERROR));
     }
 }

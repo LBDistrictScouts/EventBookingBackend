@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Event\BookingListener;
 use App\Model\Entity\Entry;
 use App\Model\Table\EntriesTable;
+use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
 use Cake\Mailer\MailerAwareTrait;
@@ -95,11 +96,126 @@ class BookingController extends AppController
             foreach ($data['participants'] as &$participant) {
                 // Filter out empty keys in each participant
                 $participant = array_filter($participant, fn($_, $key) => $key !== '', ARRAY_FILTER_USE_BOTH);
+                $participant = $this->normalizeParticipantData($participant);
             }
             unset($participant); // Unset reference to prevent unexpected behavior
         }
 
         return $data;
+    }
+
+    /**
+     * @param array<string, mixed> $participant
+     * @return array<string, mixed>
+     */
+    private function normalizeParticipantData(array $participant): array
+    {
+        $participantTypeId = $participant['participant_type_id'] ?? $participant['participant_type'] ?? null;
+        if (is_string($participantTypeId)) {
+            $resolvedParticipantTypeId = $this->resolveParticipantTypeId($participantTypeId);
+            if ($resolvedParticipantTypeId !== null) {
+                $participant['participant_type_id'] = $resolvedParticipantTypeId;
+            }
+        }
+
+        $sectionId = $participant['section_id'] ?? $participant['section'] ?? null;
+        if (is_string($sectionId)) {
+            $resolvedSectionId = $this->resolveSectionId($sectionId);
+            if ($resolvedSectionId !== null) {
+                $participant['section_id'] = $resolvedSectionId;
+            }
+        }
+
+        return $participant;
+    }
+
+    /**
+     * @param string $value
+     * @return string|null
+     */
+    private function resolveParticipantTypeId(string $value): ?string
+    {
+        $trimmedValue = trim($value);
+        if ($trimmedValue === '') {
+            return null;
+        }
+
+        if (preg_match('/^[0-9a-f-]{36}$/i', $trimmedValue) === 1) {
+            return $trimmedValue;
+        }
+
+        $participantTypes = $this->fetchTable('ParticipantTypes')->find()
+            ->all();
+
+        $aliases = [
+            'parentsnonuniformedvolunteers' => 'parentnonuniformedvolunteer',
+            'leadersvolunteers' => 'leadervolunteer',
+        ];
+        $normalizedNeedleKey = $this->normalizeLookupValue($trimmedValue);
+        $normalizedNeedle = $aliases[$normalizedNeedleKey] ?? $normalizedNeedleKey;
+
+        foreach ($participantTypes as $participantType) {
+            if (!$participantType instanceof EntityInterface) {
+                continue;
+            }
+
+            $candidateKeys = [
+                $participantType->get('participant_type'),
+                $participantType->get('osm_type_code'),
+            ];
+            foreach ($candidateKeys as $candidateKey) {
+                if (!is_string($candidateKey) || $candidateKey === '') {
+                    continue;
+                }
+
+                $normalizedCandidateKey = $this->normalizeLookupValue($candidateKey);
+                $normalizedCandidate = $aliases[$normalizedCandidateKey] ?? $normalizedCandidateKey;
+                if ($normalizedCandidate === $normalizedNeedle) {
+                    $resolvedId = $participantType->get('id');
+
+                    return is_string($resolvedId) ? $resolvedId : null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $value
+     * @return string|null
+     */
+    private function resolveSectionId(string $value): ?string
+    {
+        $trimmedValue = trim($value);
+        if ($trimmedValue === '') {
+            return null;
+        }
+
+        if (preg_match('/^[0-9a-f-]{36}$/i', $trimmedValue) === 1) {
+            return $trimmedValue;
+        }
+
+        $section = $this->fetchTable('Sections')->find()
+            ->where(['section_name' => $trimmedValue])
+            ->first();
+
+        if ($section === null) {
+            return null;
+        }
+
+        $resolvedId = $section->get('id');
+
+        return is_string($resolvedId) ? $resolvedId : null;
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    private function normalizeLookupValue(string $value): string
+    {
+        return strtolower((string)preg_replace('/[^a-z0-9]+/i', '', $value));
     }
 
     /**

@@ -52,6 +52,7 @@ class ParticipantsControllerTest extends TestCase
         $this->assertResponseOk();
         $this->assertResponseContains('Lorem ipsum dolor sit amet');
         $this->assertResponseContains('Showing participants for the current event: Lorem ipsum dolor sit amet');
+        $this->assertResponseContains('Show Deleted Participants');
     }
 
     public function testIndexCanShowAllParticipantsAcrossEvents(): void
@@ -106,6 +107,22 @@ class ParticipantsControllerTest extends TestCase
         $this->assertResponseContains('Showing participants across all events.');
         $this->assertResponseContains('Second Event Team');
         $this->assertResponseContains('Second');
+    }
+
+    public function testIndexCanSearchParticipantsByParticipantName(): void
+    {
+        $this->get('/participants?participants_search=ipsum');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
+    }
+
+    public function testIndexCanSearchParticipantsByEntryName(): void
+    {
+        $this->get('/participants?participants_search=Lorem');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Lorem ipsum dolor sit amet');
     }
 
     /**
@@ -186,6 +203,71 @@ class ParticipantsControllerTest extends TestCase
         $participants = $this->getTableLocator()->get('Participants');
         $deleted = $participants->find('withTrashed')->where(['id' => '5045fd83-55db-4d36-8a8a-63222e50e3fd'])->firstOrFail();
         $this->assertNotNull($deleted->deleted);
+    }
+
+    public function testIndexHidesDeletedParticipantsByDefault(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $participants->deleteOrFail($participant);
+
+        $this->get('/participants');
+
+        $this->assertResponseOk();
+        $this->assertResponseNotContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $this->assertResponseContains('Show Deleted Participants');
+    }
+
+    public function testIndexCanShowDeletedParticipants(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $participants->deleteOrFail($participant);
+
+        $this->get('/participants?deleted=1');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $this->assertResponseContains('Hide Deleted Participants');
+    }
+
+    public function testIndexCanShowDeletedParticipantsAcrossAllEvents(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $participants->deleteOrFail($participant);
+
+        $this->get('/participants?all=1&deleted=1');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Showing participants across all events.');
+        $this->assertResponseContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $this->assertResponseContains('Hide Deleted Participants');
+    }
+
+    public function testIndexCanSearchDeletedParticipants(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $participants->deleteOrFail($participant);
+
+        $this->get('/participants?deleted=1&participants_search=ipsum');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $this->assertResponseContains('Hide Deleted Participants');
+    }
+
+    public function testIndexCanSortDeletedParticipantSearchResults(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $participants->deleteOrFail($participant);
+
+        $this->get('/participants?deleted=1&participants_search=Lorem&sort=deleted&direction=asc');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
     }
 
     public function testIndexCanFilterCheckedInParticipants(): void

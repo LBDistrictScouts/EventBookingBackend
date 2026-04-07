@@ -173,26 +173,46 @@ class EntriesTable extends Table
             'Participants' => function (SelectQuery $query): SelectQuery {
                 return $query
                     ->contain([
-                        'ParticipantTypes',
-                        'Sections' => ['Groups', 'ParticipantTypes'],
+                        'ParticipantTypes' => ['strategy' => 'select'],
+                        'Sections' => [
+                            'strategy' => 'select',
+                            'Groups' => ['strategy' => 'select'],
+                            'ParticipantTypes' => ['strategy' => 'select'],
+                        ],
                     ])
-                    ->leftJoinWith('ParticipantTypes')
                     ->orderBy([
-                        'ParticipantTypes.sort_order' => 'ASC',
                         'Participants.last_name' => 'ASC',
                         'Participants.first_name' => 'ASC',
                     ]);
             },
         ]);
 
-        if (!$public) {
-            return $query;
-        }
-
         return $query->formatResults(
-            function (CollectionInterface $results): CollectionInterface {
+            function (CollectionInterface $results) use ($public): CollectionInterface {
                 return $results->map(
-                    fn(Entry $entry): Entry => $entry->hidePublicFields(),
+                    function (Entry $entry) use ($public): Entry {
+                        $participants = (array)$entry->participants;
+                        usort(
+                            $participants,
+                            function ($left, $right): int {
+                                $leftSort = (int)($left->participant_type->sort_order ?? PHP_INT_MAX);
+                                $rightSort = (int)($right->participant_type->sort_order ?? PHP_INT_MAX);
+                                if ($leftSort !== $rightSort) {
+                                    return $leftSort <=> $rightSort;
+                                }
+
+                                $lastNameCompare = strcasecmp((string)$left->last_name, (string)$right->last_name);
+                                if ($lastNameCompare !== 0) {
+                                    return $lastNameCompare;
+                                }
+
+                                return strcasecmp((string)$left->first_name, (string)$right->first_name);
+                            },
+                        );
+                        $entry->set('participants', $participants);
+
+                        return $public ? $entry->hidePublicFields() : $entry;
+                    },
                 );
             },
         );

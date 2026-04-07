@@ -13,13 +13,38 @@ use Cake\Datasource\Exception\RecordNotFoundException;
 class ParticipantsController extends AppController
 {
     /**
+     * @var array<string, mixed> Pagination defaults.
+     */
+    protected array $paginate = [
+        'limit' => 25,
+        'order' => [
+            'Participants.first_name' => 'asc',
+            'Participants.last_name' => 'asc',
+        ],
+        'sortableFields' => [
+            'Participants.first_name',
+            'Participants.last_name',
+            'Participants.entry_id',
+            'Participants.participant_type_id',
+            'Participants.section_id',
+            'Participants.checked_in',
+            'Participants.checked_out',
+            'Participants.created',
+            'Participants.modified',
+            'Participants.deleted',
+            'Participants.highest_check_in_sequence',
+        ],
+    ];
+
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()
     {
-        $query = $this->Participants->find()
+        $showDeleted = $this->request->getQuery('deleted') === '1';
+        $query = $this->Participants->find($showDeleted ? 'withTrashed' : 'all')
             ->contain(['Entries.Events', 'ParticipantTypes', 'Sections']);
 
         $showAll = $this->request->getQuery('all') === '1';
@@ -51,13 +76,28 @@ class ParticipantsController extends AppController
             $query->where(['checked_out' => true]);
         }
 
+        $participantsSearch = trim((string)$this->request->getQuery('participants_search', ''));
+        if ($participantsSearch !== '') {
+            $participantsSearchNeedle = '%' . $participantsSearch . '%';
+            $query->leftJoinWith('Entries')
+                ->where([
+                    'OR' => [
+                        'Participants.first_name ILIKE' => $participantsSearchNeedle,
+                        'Participants.last_name ILIKE' => $participantsSearchNeedle,
+                        'Entries.entry_name ILIKE' => $participantsSearchNeedle,
+                    ],
+                ]);
+        }
+
         $participants = $this->paginate($query);
 
         $this->set(compact(
             'participants',
+            'participantsSearch',
             'checkedIn',
             'checkedOut',
             'showAll',
+            'showDeleted',
             'currentEvent',
         ));
     }

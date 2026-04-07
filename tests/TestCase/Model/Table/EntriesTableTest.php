@@ -224,4 +224,41 @@ class EntriesTableTest extends TestCase
         $this->assertSame(2, $entryOne->participant_count);
         $this->assertSame(2, $this->Entries->Participants->find()->where(['entry_id' => $entryOne->id])->count());
     }
+
+    public function testGetApiEntryByIdIncludesParticipantsWithoutResolvedParticipantType(): void
+    {
+        $entryId = '2342ad37-13f0-4fd1-bd3f-2032273626ce';
+        $participantId = '7d80b9c7-cce6-4f81-9253-cce1b463a11f';
+        $participantTypeId = 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0';
+        $participants = $this->Entries->Participants;
+        $participantTypesConnection = $participants->ParticipantTypes->getConnection();
+
+        $participants->deleteAll(['id' => $participantId]);
+        $participantTypesConnection
+            ->update('participant_types', ['deleted' => '2026-04-07 17:51:55'], ['id' => $participantTypeId], ['deleted' => 'datetime'])
+            ->execute();
+
+        $participant = $participants->newEntity([
+            'id' => $participantId,
+            'first_name' => 'Gemma',
+            'last_name' => 'Batters',
+            'entry_id' => $entryId,
+            'participant_type_id' => $participantTypeId,
+            'section_id' => null,
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+        $participants->saveOrFail($participant, ['checkRules' => false]);
+
+        $entry = $this->Entries->getApiEntryById($entryId, false);
+
+        $this->assertCount(2, $entry->participants);
+        $this->assertSame(
+            ['Gemma', 'Lorem ipsum dolor sit amet'],
+            array_map(static fn($participant) => $participant->first_name, $entry->participants),
+        );
+        $this->assertNull($entry->participants[0]->participant_type);
+        $this->assertNull($entry->participants[1]->participant_type);
+    }
 }

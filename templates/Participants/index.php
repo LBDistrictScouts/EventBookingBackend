@@ -2,7 +2,9 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Participant[]|\Cake\Collection\CollectionInterface $participants
+ * @var string $participantsSearch
  * @var bool $showAll
+ * @var bool $showDeleted
  * @var \App\Model\Entity\Event|null $currentEvent
  */
 ?>
@@ -23,6 +25,11 @@
 <?php $this->end(); ?>
 <?php $this->assign('tb_sidebar', '<ul class="nav flex-column">' . $this->fetch('tb_actions') . '</ul>'); ?>
 
+<?php
+$currentQuery = $this->request->getQueryParams();
+$baseQuery = $currentQuery;
+?>
+
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
     <div>
         <h2 class="h4 mb-1"><?= __('Participants') ?></h2>
@@ -36,28 +43,80 @@
             <?php endif; ?>
         </div>
     </div>
-    <div>
+    <div class="d-flex flex-wrap gap-2">
         <?php if ($showAll) : ?>
-            <?= $this->Html->link(__('Show Current Event Only'), ['action' => 'index'], ['class' => 'btn btn-outline-primary']) ?>
+            <?= $this->Html->link(
+                __('Show Current Event Only'),
+                ['action' => 'index', '?' => array_diff_key($currentQuery, ['all' => true])],
+                ['class' => 'btn btn-outline-primary'],
+            ) ?>
         <?php else : ?>
-            <?= $this->Html->link(__('Show All Participants'), ['action' => 'index', '?' => ['all' => '1']], ['class' => 'btn btn-outline-secondary']) ?>
+            <?= $this->Html->link(
+                __('Show All Participants'),
+                ['action' => 'index', '?' => $currentQuery + ['all' => '1']],
+                ['class' => 'btn btn-outline-secondary'],
+            ) ?>
         <?php endif; ?>
+        <?php if ($showDeleted) : ?>
+            <?= $this->Html->link(
+                __('Hide Deleted Participants'),
+                ['action' => 'index', '?' => array_diff_key($currentQuery, ['deleted' => true])],
+                ['class' => 'btn btn-outline-primary'],
+            ) ?>
+        <?php else : ?>
+            <?= $this->Html->link(
+                __('Show Deleted Participants'),
+                ['action' => 'index', '?' => $currentQuery + ['deleted' => '1']],
+                ['class' => 'btn btn-outline-secondary'],
+            ) ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <?= $this->Form->create(null, ['type' => 'get', 'valueSources' => ['query']]) ?>
+        <?php foreach ($baseQuery as $key => $value) : ?>
+            <?= $this->Form->hidden($key, ['value' => $value]) ?>
+        <?php endforeach; ?>
+        <div class="mb-0">
+            <?= $this->Form->label('participants_search', __('Search Participants'), ['class' => 'form-label']) ?>
+            <div class="input-group">
+                <?= $this->Form->control('participants_search', [
+                    'label' => false,
+                    'value' => $participantsSearch,
+                    'placeholder' => __('Search by participant or entry name'),
+                    'class' => 'form-control',
+                    'templates' => [
+                        'inputContainer' => '{{content}}',
+                    ],
+                ]) ?>
+                <?= $this->Form->button(__('Search'), ['class' => 'btn btn-primary']) ?>
+                <?= $this->Html->link(
+                    __('Clear'),
+                    ['action' => 'index', '?' => array_diff_key($currentQuery, ['participants_search' => true])],
+                    ['class' => 'btn btn-outline-secondary'],
+                ) ?>
+            </div>
+        </div>
+        <?= $this->Form->end() ?>
     </div>
 </div>
 
 <table class="table table-striped">
     <thead>
     <tr>
-        <th scope="col"><?= $this->Paginator->sort('first_name') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('last_name') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('entry_id') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('participant_type_id') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('section_id') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('checked_in') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('checked_out') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('created') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
-        <th scope="col"><?= $this->Paginator->sort('highest_check_in_sequence') ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.first_name', __('First Name')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.last_name', __('Last Name')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.entry_id', __('Entry')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.participant_type_id', __('Participant Type')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.section_id', __('Section')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.checked_in', __('Checked In')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.checked_out', __('Checked Out')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.created', __('Created')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.modified', __('Modified')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.deleted', __('Deleted')) ?></th>
+        <th scope="col"><?= $this->Paginator->sort('Participants.highest_check_in_sequence', __('Highest Check In Sequence')) ?></th>
         <th scope="col" class="actions"><?= __('Actions') ?></th>
     </tr>
     </thead>
@@ -73,6 +132,7 @@
             <td><?= h($participant->checked_out) ?></td>
             <td><?= h($participant->created) ?></td>
             <td><?= h($participant->modified) ?></td>
+            <td><?= h($participant->deleted) ?></td>
             <td><?= $this->Number->format($participant->highest_check_in_sequence) ?></td>
             <td class="actions">
                 <?= $this->Actions->buttons($participant) ?>
