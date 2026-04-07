@@ -55,6 +55,11 @@ class ParticipantTypesTable extends Table
             ->notEmptyString('participant_type');
 
         $validator
+            ->scalar('osm_type_code')
+            ->maxLength('osm_type_code', 20)
+            ->allowEmptyString('osm_type_code');
+
+        $validator
             ->boolean('adult')
             ->requirePresence('adult', 'create')
             ->notEmptyString('adult');

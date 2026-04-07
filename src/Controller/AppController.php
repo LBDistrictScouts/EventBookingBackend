@@ -16,6 +16,9 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
+use App\Model\Entity\Checkpoint;
+use App\Model\Entity\Event as EventEntity;
+use App\Model\Entity\Participant;
 use Cake\Controller\Controller;
 use Cake\Event\EventInterface;
 use Cake\ORM\Association;
@@ -128,5 +131,99 @@ class AppController extends Controller
         $entryOptions = $query->toArray();
 
         return $entryOptions;
+    }
+
+    /**
+     * Build a chart-ready checkpoint progress summary for a participant scope.
+     *
+     * @param list<\App\Model\Entity\Participant> $participants Participants in scope.
+     * @param list<\App\Model\Entity\Event> $events Events providing checkpoint metadata.
+     * @return array{
+     *     bars: list<array{sequence: int, sequence_label: string, label: string, count: int, width: float}>,
+     *     participant_count: int,
+     *     tracked_participant_count: int,
+     *     max_count: int
+     * }
+     */
+    protected function buildCheckpointProgressData(array $participants, array $events): array
+    {
+        $sequenceNames = [];
+        $sequences = [];
+        $participantCount = 0;
+        $trackedParticipantCount = 0;
+        $counts = [];
+
+        foreach ($events as $event) {
+            if (!$event instanceof EventEntity) {
+                continue;
+            }
+
+            foreach ((array)$event->checkpoints as $checkpoint) {
+                if (!$checkpoint instanceof Checkpoint) {
+                    continue;
+                }
+
+                $sequence = (int)$checkpoint->checkpoint_sequence;
+                if ($sequence <= 0) {
+                    continue;
+                }
+
+                $sequences[$sequence] = true;
+                $checkpointName = trim((string)$checkpoint->checkpoint_name);
+                if ($checkpointName !== '') {
+                    $sequenceNames[$sequence][$checkpointName] = true;
+                }
+            }
+        }
+
+        foreach ($participants as $participant) {
+            if (!$participant instanceof Participant) {
+                continue;
+            }
+
+            $participantCount++;
+            $sequence = (int)$participant->highest_check_in_sequence;
+            if ($sequence <= 0) {
+                continue;
+            }
+
+            $trackedParticipantCount++;
+            $sequences[$sequence] = true;
+            $counts[$sequence] = ($counts[$sequence] ?? 0) + 1;
+        }
+
+        if ($sequences === []) {
+            return [
+                'bars' => [],
+                'participant_count' => $participantCount,
+                'tracked_participant_count' => $trackedParticipantCount,
+                'max_count' => 0,
+            ];
+        }
+
+        ksort($sequences);
+        $maxCount = max($counts ?: [0]);
+        $bars = [];
+
+        foreach (array_keys($sequences) as $sequence) {
+            $labels = array_keys($sequenceNames[$sequence] ?? []);
+            natcasesort($labels);
+            $count = $counts[$sequence] ?? 0;
+
+            $bars[] = [
+                'sequence' => $sequence,
+                'sequence_label' => __('Checkpoint {0}', $sequence),
+                'label' => count($labels) === 1 ? (string)reset($labels) : __('Checkpoint {0}', $sequence),
+                'count' => $count,
+                'width' => $maxCount > 0 ? $count / $maxCount * 100 : 0.0,
+            ];
+        }
+
+        return [
+            'bars' => $bars,
+            'participant_count' => $participantCount,
+            'tracked_participant_count' => $trackedParticipantCount,
+            'max_count' => $maxCount,
+        ];
     }
 }

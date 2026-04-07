@@ -23,6 +23,7 @@
         <legend><?= __('Add Participant Type') ?></legend>
         <?php
             echo $this->Form->control('participant_type');
+            echo $this->Form->control('osm_type_code');
             echo $this->Form->control('adult');
             echo $this->Form->control('uniformed');
             echo $this->Form->control('out_of_district');

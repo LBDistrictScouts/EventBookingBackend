@@ -172,7 +172,10 @@ class EntriesTable extends Table
             'CheckIns',
             'Participants' => function (SelectQuery $query): SelectQuery {
                 return $query
-                    ->contain(['ParticipantTypes', 'Sections'])
+                    ->contain([
+                        'ParticipantTypes',
+                        'Sections' => ['Groups', 'ParticipantTypes'],
+                    ])
                     ->leftJoinWith('ParticipantTypes')
                     ->orderBy([
                         'ParticipantTypes.sort_order' => 'ASC',

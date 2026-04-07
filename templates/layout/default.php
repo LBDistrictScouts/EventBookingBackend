@@ -80,8 +80,8 @@ $this->start('tb_body_start');
     <div class="container-fluid">
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar app-sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <div class="px-3 mb-3">
+                <div class="position-sticky pt-3 app-sidebar__inner">
+                    <div class="px-3 mb-4">
                         <?= $this->Form->create(null, [
                             'type' => 'get',
                             'url' => ['controller' => 'Entries', 'action' => 'findByReference'],
@@ -103,26 +103,19 @@ $this->start('tb_body_start');
                         <div class="form-text"><?= __('Use full ref or number only.') ?></div>
                         <?= $this->Form->end() ?>
                     </div>
-                    <ul class="navbar-nav px-3 w-100 d-md-none">
-                        <li class="nav-item text-nowrap">
-                            <?= $this->Html->link('Home', '/', ['class' => 'nav-link']) ?>
-                        </li>
-                        <li class="nav-item text-nowrap">
-                            <?= $this->Html->link('Events', ['controller' => 'Events', 'action' => 'index'], ['class' => 'nav-link']) ?>
-                        </li>
-                        <li class="nav-item text-nowrap">
-                            <?= $this->Html->link('Entries', ['controller' => 'Entries', 'action' => 'index'], ['class' => 'nav-link']) ?>
-                        </li>
-                        <li class="nav-item text-nowrap">
-                            <?= $this->Html->link('Checkpoints', ['controller' => 'Checkpoints', 'action' => 'index'], ['class' => 'nav-link']) ?>
-                        </li>
-                    </ul>
-                    <hr class="d-md-none"/>
-                    <?= $this->fetch('tb_sidebar') ?>
+                    <?= $this->element('app_sidebar_navigation') ?>
+                    <?php if (trim($this->fetch('tb_sidebar')) !== '') : ?>
+                        <div class="app-sidebar__context px-3 mt-4">
+                            <div class="app-sidebar__heading"><?= __('Context Actions') ?></div>
+                            <div class="app-sidebar__context-links">
+                                <?= $this->fetch('tb_sidebar') ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </nav>
 
-            <main role="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main role="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4 app-main">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center
                             pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2 page-header"><?= h($this->request->getParam('controller')) ?></h1>

@@ -56,6 +56,11 @@ class SendEventRemindersCommand extends Command
                 'help' => 'List due reminders without sending any email.',
                 'boolean' => true,
                 'default' => false,
+            ])
+            ->addOption('fail-on-errors', [
+                'help' => 'Exit non-zero when one or more reminder enqueues fail.',
+                'boolean' => true,
+                'default' => false,
             ]);
     }
 
@@ -69,6 +74,7 @@ class SendEventRemindersCommand extends Command
         $leadHours = (int)$args->getOption('lead-hours');
         $windowMinutes = (int)$args->getOption('window-minutes');
         $dryRun = (bool)$args->getOption('dry-run');
+        $failOnErrors = (bool)$args->getOption('fail-on-errors');
         $nowOption = $args->getOption('now');
 
         $now = is_string($nowOption) && $nowOption !== ''
@@ -85,10 +91,23 @@ class SendEventRemindersCommand extends Command
         $queueContext = $configuredContext instanceof Context ? $configuredContext : null;
         $queueName = is_string($configuredQueueName) && $configuredQueueName !== '' ? $configuredQueueName : null;
         if (!$dryRun && ($queueContext === null || $queueName === null)) {
-            $io->err('Queue context is not configured.');
+            $io->err(sprintf(
+                'Queue context is not configured. Context present: %s, Queue name present: %s',
+                $queueContext !== null ? 'yes' : 'no',
+                $queueName !== null ? 'yes' : 'no',
+            ));
 
             return static::CODE_ERROR;
         }
+
+        $io->out(sprintf(
+            'Starting reminder run. Dry-run: %s, Fail-on-errors: %s, Queue: %s, Window: %s to %s',
+            $dryRun ? 'yes' : 'no',
+            $failOnErrors ? 'yes' : 'no',
+            $queueName ?? 'n/a',
+            $windowStart->format('Y-m-d H:i:s'),
+            $windowEnd->format('Y-m-d H:i:s'),
+        ));
 
         /** @var \App\Model\Table\EntriesTable $entriesTable */
         $entriesTable = $this->fetchTable('Entries');
@@ -139,18 +158,40 @@ class SendEventRemindersCommand extends Command
                 $io->out(sprintf('Queued reminder for %s <%s>', $reference, (string)$entry->entry_email));
             } catch (Throwable $exception) {
                 $failedCount++;
-                $io->err(sprintf('Failed reminder for %s: %s', $reference, $exception->getMessage()));
+                $io->err(sprintf(
+                    'Failed reminder for %s <%s>: %s: %s',
+                    $reference,
+                    (string)$entry->entry_email,
+                    $exception::class,
+                    $exception->getMessage(),
+                ));
             }
         }
 
-        $io->success(sprintf(
+        $summary = sprintf(
             'Reminder run complete. Queued: %d, Failed: %d, Window: %s to %s',
             $queuedCount,
             $failedCount,
             $windowStart->format('Y-m-d H:i:s'),
             $windowEnd->format('Y-m-d H:i:s'),
-        ));
+        );
 
-        return $failedCount > 0 ? static::CODE_ERROR : static::CODE_SUCCESS;
+        if ($failedCount > 0) {
+            $io->err($summary);
+
+            if ($failOnErrors) {
+                return static::CODE_ERROR;
+            }
+
+            $io->warning(
+                'Reminder enqueue failures occurred, but the command is exiting successfully to avoid CronJob retries.',
+            );
+
+            return static::CODE_SUCCESS;
+        }
+
+        $io->success($summary);
+
+        return static::CODE_SUCCESS;
     }
 }

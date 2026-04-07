@@ -87,6 +87,159 @@ class BookingControllerTest extends TestCase
         $this->assertResponseOk();
     }
 
+    public function testBookJsonDoesNotRequireAuthentication(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+
+        $participantTypes = $this->getTableLocator()->get('ParticipantTypes');
+        $participantType = $participantTypes->find('all')->firstOrFail();
+
+        $sections = $this->getTableLocator()->get('Sections');
+        $section = $sections->find('all')->firstOrFail();
+
+        $this->session([]);
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Public Booking',
+            'entry_email' => 'public-booking@example.com',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => 'ab3437be-53f2-49f8-af5f-c8f1daebcb91',
+                    'first_name' => 'Public',
+                    'last_name' => 'Booker',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $section->id,
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+        $resultData = json_decode((string)$this->_response->getBody(), true);
+        $this->assertSame(true, $resultData['success']);
+        $this->assertSame('Saved', $resultData['message']);
+    }
+
+    public function testBookSendsSectionNotificationEmailsWithFullTeamRoster(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+
+        $participantTypes = $this->getTableLocator()->get('ParticipantTypes');
+        $participantType = $participantTypes->find('all')->firstOrFail();
+
+        $sections = $this->getTableLocator()->get('Sections');
+        $firstSection = $sections->get('95116a77-0675-4e1a-9d0c-74e3d40d92c1');
+
+        $secondSection = $sections->newEntity([
+            'section_name' => 'Different Section',
+            'notification_email' => 'different-section@example.com',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'group_id' => '873b0f71-5389-46f9-baae-7d4855406b64',
+            'osm_section_id' => 99,
+        ]);
+        $this->assertNotFalse($sections->save($secondSection));
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Mixed Team',
+            'entry_email' => 'mixed-team@example.com',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => 'ab3437be-53f2-49f8-af5f-c8f1daebcb91',
+                    'first_name' => 'Alex',
+                    'last_name' => 'Walker',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $firstSection->id,
+                ],
+                [
+                    'access_key' => '5f6e69f2-fc75-4d1d-b6cb-7176d9e620d4',
+                    'first_name' => 'Sam',
+                    'last_name' => 'Rivers',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $secondSection->id,
+                ],
+                [
+                    'access_key' => 'fe16ca0b-5fcb-469d-a8a1-7d16f58ac8a8',
+                    'first_name' => 'Pat',
+                    'last_name' => 'Jones',
+                    'participant_type_id' => $participantType->id,
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+        $this->assertMailCount(3);
+        $this->assertMailSentTo('mixed-team@example.com');
+        $this->assertMailSentTo('section@example.com');
+        $this->assertMailSentTo('different-section@example.com');
+        $this->assertMailContainsTextAt(1, 'Alex Walker');
+        $this->assertMailContainsTextAt(1, 'Sam Rivers');
+        $this->assertMailContainsTextAt(1, 'Section: Different Section');
+        $this->assertMailContainsTextAt(2, 'Alex Walker');
+        $this->assertMailContainsTextAt(2, 'Sam Rivers');
+    }
+
+    public function testBookDeduplicatesSectionNotificationsByEmailAddress(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->find('all')->firstOrFail();
+
+        $participantTypes = $this->getTableLocator()->get('ParticipantTypes');
+        $participantType = $participantTypes->find('all')->firstOrFail();
+
+        $sections = $this->getTableLocator()->get('Sections');
+        $firstSection = $sections->get('95116a77-0675-4e1a-9d0c-74e3d40d92c1');
+
+        $secondSection = $sections->newEntity([
+            'section_name' => 'Shared Inbox Section',
+            'notification_email' => 'shared-inbox@example.com',
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'group_id' => '873b0f71-5389-46f9-baae-7d4855406b64',
+            'osm_section_id' => 100,
+        ]);
+        $this->assertNotFalse($sections->save($secondSection));
+
+        $firstSection->notification_email = 'shared-inbox@example.com';
+        $this->assertNotFalse($sections->save($firstSection));
+
+        $this->post('/book.json', [
+            'event_id' => $event->id,
+            'entry_name' => 'Shared Inbox Team',
+            'entry_email' => 'shared-team@example.com',
+            'entry_mobile' => '07123456780',
+            'participants' => [
+                [
+                    'access_key' => 'd53ab523-0f37-4b1b-b4e0-167fdad4431c',
+                    'first_name' => 'Alex',
+                    'last_name' => 'Walker',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $firstSection->id,
+                ],
+                [
+                    'access_key' => '7df1d2cb-6331-42b0-97cc-1626f13c2f8e',
+                    'first_name' => 'Sam',
+                    'last_name' => 'Rivers',
+                    'participant_type_id' => $participantType->id,
+                    'section_id' => $secondSection->id,
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+        $this->assertMailCount(2);
+        $this->assertMailSentToAt(0, 'shared-team@example.com');
+        $this->assertMailSentToAt(1, 'shared-inbox@example.com');
+        $this->assertMailSubjectContains('New Signup for Lorem ipsum dolor sit amet & Shared Inbox Section');
+        $this->assertMailContainsTextAt(1, 'Alex Walker');
+        $this->assertMailContainsTextAt(1, 'Sam Rivers');
+        $this->assertMailContainsTextAt(1, 'A new booking has been received for Lorem ipsum dolor sit amet & Shared Inbox Section.');
+        $this->assertMailContainsTextAt(1, 'Participants: 2 total, 1 from Lorem ipsum dolor sit amet, 1 from Shared Inbox Section.');
+    }
+
     /**
      * Test index method
      *

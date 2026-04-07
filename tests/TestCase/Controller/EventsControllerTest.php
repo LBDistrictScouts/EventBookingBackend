@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
+use Cake\Cache\Cache;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -42,6 +43,7 @@ class EventsControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Cache::clear('navigation');
         $this->loginUser();
     }
 
@@ -102,6 +104,18 @@ class EventsControllerTest extends TestCase
         $this->assertResponseError();
     }
 
+    public function testCurrentJsonDoesNotRequireAuthentication(): void
+    {
+        $this->session([]);
+
+        $this->get('/events/current.json');
+
+        $this->assertResponseOk();
+        $resultData = json_decode((string)$this->_response->getBody(), true);
+        $this->assertArrayHasKey('event', $resultData);
+        $this->assertCount(10, $resultData['event']);
+    }
+
     /**
      * @return void
      * @uses \App\Controller\EventsController::current()
@@ -144,6 +158,27 @@ class EventsControllerTest extends TestCase
     }
 
     /**
+     * @return void
+     * @uses \App\Controller\EventsController::current()
+     */
+    public function testCurrentSidebarCheckpointCacheIsInvalidatedAfterCheckpointSave(): void
+    {
+        $this->get('/');
+        $this->assertResponseOk();
+        $this->assertResponseContains('1. Lorem ipsum dolor sit amet');
+
+        $checkpoints = $this->getTableLocator()->get('Checkpoints');
+        $checkpoint = $checkpoints->get('8454694e-a2f3-4775-b75d-1fd3e57cc4b7');
+        $checkpoint->checkpoint_name = 'Updated Sidebar Checkpoint';
+        $checkpoints->saveOrFail($checkpoint);
+
+        $this->get('/');
+        $this->assertResponseOk();
+        $this->assertResponseContains('1. Updated Sidebar Checkpoint');
+        $this->assertResponseNotContains('1. Lorem ipsum dolor sit amet');
+    }
+
+    /**
      * Test view method
      *
      * @return void
@@ -160,6 +195,19 @@ class EventsControllerTest extends TestCase
         $this->assertArrayHasKey('sections', $resultData['event']);
         $this->assertArrayHasKey('questions', $resultData['event']);
         $this->assertArrayHasKey('checkpoints', $resultData['event']);
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EventsController::view()
+     */
+    public function testHtmlViewRendersCheckpointProgressChart(): void
+    {
+        $this->get('/events/view/3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Checkpoint Progress');
+        $this->assertResponseContains('1 participants');
     }
 
     /**

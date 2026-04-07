@@ -25,6 +25,10 @@ class GroupsControllerTest extends TestCase
         'app.Groups',
         'app.ParticipantTypes',
         'app.Sections',
+        'app.Events',
+        'app.Entries',
+        'app.Participants',
+        'app.Checkpoints',
     ];
 
     /**
@@ -59,6 +63,83 @@ class GroupsControllerTest extends TestCase
         $this->get('/groups/view/873b0f71-5389-46f9-baae-7d4855406b64');
         $this->assertResponseOk();
         $this->assertResponseContains('Lorem ipsum dolor sit amet');
+        $this->assertResponseContains('Checkpoint Progress');
+        $this->assertResponseContains('1 participants');
+    }
+
+    public function testViewCheckpointProgressFollowsCurrentEventFilter(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->newEntity([
+            'event_name' => 'Second Group Event',
+            'event_description' => 'Second Group Event Description',
+            'booking_code' => 'GROUP2',
+            'start_time' => '2027-01-17 12:00:00',
+            'bookable' => true,
+            'finished' => false,
+            'entry_count' => 1,
+            'participant_count' => 1,
+            'checked_in_count' => 0,
+        ]);
+        $events->saveOrFail($event);
+        $eventId = (string)$event->id;
+
+        $eventsSections = $this->getTableLocator()->get('EventsSections');
+        $eventsSection = $eventsSections->newEntity([
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'event_id' => $eventId,
+        ], [
+            'accessibleFields' => [
+                'section_id' => true,
+                'event_id' => true,
+            ],
+        ]);
+        $eventsSections->saveOrFail($eventsSection);
+
+        $checkpoints = $this->getTableLocator()->get('Checkpoints');
+        $checkpoint = $checkpoints->newEntity([
+            'id' => 'c2222222-a2f3-4775-b75d-1fd3e57cc4b7',
+            'checkpoint_sequence' => 2,
+            'checkpoint_name' => 'Group Event Summit',
+            'event_id' => $eventId,
+        ]);
+        $checkpoints->saveOrFail($checkpoint);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        $entry = $entries->newEntity([
+            'event_id' => $eventId,
+            'entry_name' => 'Second Group Team',
+            'reference_number' => 2,
+            'active' => true,
+            'participant_count' => 1,
+            'checked_in_count' => 0,
+            'entry_email' => 'group@example.com',
+            'entry_mobile' => '07000000001',
+            'security_code' => 'XYZ34',
+        ]);
+        $entries->saveOrFail($entry);
+        $entryId = (string)$entry->id;
+
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->newEntity([
+            'first_name' => 'Group',
+            'last_name' => 'Walker',
+            'entry_id' => $entryId,
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 2,
+        ]);
+        $participants->saveOrFail($participant);
+
+        $this->get('/groups/view/873b0f71-5389-46f9-baae-7d4855406b64');
+        $this->assertResponseOk();
+        $this->assertResponseNotContains('Group Event Summit');
+
+        $this->get('/groups/view/873b0f71-5389-46f9-baae-7d4855406b64?all=1');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Group Event Summit');
     }
 
     /**

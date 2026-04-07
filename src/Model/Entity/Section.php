@@ -10,6 +10,7 @@ use Cake\ORM\Entity;
  *
  * @property string $id
  * @property string $section_name
+ * @property string|null $notification_email
  * @property string $participant_type_id
  * @property string $group_id
  * @property int|null $osm_section_id
@@ -35,6 +36,7 @@ class Section extends Entity
      */
     protected array $_accessible = [
         'section_name' => true,
+        'notification_email' => true,
         'participant_type_id' => true,
         'group_id' => true,
         'osm_section_id' => true,
@@ -45,5 +47,14 @@ class Section extends Entity
         'group' => true,
         'participants' => true,
         'events' => true,
+    ];
+
+    /**
+     * Fields hidden from array/json representations.
+     *
+     * @var list<string>
+     */
+    protected array $_hidden = [
+        'notification_email',
     ];
 }

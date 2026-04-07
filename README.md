@@ -56,6 +56,8 @@ Minimum environment/config values you need:
 
 Optional runtime values:
 
+- `APP_FULL_BASE_URL` for generating absolute links in emails and CLI-triggered notifications
+- `APP_FRONTEND_BASE_URL` for frontend confirmation email links such as `/edit/{id}`; falls back to `APP_FULL_BASE_URL` when unset
 - `AWS_SESSION_TOKEN`
 - `AWS_PROFILE` for non-container local CLI development when you want to use a named AWS profile instead of explicit credentials
 - `SMTP_HOST`
@@ -208,7 +210,9 @@ If your package visibility is private, consumers will need appropriate GitHub pa
 
 ## Kubernetes
 
-Kubernetes manifests for a local k3s deployment live in [`k8s/local-k3s.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/local-k3s.yaml), [`k8s/deploy-job.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/deploy-job.yaml), and [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml).
+Kubernetes manifests for a local k3s deployment live under [`k8s/base/`](/Users/jacob/Development/EventBookingBackend/k8s/base), with [`k8s/kustomization.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/kustomization.yaml) as the steady-state entrypoint. Operational resources remain separate in [`k8s/operations/deploy-job.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/operations/deploy-job.yaml) and [`k8s/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/secrets/onepassword-item.yaml).
+
+For direct HTTPS on the Event Booking `LoadBalancer` origin, see [`k8s/README.md`](/Users/jacob/Development/EventBookingBackend/k8s/README.md). On a fresh cluster, run [`k8s/bootstrap-origin-tls.sh`](/Users/jacob/Development/EventBookingBackend/k8s/bootstrap-origin-tls.sh) once to seed the temporary TLS secret before applying the steady-state manifest.
 
 The runtime image is the same one published by GitHub Actions:
 
@@ -259,7 +263,7 @@ The operator flow in this repo assumes:
 - the operator creates a Kubernetes `Secret` with the same name
 - the application workloads consume that generated `Secret` via `secretRef`
 
-Update [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml) so `spec.itemPath` points to your real 1Password item:
+Update [`k8s/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/secrets/onepassword-item.yaml) so `spec.itemPath` points to your real 1Password item:
 
 ```text
 vaults/<vault-id-or-title>/items/<item-id-or-title>
@@ -269,7 +273,7 @@ The installed CRD in your cluster exposes exactly one required spec field, `item
 
 Basic local k3s flow:
 
-1. Update [`k8s/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/onepassword-item.yaml) with the correct vault and item path.
+1. Update [`k8s/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/secrets/onepassword-item.yaml) with the correct vault and item path.
 2. Create the GHCR image pull secret in the `event-booking` namespace. The manifests reference a secret named `ghcr-pull-secret` through the `event-booking-runtime` service account.
 
 ```bash
@@ -287,15 +291,15 @@ The GitHub token must be able to read the private package. For GitHub Container 
 3. Apply the namespace, config, operator item, and workloads:
 
 ```bash
-kubectl apply -f k8s/local-k3s.yaml
-kubectl apply -f k8s/onepassword-item.yaml
+kubectl apply -k k8s
+kubectl apply -f k8s/secrets/onepassword-item.yaml
 ```
 
 4. Wait for the operator to create the `event-booking-secrets` Kubernetes `Secret`, then run the one-shot deploy job to create schemas, run post-install hooks, and execute migrations:
 
 ```bash
 kubectl get secret -n event-booking event-booking-secrets
-kubectl apply -f k8s/deploy-job.yaml
+kubectl apply -f k8s/operations/deploy-job.yaml
 kubectl logs -n event-booking job/event-booking-deploy -f
 ```
 

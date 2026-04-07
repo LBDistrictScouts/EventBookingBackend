@@ -91,6 +91,22 @@ class CheckInsControllerTest extends TestCase
         $this->assertGreaterThan(1, $checkIns->find()->count());
     }
 
+    public function testAddJsonDoesNotRequireAuthentication(): void
+    {
+        $this->session([]);
+
+        $this->post('/check-in.json', [
+            'checkpoint_id' => '8454694e-a2f3-4775-b75d-1fd3e57cc4b7',
+            'entry_id' => '2342ad37-13f0-4fd1-bd3f-2032273626ce',
+            'check_in_time' => '2025-01-16 12:00:00',
+            'participants' => ['5045fd83-55db-4d36-8a8a-63222e50e3fd'],
+        ]);
+
+        $this->assertResponseOk();
+        $checkIns = $this->getTableLocator()->get('CheckIns');
+        $this->assertGreaterThan(1, $checkIns->find()->count());
+    }
+
     /**
      * Test edit method
      *

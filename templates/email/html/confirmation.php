@@ -6,6 +6,7 @@
  * @var \App\Model\Entity\Entry $entry
  * @var string|null $notificationType
  * @var \App\Model\Entity\Entry|null $mergedEntry
+ * @var string $editUrl
  */
 
 ?>
@@ -91,6 +92,12 @@ $summary = match ($notificationType) {
                         </table>
 
                         <p style="color: #333; font-size: 14px;">You will need the booking reference and security code to register on the day of the walk.</p>
+                        <p style="margin: 0 0 20px 0;">
+                            <a
+                                href="<?= h($editUrl) ?>"
+                                style="display: inline-block; background: #28a745; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 4px; font-weight: bold;"
+                            ><?= __('Edit Booking') ?></a>
+                        </p>
 
                         <?php if (!empty($entry->participants)) : ?>
                             <table

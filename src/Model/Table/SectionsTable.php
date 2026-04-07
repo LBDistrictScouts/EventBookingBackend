@@ -67,6 +67,12 @@ class SectionsTable extends Table
             ->notEmptyString('section_name');
 
         $validator
+            ->scalar('notification_email')
+            ->maxLength('notification_email', 255)
+            ->allowEmptyString('notification_email')
+            ->email('notification_email');
+
+        $validator
             ->uuid('participant_type_id')
             ->notEmptyString('participant_type_id');
 

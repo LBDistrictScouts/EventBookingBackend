@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\View\Cell\LiveEventCheckpointsCell;
+use ArrayObject;
+use Cake\Cache\Cache;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\Event;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -80,5 +85,27 @@ class CheckpointsTable extends Table
         $rules->add($rules->existsIn(['event_id'], 'Events'), ['errorField' => 'event_id']);
 
         return $rules;
+    }
+
+    /**
+     * @param \Cake\Event\Event<static> $event
+     * @param \Cake\Datasource\EntityInterface $entity
+     * @param \ArrayObject<string, mixed> $options
+     * @return void
+     */
+    public function afterSave(Event $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        Cache::delete(LiveEventCheckpointsCell::CACHE_KEY, 'navigation');
+    }
+
+    /**
+     * @param \Cake\Event\Event<static> $event
+     * @param \Cake\Datasource\EntityInterface $entity
+     * @param \ArrayObject<string, mixed> $options
+     * @return void
+     */
+    public function afterDelete(Event $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        Cache::delete(LiveEventCheckpointsCell::CACHE_KEY, 'navigation');
     }
 }

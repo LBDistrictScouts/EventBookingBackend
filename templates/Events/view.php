@@ -6,6 +6,7 @@
 ?>
 <?php $this->extend('/layout/TwitterBootstrap/dashboard'); ?>
 <?php $this->Html->css('event-view', ['block' => true]); ?>
+<?php $this->Html->css('checkpoint-progress-chart', ['block' => true]); ?>
 
 <?php
 $entryCount = $event->entry_count ?? 0;
@@ -50,6 +51,7 @@ $checkedInCount = $event->checked_in_count ?? 0;
                                 <h3 class="h5 mb-3"><?= __('Jump To') ?></h3>
                                 <div class="d-grid gap-2">
                                     <?= $this->Html->link(__('Entries'), ['action' => 'view', $event->id, '#' => 'entries'], ['class' => 'btn btn-outline-primary text-start']) ?>
+                                    <?= $this->Html->link(__('Checkpoint Progress'), ['action' => 'view', $event->id, '#' => 'checkpoint-progress'], ['class' => 'btn btn-outline-primary text-start']) ?>
                                     <?= $this->Html->link(__('Sections'), ['action' => 'view', $event->id, '#' => 'sections'], ['class' => 'btn btn-outline-primary text-start']) ?>
                                     <?= $this->Html->link(__('Checkpoints'), ['action' => 'view', $event->id, '#' => 'checkpoints'], ['class' => 'btn btn-outline-primary text-start']) ?>
                                     <?= $this->Html->link(__('Questions'), ['action' => 'view', $event->id, '#' => 'questions'], ['class' => 'btn btn-outline-primary text-start']) ?>
@@ -93,6 +95,15 @@ $checkedInCount = $event->checked_in_count ?? 0;
 
         <div class="row g-4 align-items-start">
             <div class="col-12 col-xl-8">
+                <div class="mb-4" id="checkpoint-progress">
+                    <?= $this->element('Dashboard/checkpoint_progress_chart', [
+                        'progress' => $checkpointProgress,
+                        'title' => __('Checkpoint Progress'),
+                        'description' => __('See how many participants have reached each checkpoint as their highest recorded point in this event.'),
+                        'emptyMessage' => __('No checkpoint progress has been recorded for this event yet.'),
+                    ]) ?>
+                </div>
+
                 <div class="mb-4" id="entries">
                     <?= $this->element('Events/entries_table', compact('event', 'entries', 'entriesPagination', 'entriesSearch')) ?>
                 </div>

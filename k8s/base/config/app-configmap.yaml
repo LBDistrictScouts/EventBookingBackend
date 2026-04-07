@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-booking-config
+  namespace: event-booking
+data:
+  APP_NAME: event-booking-backend
+  DEBUG: "false"
+  APP_ENCODING: UTF-8
+  APP_DEFAULT_LOCALE: en_GB
+  APP_DEFAULT_TIMEZONE: Europe/London
+  AWS_REGION: eu-west-1
+  DISTRICT_CORE_DATA_URL: https://district-core-data.jacobagtyler.com/
+  SMTP_HOST: email-smtp.eu-west-1.amazonaws.com
+  SMTP_PORT: "587"
+  SMTP_TIMEOUT: "30"
+  SMTP_TLS: "true"
+  SMTP_LOG: "true"
