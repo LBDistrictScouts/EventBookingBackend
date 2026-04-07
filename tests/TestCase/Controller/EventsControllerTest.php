@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
+use Cake\Cache\Cache;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -42,6 +43,7 @@ class EventsControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Cache::clear('navigation');
         $this->loginUser();
     }
 
@@ -153,6 +155,27 @@ class EventsControllerTest extends TestCase
         $this->assertResponseContains('#checkpoints');
         $this->assertResponseContains('#questions');
         $this->assertResponseContains('Entry Reference');
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EventsController::current()
+     */
+    public function testCurrentSidebarCheckpointCacheIsInvalidatedAfterCheckpointSave(): void
+    {
+        $this->get('/');
+        $this->assertResponseOk();
+        $this->assertResponseContains('1. Lorem ipsum dolor sit amet');
+
+        $checkpoints = $this->getTableLocator()->get('Checkpoints');
+        $checkpoint = $checkpoints->get('8454694e-a2f3-4775-b75d-1fd3e57cc4b7');
+        $checkpoint->checkpoint_name = 'Updated Sidebar Checkpoint';
+        $checkpoints->saveOrFail($checkpoint);
+
+        $this->get('/');
+        $this->assertResponseOk();
+        $this->assertResponseContains('1. Updated Sidebar Checkpoint');
+        $this->assertResponseNotContains('1. Lorem ipsum dolor sit amet');
     }
 
     /**

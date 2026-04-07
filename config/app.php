@@ -129,6 +129,15 @@ return [
             'url' => env('CACHE_DEFAULT_URL', null),
         ],
 
+        'navigation' => [
+            'className' => FileEngine::class,
+            'prefix' => 'event_booking_navigation_',
+            'path' => CACHE . 'navigation' . DS,
+            'serialize' => true,
+            'duration' => '+6 hours',
+            'url' => env('CACHE_NAVIGATION_URL', null),
+        ],
+
         /*
          * Configure the cache used for general framework caching.
          * Translation cache files are stored with this configuration.
