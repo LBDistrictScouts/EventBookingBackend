@@ -1,0 +1,137 @@
+.section-view {
+    --section-view-ink: #12343b;
+    --section-view-accent: #f4b400;
+    --section-view-soft: #eef7f2;
+}
+
+.section-view-shell {
+    max-width: 1440px;
+}
+
+.section-hero {
+    background:
+        radial-gradient(circle at top right, rgba(244, 180, 0, 0.16), transparent 30%),
+        linear-gradient(135deg, #ffffff 0%, #f4faf7 100%);
+}
+
+.section-kicker,
+.section-stat-label,
+.section-detail-label,
+.section-team-card__eyebrow {
+    color: #5d746f;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.section-panel {
+    background: rgba(18, 52, 59, 0.05);
+}
+
+.section-meta-line,
+.section-team-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.65rem;
+    color: #4f6662;
+    font-weight: 600;
+}
+
+.section-meta-separator {
+    color: #9aada9;
+}
+
+.section-stat {
+    background: linear-gradient(135deg, #f8fbfa 0%, var(--section-view-soft) 100%);
+    border-left: 0.45rem solid var(--section-view-ink);
+}
+
+.section-stat-accent {
+    border-left-color: var(--section-view-accent);
+}
+
+.section-stat-value {
+    color: var(--section-view-ink);
+    font-size: clamp(2.6rem, 5vw, 4.8rem);
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.5rem 0 0.75rem;
+}
+
+.section-stat-note {
+    color: #5d746f;
+    font-size: 0.95rem;
+}
+
+.section-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem 1.25rem;
+}
+
+.section-detail-value {
+    color: #1f2d2f;
+    font-weight: 600;
+}
+
+.section-team-stack {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.section-team-card {
+    border: 1px solid #dfe8e5;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbf9 100%);
+}
+
+.section-team-card__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.section-team-subcard {
+    height: 100%;
+    border-radius: 0.85rem;
+    background: #eef6f3;
+    padding: 1rem;
+}
+
+.section-pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.section-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    background: #dbeee5;
+    color: #18443d;
+    font-weight: 600;
+}
+
+.section-team-roster .table {
+    --bs-table-bg: transparent;
+}
+
+.section-view .table-primary-subtle td {
+    --bs-table-bg: #e3f1ec;
+}
+
+@media (max-width: 767.98px) {
+    .section-hero .display-6 {
+        font-size: 2.1rem;
+    }
+
+    .section-team-card__header {
+        flex-direction: column;
+    }
+}

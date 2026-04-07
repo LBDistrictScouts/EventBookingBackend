@@ -12,6 +12,7 @@ use App\Model\Entity\ParticipantType;
 use App\Model\Entity\Section;
 use Cake\Core\Configure;
 use Cake\I18n\DateTime;
+use Cake\Routing\Router;
 use Cake\TestSuite\EmailTrait;
 use Cake\TestSuite\TestCase;
 
@@ -26,6 +27,32 @@ class BookingMailerTest extends TestCase
     {
         parent::setUp();
         Configure::write('App.frontendBaseUrl', false);
+    }
+
+    /**
+     * @return string
+     */
+    private function expectedFullBaseUrl(): string
+    {
+        $configuredBaseUrl = Configure::read('App.fullBaseUrl');
+        if (is_string($configuredBaseUrl) && trim($configuredBaseUrl) !== '') {
+            return rtrim($configuredBaseUrl, '/');
+        }
+
+        return rtrim((string)Router::fullBaseUrl(), '/');
+    }
+
+    /**
+     * @return string
+     */
+    private function expectedPublicBaseUrl(): string
+    {
+        $frontendBaseUrl = Configure::read('App.frontendBaseUrl');
+        if (is_string($frontendBaseUrl) && trim($frontendBaseUrl) !== '') {
+            return rtrim($frontendBaseUrl, '/');
+        }
+
+        return $this->expectedFullBaseUrl();
     }
 
     /**
@@ -103,8 +130,9 @@ class BookingMailerTest extends TestCase
         $mailer = new BookingMailer();
         $mailer->send('confirmation', [$entry]);
 
-        $this->assertMailContainsText('http://localhost:5173/edit/c3cbb44d-7ef8-4c45-b53b-fc33df4847bf');
-        $this->assertMailContainsHtml('http://localhost:5173/edit/c3cbb44d-7ef8-4c45-b53b-fc33df4847bf');
+        $expectedEditUrl = $this->expectedPublicBaseUrl() . '/edit/c3cbb44d-7ef8-4c45-b53b-fc33df4847bf';
+        $this->assertMailContainsText($expectedEditUrl);
+        $this->assertMailContainsHtml($expectedEditUrl);
     }
 
     public function testConfirmationFallsBackToFullBaseUrlWhenFrontendBaseUrlIsUnset(): void
@@ -130,8 +158,9 @@ class BookingMailerTest extends TestCase
         $mailer = new BookingMailer();
         $mailer->send('confirmation', [$entry]);
 
-        $this->assertMailContainsText('http://localhost:8765/edit/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
-        $this->assertMailContainsHtml('http://localhost:8765/edit/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+        $expectedEditUrl = $this->expectedPublicBaseUrl() . '/edit/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+        $this->assertMailContainsText($expectedEditUrl);
+        $this->assertMailContainsHtml($expectedEditUrl);
     }
 
     public function testConfirmationForUpdatedEntryUsesUpdateCopy(): void
@@ -250,7 +279,9 @@ class BookingMailerTest extends TestCase
         $this->assertMailContainsText('Pat Jones');
         $this->assertMailContainsText('Section: Scouts');
         $this->assertMailContainsText('Section: No section');
-        $this->assertMailContainsText('Log in to view Cubs: http://localhost:8765/auth/login?redirect=%2Fsections%2Fview%2F95116a77-0675-4e1a-9d0c-74e3d40d92c1');
+        $expectedLoginUrl = $this->expectedFullBaseUrl() .
+            '/auth/login?redirect=%2Fsections%2Fview%2F95116a77-0675-4e1a-9d0c-74e3d40d92c1';
+        $this->assertMailContainsText('Log in to view Cubs: ' . $expectedLoginUrl);
     }
 
     public function testSectionSignupNotificationAggregatesMultipleSections(): void
@@ -312,7 +343,11 @@ class BookingMailerTest extends TestCase
         $this->assertMailSubjectContains('New Signup for 4th Letchworth Beavers & 4th Letchworth Cubs');
         $this->assertMailContainsText('A new booking has been received for 4th Letchworth Beavers & 4th Letchworth Cubs.');
         $this->assertMailContainsText('Participants: 3 total, 1 from 4th Letchworth Beavers, 1 from 4th Letchworth Cubs.');
-        $this->assertMailContainsText('Log in to view 4th Letchworth Beavers: http://localhost:8765/auth/login?redirect=%2Fsections%2Fview%2F11111111-1111-1111-1111-111111111111');
-        $this->assertMailContainsText('Log in to view 4th Letchworth Cubs: http://localhost:8765/auth/login?redirect=%2Fsections%2Fview%2F22222222-2222-2222-2222-222222222222');
+        $expectedBeaversLoginUrl = $this->expectedFullBaseUrl() .
+            '/auth/login?redirect=%2Fsections%2Fview%2F11111111-1111-1111-1111-111111111111';
+        $expectedCubsLoginUrl = $this->expectedFullBaseUrl() .
+            '/auth/login?redirect=%2Fsections%2Fview%2F22222222-2222-2222-2222-222222222222';
+        $this->assertMailContainsText('Log in to view 4th Letchworth Beavers: ' . $expectedBeaversLoginUrl);
+        $this->assertMailContainsText('Log in to view 4th Letchworth Cubs: ' . $expectedCubsLoginUrl);
     }
 }

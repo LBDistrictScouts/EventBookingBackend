@@ -178,6 +178,19 @@ class EventsControllerTest extends TestCase
      * @return void
      * @uses \App\Controller\EventsController::view()
      */
+    public function testHtmlViewRendersCheckpointProgressChart(): void
+    {
+        $this->get('/events/view/3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('Checkpoint Progress');
+        $this->assertResponseContains('1 participants');
+    }
+
+    /**
+     * @return void
+     * @uses \App\Controller\EventsController::view()
+     */
     public function testViewFiltersEntriesByPartialSearchAcrossContactFields(): void
     {
         $entries = $this->getTableLocator()->get('Entries');
