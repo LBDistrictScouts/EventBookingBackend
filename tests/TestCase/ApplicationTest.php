@@ -48,9 +48,11 @@ class ApplicationTest extends TestCase
         $app->bootstrap();
         $plugins = $app->getPlugins();
 
-        $this->assertTrue($plugins->has('Bake'), 'plugins has Bake?');
+        $this->assertTrue($plugins->has('BootstrapUI'), 'plugins has BootstrapUI?');
         $this->assertFalse($plugins->has('DebugKit'), 'plugins has DebugKit?');
-        $this->assertTrue($plugins->has('Migrations'), 'plugins has Migrations?');
+        $this->assertTrue($plugins->has('DistrictUI'), 'plugins has DistrictUI?');
+        $this->assertTrue($plugins->has('LBDistrictScouts/CoreDataSeeder'), 'plugins has CoreDataSeeder?');
+        $this->assertTrue($plugins->has('Muffin/Trash'), 'plugins has Muffin/Trash?');
     }
 
     /**

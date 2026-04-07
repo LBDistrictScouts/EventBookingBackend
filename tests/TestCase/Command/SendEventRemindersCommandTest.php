@@ -23,6 +23,7 @@ use Interop\Queue\Queue;
 use Interop\Queue\SubscriptionConsumer;
 use Interop\Queue\Topic;
 use RuntimeException;
+use Throwable;
 
 class SendEventRemindersCommandTest extends TestCase
 {
@@ -78,6 +79,7 @@ class SendEventRemindersCommandTest extends TestCase
         $this->assertArrayHasKey('lead-hours', $result->options());
         $this->assertArrayHasKey('window-minutes', $result->options());
         $this->assertArrayHasKey('dry-run', $result->options());
+        $this->assertArrayHasKey('fail-on-errors', $result->options());
     }
 
     public function testExecuteSendsReminderAndMarksEntrySent(): void
@@ -182,10 +184,77 @@ class SendEventRemindersCommandTest extends TestCase
         $this->assertNull($row['reminder_sent'] ?? null);
     }
 
+    public function testExecuteEnqueueFailureExitsSuccessfullyByDefault(): void
+    {
+        $this->configureQueueContext(new RuntimeException('Queue send failed.'));
+
+        $events = $this->getTableLocator()->get('Events');
+        /** @var \App\Model\Entity\Event $event */
+        $event = $events->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+        $event->start_time = new DateTime('2026-03-18 20:00:00');
+        $event->finished = false;
+        $events->saveOrFail($event);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce');
+        $entry->reminder_sent = null;
+        $entries->saveOrFail($entry);
+
+        $command = new SendEventRemindersCommand();
+        $result = $command->execute(
+            new Arguments([], [
+                'lead-hours' => '12',
+                'window-minutes' => '60',
+                'now' => '2026-03-18 08:00:00',
+                'dry-run' => false,
+                'fail-on-errors' => false,
+            ], []),
+            $this->createConsoleIo(),
+        );
+
+        $this->assertSame(0, $result);
+        $this->assertMailCount(0);
+    }
+
+    public function testExecuteEnqueueFailureCanExitNonZeroWhenRequested(): void
+    {
+        $this->configureQueueContext(new RuntimeException('Queue send failed.'));
+
+        $events = $this->getTableLocator()->get('Events');
+        /** @var \App\Model\Entity\Event $event */
+        $event = $events->get('3a6d9419-b621-45cf-a13e-4db9647bf5bc');
+        $event->start_time = new DateTime('2026-03-18 20:00:00');
+        $event->finished = false;
+        $events->saveOrFail($event);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        /** @var \App\Model\Entity\Entry $entry */
+        $entry = $entries->get('2342ad37-13f0-4fd1-bd3f-2032273626ce');
+        $entry->reminder_sent = null;
+        $entries->saveOrFail($entry);
+
+        $command = new SendEventRemindersCommand();
+        $result = $command->execute(
+            new Arguments([], [
+                'lead-hours' => '12',
+                'window-minutes' => '60',
+                'now' => '2026-03-18 08:00:00',
+                'dry-run' => false,
+                'fail-on-errors' => true,
+            ], []),
+            $this->createConsoleIo(),
+        );
+
+        $this->assertSame(1, $result);
+        $this->assertMailCount(0);
+    }
+
     /**
+     * @param \Throwable|null $sendException
      * @return object{bodies: array<int, string>}
      */
-    private function configureQueueContext(): object
+    private function configureQueueContext(?Throwable $sendException = null): object
     {
         $queueState = new class {
             /**
@@ -205,20 +274,25 @@ class SendEventRemindersCommandTest extends TestCase
             }
         };
 
-        $producer = new class ($queueState) implements Producer {
+        $producer = new class ($queueState, $sendException) implements Producer {
             private ?int $deliveryDelay = null;
             private ?int $priority = null;
             private ?int $timeToLive = null;
 
             /**
              * @param object{bodies: array<int, string>} $queueState
+             * @param \Throwable|null $sendException
              */
-            public function __construct(private object $queueState)
+            public function __construct(private object $queueState, private ?Throwable $sendException)
             {
             }
 
             public function send(Destination $destination, Message $message): void
             {
+                if ($this->sendException !== null) {
+                    throw $this->sendException;
+                }
+
                 $this->queueState->bodies[] = $message->getBody();
             }
 

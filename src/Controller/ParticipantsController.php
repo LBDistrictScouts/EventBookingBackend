@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Datasource\Exception\RecordNotFoundException;
+
 /**
  * Participants Controller
  *
@@ -18,7 +20,26 @@ class ParticipantsController extends AppController
     public function index()
     {
         $query = $this->Participants->find()
-            ->contain(['Entries', 'ParticipantTypes', 'Sections']);
+            ->contain(['Entries.Events', 'ParticipantTypes', 'Sections']);
+
+        $showAll = $this->request->getQuery('all') === '1';
+        $currentEvent = null;
+        if (!$showAll) {
+            try {
+                /** @var \App\Model\Table\EventsTable $eventsTable */
+                $eventsTable = $this->fetchTable('Events');
+                $currentEvent = $eventsTable->find()
+                    ->where(['bookable' => true, 'finished' => false])
+                    ->orderByAsc('start_time')
+                    ->firstOrFail();
+
+                $query->matching('Entries', function ($entriesQuery) use ($currentEvent) {
+                    return $entriesQuery->where(['Entries.event_id' => $currentEvent->id]);
+                });
+            } catch (RecordNotFoundException) {
+                $currentEvent = null;
+            }
+        }
 
         $checkedIn = $this->request->getQuery('checked-in') ?? false;
         if ($checkedIn) {
@@ -36,6 +57,8 @@ class ParticipantsController extends AppController
             'participants',
             'checkedIn',
             'checkedOut',
+            'showAll',
+            'currentEvent',
         ));
     }
 

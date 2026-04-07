@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\View\Cell\LiveEventCheckpointsCell;
+use ArrayObject;
+use Cake\Cache\Cache;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\Event;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -118,5 +123,27 @@ class EventsTable extends Table
         $rules->add($rules->isUnique(['booking_code']), ['errorField' => 'booking_code']);
 
         return $rules;
+    }
+
+    /**
+     * @param \Cake\Event\Event<static> $event
+     * @param \Cake\Datasource\EntityInterface $entity
+     * @param \ArrayObject<string, mixed> $options
+     * @return void
+     */
+    public function afterSave(Event $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        Cache::delete(LiveEventCheckpointsCell::CACHE_KEY, 'navigation');
+    }
+
+    /**
+     * @param \Cake\Event\Event<static> $event
+     * @param \Cake\Datasource\EntityInterface $entity
+     * @param \ArrayObject<string, mixed> $options
+     * @return void
+     */
+    public function afterDelete(Event $event, EntityInterface $entity, ArrayObject $options): void
+    {
+        Cache::delete(LiveEventCheckpointsCell::CACHE_KEY, 'navigation');
     }
 }

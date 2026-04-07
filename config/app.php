@@ -57,7 +57,8 @@ return [
         'webroot' => 'webroot',
         'wwwRoot' => WWW_ROOT,
         //'baseUrl' => env('SCRIPT_NAME'),
-        'fullBaseUrl' => false,
+        'fullBaseUrl' => env('APP_FULL_BASE_URL', false),
+        'frontendBaseUrl' => env('APP_FRONTEND_BASE_URL', false),
         'imageBaseUrl' => 'img/',
         'cssBaseUrl' => 'css/',
         'jsBaseUrl' => 'js/',
@@ -99,6 +100,12 @@ return [
         'QueueName' => env('AWS_SQS_QUEUE_NAME'),
     ],
 
+    'CoreDataSeeder' => [
+        'url' => env('DISTRICT_CORE_DATA_URL'),
+        'username' => env('DISTRICT_CORE_DATA_USERNAME'),
+        'password' => env('DISTRICT_CORE_DATA_PASSWORD'),
+    ],
+
     /*
      * Apply timestamps with the last modified time to static assets (js, css, images).
      * Will append a querystring parameter containing the time the file was modified.
@@ -120,6 +127,15 @@ return [
             'className' => FileEngine::class,
             'path' => CACHE,
             'url' => env('CACHE_DEFAULT_URL', null),
+        ],
+
+        'navigation' => [
+            'className' => FileEngine::class,
+            'prefix' => 'event_booking_navigation_',
+            'path' => CACHE . 'navigation' . DS,
+            'serialize' => true,
+            'duration' => '+6 hours',
+            'url' => env('CACHE_NAVIGATION_URL', null),
         ],
 
         /*

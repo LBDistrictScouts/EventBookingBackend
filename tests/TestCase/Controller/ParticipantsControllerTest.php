@@ -51,6 +51,61 @@ class ParticipantsControllerTest extends TestCase
         $this->get('/participants');
         $this->assertResponseOk();
         $this->assertResponseContains('Lorem ipsum dolor sit amet');
+        $this->assertResponseContains('Showing participants for the current event: Lorem ipsum dolor sit amet');
+    }
+
+    public function testIndexCanShowAllParticipantsAcrossEvents(): void
+    {
+        $events = $this->getTableLocator()->get('Events');
+        $event = $events->newEntity([
+            'event_name' => 'Second Event',
+            'event_description' => 'Second Event Description',
+            'booking_code' => 'SECOND',
+            'start_time' => '2027-01-20 09:00:00',
+            'bookable' => true,
+            'finished' => false,
+            'entry_count' => 1,
+            'participant_count' => 1,
+            'checked_in_count' => 0,
+        ]);
+        $events->saveOrFail($event);
+
+        $entries = $this->getTableLocator()->get('Entries');
+        $entry = $entries->newEntity([
+            'event_id' => $event->id,
+            'entry_name' => 'Second Event Team',
+            'reference_number' => 2,
+            'active' => true,
+            'participant_count' => 1,
+            'checked_in_count' => 0,
+            'entry_email' => 'second@example.com',
+            'entry_mobile' => '07000000000',
+            'security_code' => 'XYZ12',
+        ]);
+        $entries->saveOrFail($entry);
+
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->newEntity([
+            'first_name' => 'Second',
+            'last_name' => 'Walker',
+            'entry_id' => $entry->id,
+            'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+            'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+            'checked_in' => false,
+            'checked_out' => false,
+            'highest_check_in_sequence' => 0,
+        ]);
+        $participants->saveOrFail($participant);
+
+        $this->get('/participants');
+        $this->assertResponseOk();
+        $this->assertResponseNotContains('Second Event Team');
+
+        $this->get('/participants?all=1');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Showing participants across all events.');
+        $this->assertResponseContains('Second Event Team');
+        $this->assertResponseContains('Second');
     }
 
     /**

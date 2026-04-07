@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: event-booking-backend-tls
+  namespace: event-booking
+spec:
+  secretName: event-booking-backend-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - event-backend.jacobagtyler.com

@@ -167,6 +167,7 @@ class EventsController extends AppController
             return;
         }
 
+        /** @var \App\Model\Entity\Event $event */
         $event = $this->Events->get(
             $id,
             contain: [
@@ -174,6 +175,16 @@ class EventsController extends AppController
                 'Checkpoints' => ['sort' => 'checkpoint_sequence'],
             ],
         );
+
+        /** @var list<\App\Model\Entity\Participant> $checkpointParticipants */
+        $checkpointParticipants = $this->fetchTable('Participants')
+            ->find()
+            ->matching('Entries', function (SelectQuery $query) use ($id): SelectQuery {
+                return $query->where(['Entries.event_id' => $id]);
+            })
+            ->all()
+            ->toList();
+        $checkpointProgress = $this->buildCheckpointProgressData($checkpointParticipants, [$event]);
 
         /** @var \Cake\ORM\Query\SelectQuery<array<string, mixed>|\Cake\Datasource\EntityInterface> $entriesQuery */
         $entriesQuery = $this->Events->Entries->find()
@@ -243,6 +254,7 @@ class EventsController extends AppController
             'sections',
             'sectionsPagination',
             'entriesSearch',
+            'checkpointProgress',
         ));
     }
 

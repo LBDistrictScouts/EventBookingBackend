@@ -46,6 +46,7 @@ use Cake\Mailer\TransportFactory;
 use Cake\Routing\Router;
 use Cake\Utility\Security;
 use Detection\MobileDetect;
+use josegonzalez\Dotenv\Loader;
 
 /**
  * Load global functions.
@@ -63,9 +64,10 @@ $dotenvFiles = array_values(array_filter([
     CONFIG . '.env',
 ], 'file_exists'));
 
-if (!env('APP_NAME') && $dotenvFiles !== []) {
-    $dotenv = new \josegonzalez\Dotenv\Loader($dotenvFiles);
+if ($dotenvFiles !== []) {
+    $dotenv = new Loader($dotenvFiles);
     $dotenv->parse()
+        ->skipExisting()
         ->putenv()
         ->toEnv()
         ->toServer();

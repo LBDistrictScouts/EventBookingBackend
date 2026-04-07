@@ -15,6 +15,7 @@
  * @var \App\Model\Entity\Entry $entry
  * @var string|null $notificationType
  * @var \App\Model\Entity\Entry|null $mergedEntry
+ * @var string $editUrl
  */
 
 ?>
@@ -79,5 +80,6 @@ Participants
 
 You will receive an email confirming the above information.
 You will need the booking reference and security code to register on the day of the walk.
+Edit Booking: <?= $editUrl ?>
 
 The Greenway Team

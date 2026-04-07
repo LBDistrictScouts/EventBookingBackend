@@ -46,6 +46,18 @@ class ParticipantTypesControllerTest extends TestCase
         $this->assertCount(1, $data['participantTypes']);
     }
 
+    public function testPublicIndexJsonDoesNotRequireAuthentication(): void
+    {
+        $this->session([]);
+
+        $this->get('/participant-types.json');
+
+        $this->assertResponseOk();
+        $data = json_decode((string)$this->_response->getBody(), true);
+        $this->assertArrayHasKey('participantTypes', $data);
+        $this->assertCount(1, $data['participantTypes']);
+    }
+
     /**
      * Test view method
      *
