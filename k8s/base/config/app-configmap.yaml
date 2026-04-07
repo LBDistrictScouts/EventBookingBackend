@@ -9,6 +9,8 @@ data:
   APP_ENCODING: UTF-8
   APP_DEFAULT_LOCALE: en_GB
   APP_DEFAULT_TIMEZONE: Europe/London
+  APP_FULL_BASE_URL: https://event-backend.jagt-api.uk
+  APP_FRONTEND_BASE_URL: https://greenway.lbdscouts.org.uk
   AWS_REGION: eu-west-1
   DISTRICT_CORE_DATA_URL: https://district-core-data.jacobagtyler.com/
   SMTP_HOST: email-smtp.eu-west-1.amazonaws.com
