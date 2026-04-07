@@ -228,6 +228,7 @@ class ParticipantsControllerTest extends TestCase
 
         $this->assertResponseOk();
         $this->assertResponseContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $this->assertResponseContains('/participants/restore/5045fd83-55db-4d36-8a8a-63222e50e3fd');
         $this->assertResponseContains('Hide Deleted Participants');
     }
 
@@ -268,6 +269,22 @@ class ParticipantsControllerTest extends TestCase
 
         $this->assertResponseOk();
         $this->assertResponseContains('/participants/view/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+    }
+
+    public function testRestore(): void
+    {
+        $participants = $this->getTableLocator()->get('Participants');
+        $participant = $participants->get('5045fd83-55db-4d36-8a8a-63222e50e3fd');
+        $participants->deleteOrFail($participant);
+
+        $this->enableFormTokens();
+        $this->post('/participants/restore/5045fd83-55db-4d36-8a8a-63222e50e3fd');
+
+        $this->assertRedirectContains('/participants?deleted=1');
+        $restored = $participants->find('withTrashed')
+            ->where(['id' => '5045fd83-55db-4d36-8a8a-63222e50e3fd'])
+            ->firstOrFail();
+        $this->assertNull($restored->deleted);
     }
 
     public function testIndexCanFilterCheckedInParticipants(): void

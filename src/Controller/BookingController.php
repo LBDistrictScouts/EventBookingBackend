@@ -5,12 +5,15 @@ namespace App\Controller;
 
 use App\Event\BookingListener;
 use App\Model\Entity\Entry;
+use App\Model\Entity\Participant;
 use App\Model\Table\EntriesTable;
 use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
 use Cake\Mailer\MailerAwareTrait;
+use Cake\ORM\Query\SelectQuery;
 use Cake\View\JsonView;
+use DateTimeInterface;
 use RuntimeException;
 
 /**
@@ -285,14 +288,31 @@ class BookingController extends AppController
             return null;
         }
 
-        $entry = $this->Entries->get($id, contain: ['Participants']);
+        $entry = $this->Entries->get($id, contain: [
+            'Participants' => fn(SelectQuery $query): SelectQuery => $query->find('withTrashed'),
+        ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->prefilterData($this->request->getData());
+            $patchedParticipants = null;
+            if (isset($data['participants']) && is_array($data['participants'])) {
+                $data['participants'] = $this->matchSubmittedParticipantsToExisting(
+                    $data['participants'],
+                    (array)$entry->get('participants'),
+                );
+                $patchedParticipants = $this->buildPatchedParticipants(
+                    $data['participants'],
+                    (array)$entry->get('participants'),
+                );
+            }
             $participantIdsToKeep = $this->extractParticipantIds($data['participants'] ?? []);
             $participantsToDelete = [];
 
             if (array_key_exists('participants', $data)) {
                 foreach ($entry->get('participants') as $participant) {
+                    if ($participant->get('deleted') !== null) {
+                        continue;
+                    }
+
                     $participantId = $participant->get('id');
                     if (is_string($participantId) && !isset($participantIdsToKeep[$participantId])) {
                         $participantsToDelete[] = $participant;
@@ -300,9 +320,14 @@ class BookingController extends AppController
                 }
             }
 
+            unset($data['participants']);
             $entry = $this->Entries->patchEntity($entry, $data);
             if (!$entry instanceof Entry) {
                 throw new RuntimeException('Patched entry has unexpected type.');
+            }
+            if (is_array($patchedParticipants)) {
+                $entry->set('participants', $patchedParticipants);
+                $entry->setDirty('participants', true);
             }
 
             $errors = [];
@@ -369,5 +394,160 @@ class BookingController extends AppController
         }
 
         return $participantIds;
+    }
+
+    /**
+     * @param array<int, mixed> $submittedParticipants
+     * @param array<int, \App\Model\Entity\Participant> $existingParticipants
+     * @return array<int, mixed>
+     */
+    private function matchSubmittedParticipantsToExisting(
+        array $submittedParticipants,
+        array $existingParticipants,
+    ): array {
+        $participantsByAccessKey = [];
+        foreach ($existingParticipants as $participant) {
+            if (!$participant instanceof Participant) {
+                continue;
+            }
+
+            $accessKey = $participant->get('access_key');
+            if (!is_string($accessKey) || $accessKey === '') {
+                continue;
+            }
+
+            $currentMatch = $participantsByAccessKey[$accessKey] ?? null;
+            if (
+                !$currentMatch instanceof Participant ||
+                $this->shouldPreferParticipantMatch($participant, $currentMatch)
+            ) {
+                $participantsByAccessKey[$accessKey] = $participant;
+            }
+        }
+
+        foreach ($submittedParticipants as &$participant) {
+            if (!is_array($participant)) {
+                continue;
+            }
+
+            $participantId = $participant['id'] ?? null;
+            if (is_string($participantId) && $participantId !== '') {
+                continue;
+            }
+
+            $accessKey = $participant['access_key'] ?? null;
+            if (!is_string($accessKey) || $accessKey === '') {
+                continue;
+            }
+
+            $matchedParticipant = $participantsByAccessKey[$accessKey] ?? null;
+            if (!$matchedParticipant instanceof Participant) {
+                continue;
+            }
+
+            $matchedParticipantId = $matchedParticipant->get('id');
+            if (!is_string($matchedParticipantId) || $matchedParticipantId === '') {
+                continue;
+            }
+
+            $participant['id'] = $matchedParticipantId;
+            if ($matchedParticipant->get('deleted') !== null) {
+                $participant['deleted'] = null;
+            }
+        }
+        unset($participant);
+
+        return $submittedParticipants;
+    }
+
+    /**
+     * @param array<int, mixed> $submittedParticipants
+     * @param array<int, \App\Model\Entity\Participant> $existingParticipants
+     * @return array<int, \App\Model\Entity\Participant>
+     */
+    private function buildPatchedParticipants(array $submittedParticipants, array $existingParticipants): array
+    {
+        $existingParticipantsById = [];
+        foreach ($existingParticipants as $participant) {
+            if (!$participant instanceof Participant) {
+                continue;
+            }
+
+            $participantId = $participant->get('id');
+            if (is_string($participantId) && $participantId !== '') {
+                $existingParticipantsById[$participantId] = $participant;
+            }
+        }
+
+        $patchedParticipants = [];
+        foreach ($submittedParticipants as $participantData) {
+            if (!is_array($participantData)) {
+                continue;
+            }
+
+            $participantId = $participantData['id'] ?? null;
+            if (
+                is_string($participantId) &&
+                $participantId !== '' &&
+                isset($existingParticipantsById[$participantId])
+            ) {
+                $patchedParticipant = $this->Entries->Participants->patchEntity(
+                    $existingParticipantsById[$participantId],
+                    $participantData,
+                    ['accessibleFields' => ['id' => true]],
+                );
+                if (!$patchedParticipant instanceof Participant) {
+                    throw new RuntimeException('Patched participant has unexpected type.');
+                }
+
+                $patchedParticipants[] = $patchedParticipant;
+
+                continue;
+            }
+
+            $newParticipant = $this->Entries->Participants->newEntity($participantData);
+            if (!$newParticipant instanceof Participant) {
+                throw new RuntimeException('New participant has unexpected type.');
+            }
+
+            $patchedParticipants[] = $newParticipant;
+        }
+
+        return $patchedParticipants;
+    }
+
+    /**
+     * @param \App\Model\Entity\Participant $candidate
+     * @param \App\Model\Entity\Participant $current
+     * @return bool
+     */
+    private function shouldPreferParticipantMatch(Participant $candidate, Participant $current): bool
+    {
+        $candidateDeleted = $candidate->get('deleted') !== null;
+        $currentDeleted = $current->get('deleted') !== null;
+        if ($candidateDeleted !== $currentDeleted) {
+            return !$candidateDeleted;
+        }
+
+        return $this->participantTimestamp($candidate) >= $this->participantTimestamp($current);
+    }
+
+    /**
+     * @param \App\Model\Entity\Participant $participant
+     * @return int
+     */
+    private function participantTimestamp(Participant $participant): int
+    {
+        $modified = $participant->get('modified');
+        if ($modified instanceof DateTimeInterface) {
+            return $modified->getTimestamp();
+        }
+
+        $created = $participant->get('created');
+        if ($created instanceof DateTimeInterface) {
+            return $created->getTimestamp();
+        }
+
+        return 0;
     }
 }

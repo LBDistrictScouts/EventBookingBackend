@@ -210,4 +210,27 @@ class ParticipantsController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+
+    /**
+     * Restore method
+     *
+     * @param string|null $id Participant id.
+     * @return \Cake\Http\Response|null Redirects to index.
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function restore(?string $id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $participant = $this->Participants->find('withTrashed')
+            ->where(['Participants.id' => $id])
+            ->firstOrFail();
+
+        if ($this->Participants->updateAll(['deleted' => null], ['id' => $participant->id]) > 0) {
+            $this->Flash->success(__('The participant has been restored.'));
+        } else {
+            $this->Flash->error(__('The participant could not be restored. Please, try again.'));
+        }
+
+        return $this->redirect(['action' => 'index', '?' => ['deleted' => '1']]);
+    }
 }

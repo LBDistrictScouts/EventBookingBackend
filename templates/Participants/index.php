@@ -135,7 +135,7 @@ $baseQuery = $currentQuery;
             <td><?= h($participant->deleted) ?></td>
             <td><?= $this->Number->format($participant->highest_check_in_sequence) ?></td>
             <td class="actions">
-                <?= $this->Actions->buttons($participant) ?>
+                <?= $this->Actions->buttons($participant, ['deleted' => $participant->deleted !== null]) ?>
             </td>
         </tr>
         <?php endforeach; ?>

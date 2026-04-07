@@ -54,6 +54,7 @@ class ActionsHelper extends Helper
         ];
 
         $config = array_replace_recursive($defaults, $options);
+        $deleted = (bool)($options['deleted'] ?? false);
 
         $outline = $options['outline'] ?? false;
 
@@ -65,6 +66,12 @@ class ActionsHelper extends Helper
                     $config[$action]['class'],
                 );
             }
+        }
+
+        if ($deleted) {
+            $config['delete']['class'] = str_replace('danger', 'info', $config['delete']['class']);
+            $config['delete']['icon'] = 'arrow-counterclockwise';
+            $config['delete']['confirm'] = __('Are you sure you want to restore # {0}?', $id);
         }
 
         $html = '<div class="btn-group" role="group">';
@@ -88,7 +95,7 @@ class ActionsHelper extends Helper
         if ($config['delete']['show']) {
             $html .= $this->Form->postLink(
                 $this->Html->icon($config['delete']['icon']),
-                ['controller' => $controller, 'action' => 'delete', $id],
+                ['controller' => $controller, 'action' => $deleted ? 'restore' : 'delete', $id],
                 [
                     'escape' => false,
                     'class' => $config['delete']['class'],

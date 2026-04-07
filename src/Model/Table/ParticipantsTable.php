@@ -143,6 +143,10 @@ class ParticipantsTable extends Table
             ->notEmptyString('last_name');
 
         $validator
+            ->uuid('access_key')
+            ->allowEmptyString('access_key');
+
+        $validator
             ->uuid('entry_id')
             ->notEmptyString('entry_id');
 

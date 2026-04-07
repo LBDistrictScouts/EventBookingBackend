@@ -573,6 +573,55 @@ class BookingControllerTest extends TestCase
     /**
      * @return void
      */
+    public function testEditReusesParticipantMatchedByAccessKeyWithoutId(): void
+    {
+        $participantAccessKey = '391f7123-14fe-4f63-8fc1-a7c6a2aebfb2';
+        [$entry, $participant] = $this->createPublicEntryWithParticipant($participantAccessKey);
+        $participantId = $participant->id;
+
+        $this->post('/booking/edit/' . $entry->id . '.json', [
+            'event_id' => $entry->event_id,
+            'entry_name' => 'Booking Edit Json',
+            'entry_email' => $entry->entry_email,
+            'entry_mobile' => $entry->entry_mobile,
+            'active' => true,
+            'participant_count' => 1,
+            'checked_in_count' => 0,
+            'security_code' => $entry->security_code,
+            'participants' => [
+                [
+                    'access_key' => $participantAccessKey,
+                    'first_name' => 'Jacob',
+                    'last_name' => 'Updated',
+                    'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
+                    'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',
+                ],
+            ],
+        ]);
+
+        $this->assertResponseOk();
+
+        $resultData = $this->decodeJsonResponse();
+        $this->assertSuccessfulBookingResponse($resultData, 1);
+        $this->assertSame($participantId, $resultData['entry']['participants'][0]['id']);
+        $this->assertSame('Jacob', $resultData['entry']['participants'][0]['first_name']);
+        $this->assertSame('Updated', $resultData['entry']['participants'][0]['last_name']);
+
+        $participants = $this->getTableLocator()->get('Participants');
+        $entryParticipants = $participants->find('withTrashed')
+            ->where(['entry_id' => $entry->id])
+            ->all()
+            ->toList();
+
+        $this->assertCount(1, $entryParticipants);
+        $this->assertSame($participantId, $entryParticipants[0]->id);
+        $this->assertSame($participantAccessKey, $entryParticipants[0]->access_key);
+        $this->assertNull($entryParticipants[0]->deleted);
+    }
+
+    /**
+     * @return void
+     */
     public function testPublicEntrySignatureMatchesAcrossLookupViewAndBookingEdit(): void
     {
         [$entry, $participant] = $this->createPublicEntryWithParticipant();
@@ -635,9 +684,10 @@ class BookingControllerTest extends TestCase
     }
 
     /**
+     * @param string|null $participantAccessKey
      * @return array{0: \App\Model\Entity\Entry, 1: \App\Model\Entity\Participant}
      */
-    private function createPublicEntryWithParticipant(): array
+    private function createPublicEntryWithParticipant(?string $participantAccessKey = null): array
     {
         $entries = $this->getTableLocator()->get('Entries');
         $participants = $this->getTableLocator()->get('Participants');
@@ -659,6 +709,7 @@ class BookingControllerTest extends TestCase
         $participant = $participants->newEntity([
             'first_name' => 'Lookup',
             'last_name' => 'Participant',
+            'access_key' => $participantAccessKey,
             'entry_id' => $entry->id,
             'participant_type_id' => 'ea1e3a48-494b-4af7-bec0-6dbee60a40c0',
             'section_id' => '95116a77-0675-4e1a-9d0c-74e3d40d92c1',

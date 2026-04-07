@@ -11,6 +11,7 @@ use Cake\ORM\Entity;
  * @property string $id
  * @property string $first_name
  * @property string $last_name
+ * @property string|null $access_key
  * @property string $entry_id
  * @property string $participant_type_id
  * @property string|null $section_id
@@ -40,6 +41,7 @@ class Participant extends Entity
     protected array $_accessible = [
         'first_name' => true,
         'last_name' => true,
+        'access_key' => true,
         'entry_id' => true,
         'participant_type_id' => true,
         'section_id' => true,
