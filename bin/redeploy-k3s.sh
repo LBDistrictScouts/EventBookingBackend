@@ -17,7 +17,7 @@ into the shared webroot, without recreating secrets, PVCs, or the namespace.
 Environment overrides:
   NAMESPACE=<namespace>       Kubernetes namespace to use. Default: event-booking
   WAIT_TIMEOUT=<duration>     Rollout wait timeout. Default: 180s
-  RUN_MIGRATIONS=true         Also rerun the deploy job after restarting
+  RUN_MIGRATIONS=true         Also run the deploy job before restarting workloads
 EOF
 }
 
@@ -40,13 +40,16 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-    echo "Recreating deploy job..."
-    kubectl delete job event-booking-deploy -n "$NAMESPACE" --ignore-not-found
-    kubectl apply -f k8s/deploy-job.yaml
+    DEPLOY_JOB_NAME="event-booking-deploy-manual-$(date +%Y%m%d%H%M%S)"
+
+    echo "Applying deploy CronJob manifest..."
+    kubectl apply -f k8s/operations/deploy-job.yaml
+    echo "Creating one-shot deploy job '$DEPLOY_JOB_NAME' from CronJob..."
+    kubectl create job "$DEPLOY_JOB_NAME" -n "$NAMESPACE" --from=cronjob/event-booking-deploy
     echo "Streaming deploy job logs..."
-    kubectl logs -n "$NAMESPACE" job/event-booking-deploy -f
+    kubectl logs -n "$NAMESPACE" "job/$DEPLOY_JOB_NAME" -f --pod-running-timeout="$WAIT_TIMEOUT"
     echo "Waiting for deploy job completion..."
-    kubectl wait --for=condition=complete job/event-booking-deploy -n "$NAMESPACE" --timeout="$WAIT_TIMEOUT"
+    kubectl wait --for=condition=complete "job/$DEPLOY_JOB_NAME" -n "$NAMESPACE" --timeout="$WAIT_TIMEOUT"
 fi
 
 echo "Restarting app deployment in namespace '$NAMESPACE' to trigger copy-app-code..."

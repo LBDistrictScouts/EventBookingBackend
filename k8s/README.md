@@ -2,6 +2,20 @@
 
 `kustomization.yaml` is the entrypoint for the steady-state Event Booking manifest on K3s. It currently renders the grouped resources under `base/`.
 
+## Deploy
+
+After GitHub Actions has published a new image, roll the app forward with:
+
+```bash
+bin/redeploy-k3s.sh --with-migrations
+```
+
+Use `bin/redeploy-k3s.sh` without `--with-migrations` when there are no database migrations. To apply or reconcile the Kubernetes manifests directly:
+
+```bash
+kubectl apply -k k8s
+```
+
 ## HTTPS Bootstrap
 
 The web service serves HTTPS directly on the `LoadBalancer` IP using the Kubernetes secret `event-booking-backend-tls`.

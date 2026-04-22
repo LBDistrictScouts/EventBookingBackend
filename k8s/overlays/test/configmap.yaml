@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-booking-config
+  namespace: event-booking
+data:
+  DEBUG: "true"
+  APP_FULL_BASE_URL: https://event-backend-test.jacobagtyler.com

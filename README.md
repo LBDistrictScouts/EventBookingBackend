@@ -210,7 +210,19 @@ If your package visibility is private, consumers will need appropriate GitHub pa
 
 ## Kubernetes
 
-Kubernetes manifests for a local k3s deployment live under [`k8s/base/`](/Users/jacob/Development/EventBookingBackend/k8s/base), with [`k8s/kustomization.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/kustomization.yaml) as the steady-state entrypoint. Operational resources remain separate in [`k8s/operations/deploy-job.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/operations/deploy-job.yaml) and [`k8s/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/secrets/onepassword-item.yaml).
+The deploy command I usually want after GitHub Actions has published a new image is:
+
+```bash
+bin/redeploy-k3s.sh --with-migrations
+```
+
+Use `bin/redeploy-k3s.sh` without `--with-migrations` when the release does not need database migrations. For a first-time apply, or to reconcile the Kubernetes resources themselves, use:
+
+```bash
+kubectl apply -k k8s
+```
+
+Kubernetes manifests for a local k3s deployment live under [`k8s/base/`](/Users/jacob/Development/EventBookingBackend/k8s/base), with [`k8s/kustomization.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/kustomization.yaml) as the steady-state entrypoint. Operational resources remain separate in [`k8s/operations/deploy-job.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/operations/deploy-job.yaml), and the 1Password item resource lives at [`k8s/base/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/base/secrets/onepassword-item.yaml).
 
 For direct HTTPS on the Event Booking `LoadBalancer` origin, see [`k8s/README.md`](/Users/jacob/Development/EventBookingBackend/k8s/README.md). On a fresh cluster, run [`k8s/bootstrap-origin-tls.sh`](/Users/jacob/Development/EventBookingBackend/k8s/bootstrap-origin-tls.sh) once to seed the temporary TLS secret before applying the steady-state manifest.
 
@@ -263,7 +275,7 @@ The operator flow in this repo assumes:
 - the operator creates a Kubernetes `Secret` with the same name
 - the application workloads consume that generated `Secret` via `secretRef`
 
-Update [`k8s/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/secrets/onepassword-item.yaml) so `spec.itemPath` points to your real 1Password item:
+Update [`k8s/base/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/base/secrets/onepassword-item.yaml) so `spec.itemPath` points to your real 1Password item:
 
 ```text
 vaults/<vault-id-or-title>/items/<item-id-or-title>
@@ -273,7 +285,7 @@ The installed CRD in your cluster exposes exactly one required spec field, `item
 
 Basic local k3s flow:
 
-1. Update [`k8s/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/secrets/onepassword-item.yaml) with the correct vault and item path.
+1. Update [`k8s/base/secrets/onepassword-item.yaml`](/Users/jacob/Development/EventBookingBackend/k8s/base/secrets/onepassword-item.yaml) with the correct vault and item path.
 2. Create the GHCR image pull secret in the `event-booking` namespace. The manifests reference a secret named `ghcr-pull-secret` through the `event-booking-runtime` service account.
 
 ```bash
@@ -292,15 +304,13 @@ The GitHub token must be able to read the private package. For GitHub Container 
 
 ```bash
 kubectl apply -k k8s
-kubectl apply -f k8s/secrets/onepassword-item.yaml
 ```
 
 4. Wait for the operator to create the `event-booking-secrets` Kubernetes `Secret`, then run the one-shot deploy job to create schemas, run post-install hooks, and execute migrations:
 
 ```bash
 kubectl get secret -n event-booking event-booking-secrets
-kubectl apply -f k8s/operations/deploy-job.yaml
-kubectl logs -n event-booking job/event-booking-deploy -f
+bin/redeploy-k3s.sh --with-migrations
 ```
 
 If your operator is configured with auto-restart support, changes to the backing 1Password item will update the Kubernetes `Secret`, and the `OnePasswordItem` annotation enables automatic redeploy behavior for this secret.
