@@ -245,6 +245,45 @@ The nginx and PHP containers run in the same pod because the published GHCR imag
 
 Do not commit live Kubernetes secrets to the repository. When using the 1Password Kubernetes Operator, the repo only needs a `OnePasswordItem` custom resource that points at the 1Password item. The operator then creates and maintains the Kubernetes `Secret` for you.
 
+### IDE Database Tunnel
+
+The Kubernetes database service is intentionally internal-only. To connect from
+an IDE, open a local-only tunnel through the Kubernetes API server:
+
+```bash
+bin/k8s-db-tunnel.sh
+```
+
+Use these IDE settings while the tunnel process is running:
+
+- Type: `PostgreSQL`
+- Host: `127.0.0.1`
+- Port: `15432`
+- Database and user: use the values from your Kubernetes secret or 1Password item
+- Schema: `data`
+- JDBC URL shape: `jdbc:postgresql://127.0.0.1:15432/<database>?currentSchema=data`
+
+To try to print the database values during setup, run:
+
+```bash
+bin/k8s-db-tunnel.sh --show-password
+```
+
+The script binds to `127.0.0.1` by default, so it does not expose PostgreSQL on
+your LAN. It prints `Tunnel is ready` only after the local TCP listener is open.
+Close the route with `Ctrl+C`. If your IDE still cannot connect, make sure the
+host is exactly `127.0.0.1`, not `localhost`.
+
+If `kubectl port-forward` does not work in your cluster, the helper can use SSH
+to the node running the database pod instead. In this cluster that is the more
+reliable path:
+
+```bash
+bin/k8s-db-tunnel.sh --mode ssh --ssh-host node3
+```
+
+Run `ssh node3 true` once first if SSH needs to add the node host key.
+
 ### 1Password Operator
 
 Store the Kubernetes secret values in a single 1Password item, with field labels that exactly match the environment variable names used by the application:

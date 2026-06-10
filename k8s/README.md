@@ -35,6 +35,25 @@ That script:
 
 Point local DNS for `event-backend.jacobagtyler.com` to the Event Booking `LoadBalancer` IP.
 
+## IDE Database Access
+
+Use the repo helper to open a local-only PostgreSQL tunnel:
+
+```bash
+../bin/k8s-db-tunnel.sh
+```
+
+It routes `127.0.0.1:15432` to the database pod inside the `event-booking`
+namespace and waits for the local TCP listener before reporting that the tunnel
+is ready. Add `--show-password` when you want the script to try to print the
+database password for initial IDE setup.
+
+If the Kubernetes port-forward stream hangs, use the SSH fallback:
+
+```bash
+../bin/k8s-db-tunnel.sh --mode ssh --ssh-host node3
+```
+
 ## Verify
 
 ```bash
